@@ -1,0 +1,24 @@
+# Package index
+
+## All functions
+
+- [`Catalog`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/Catalog.md)
+  : Which column one software version reports for each meaning
+- [`DataCatalog`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/DataCatalog.md)
+  : What one result's fields mean to one consumer
+- [`ParsedLevels`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/ParsedLevels.md)
+  : One APB result: its levels on one observation axis
+- [`Reference`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/Reference.md)
+  : Where a field lives
+- [`catalog_version()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalog_version.md)
+  : The catalog in use
+- [`catalogue_table()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogue_table.md)
+  : The catalogue sets as one long table
+- [`catalogues()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogues.md)
+  : The catalogue sets
+- [`read_parsed_levels()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/read_parsed_levels.md)
+  : Read an APB Parquet result
+- [`rule_coverage()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/rule_coverage.md)
+  : Check every rule against one catalogue set
+- [`update_catalog()`](https://anndata-omics-bridge.github.io/apbCatalogR/reference/update_catalog.md)
+  : Download a newer catalog
