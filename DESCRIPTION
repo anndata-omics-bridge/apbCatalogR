@@ -2,7 +2,7 @@ Package: apbCatalogR
 Title: Look Up APB Result Fields by Meaning
 Version: 0.99.0
 Authors@R: 
-    person("Witold", "Wolski", , "wew@fgcz.ethz.ch", role = c("aut", "cre"),
+    person("Witold", "Wolski", , "wewolski@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6468-120X"))
 Description: Reimplements the apb-catalog API on the bundle apb-catalog
     releases: apb2 parse rules, reviewed catalogues and expected answers.
