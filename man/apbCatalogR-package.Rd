@@ -39,7 +39,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Witold Wolski \email{wewolski@gmail.com} (\href{https://orcid.org/0000-0002-6468-120X}{ORCID})
+\strong{Maintainer}: Witek Wolski \email{wewolski@gmail.com}
+
+Authors:
+\itemize{
+  \item Witold E. Wolski \email{witold.wolski@fgcz.uzh.ch} (\href{https://orcid.org/0000-0002-6468-120X}{ORCID})
+}
 
 }
 \keyword{internal}

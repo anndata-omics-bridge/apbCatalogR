@@ -1,9 +1,10 @@
 Package: apbCatalogR
 Title: Look Up APB Result Fields by Meaning
 Version: 0.99.0
-Authors@R: 
-    person("Witold", "Wolski", , "wewolski@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-6468-120X"))
+Authors@R: c(
+    person("Witold E.", "Wolski", , "witold.wolski@fgcz.uzh.ch", role = "aut",
+           comment = c(ORCID = "0000-0002-6468-120X")),
+    person("Witek", "Wolski", , "wewolski@gmail.com", role = "cre"))
 Description: Reimplements the apb-catalog API on the bundle apb-catalog
     releases: apb2 parse rules, reviewed catalogues and expected answers.
     Reads Parquet results of the AnnData Proteomics Bridge into anndataR
