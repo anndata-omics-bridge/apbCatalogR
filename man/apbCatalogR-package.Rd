@@ -32,6 +32,7 @@ Catch them with \code{\link[=tryCatch]{tryCatch()}}, for example \code{tryCatch(
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://anndata-omics-bridge.github.io/apbCatalogR/}
   \item \url{https://github.com/anndata-omics-bridge/apbCatalogR}
   \item Report bugs at \url{https://github.com/anndata-omics-bridge/apbCatalogR/issues}
 }

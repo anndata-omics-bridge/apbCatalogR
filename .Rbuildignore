@@ -11,6 +11,6 @@
 ^.*\.Rcheck$
 ^doc$
 ^Meta$
-^_pkgdown\.yml$
 ^docs$
-^pkgdown$
+^altdoc$
+^_quarto$

@@ -29,3 +29,4 @@ Set up with `usethis`; everything else follows prolfquapp and the R package rule
 | BiocCheck | `make check-bioc` |
 | Lint | `make lint` |
 | Format | `make format` |
+| Site (altdoc, as prolfquapp) | `make site` |

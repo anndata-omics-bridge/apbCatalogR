@@ -14,7 +14,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 # Introduction
 
-The AnnData Proteomics Bridge (APB) converts the reports of quantification software such as DIA-NN, Spectronaut or MaxQuant into one result layout. The columns keep the vendors' names, so a posterior error probability is `PEP` in MaxQuant and `EG_PEP` in Spectronaut. apb-catalog records what each column means; `r Biocpkg("apbCatalogR")` implements its API in R, so an R application asks for a meaning and gets the column or its data.
+The AnnData Proteomics Bridge (APB) converts the reports of quantification software such as DIA-NN, Spectronaut or MaxQuant into one result layout. The columns keep the vendors' names, so a posterior error probability is `PEP` in MaxQuant and `EG_PEP` in Spectronaut. apb-catalog records what each column means; apbCatalogR implements its API in R, so an R application asks for a meaning and gets the column or its data.
 
 The package works on a bundle apb-catalog releases: the APB parse rules, the reviewed catalogue sets and the answers apb-catalog gives on synthetic results. One bundle ships with the package.
 
