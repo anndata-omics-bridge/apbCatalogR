@@ -1,0 +1,210 @@
+{
+  "$defs": {
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "Why a reviewer assigned an entry's meaning.",
+      "properties": {
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        }
+      },
+      "required": [
+        "basis"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Location": {
+      "enum": [
+        "obs",
+        "layers",
+        "var",
+        "varm"
+      ],
+      "type": "string"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "description": "Where one field lives in an APB result: by its APB output name, its role or a prefix.\n\nA ``varm`` field also names its feature-aligned table. A ``var`` field may be named by the\nrole the level's rule gives it, and an ``obs`` field of a sample annotation by the prefix of\nits column name; both are bound to the column a level holds before they answer.",
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Table"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix"
+        }
+      },
+      "required": [
+        "level",
+        "location"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "RuleVariant": {
+      "additionalProperties": false,
+      "description": "One packaged rule level, bound by the software version pattern its rule declares.",
+      "properties": {
+        "rule": {
+          "title": "Rule",
+          "type": "string"
+        },
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "software_version_pattern": {
+          "title": "Software Version Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "level",
+        "software_version_pattern"
+      ],
+      "title": "RuleVariant",
+      "type": "object"
+    },
+    "SourceEntry": {
+      "additionalProperties": false,
+      "description": "The reviewed meaning of one retained field under the listed rule documents.",
+      "properties": {
+        "entry_id": {
+          "title": "Entry Id",
+          "type": "string"
+        },
+        "rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "reference": {
+          "$ref": "#/$defs/Reference"
+        },
+        "qualifiers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Qualifiers",
+          "type": "object"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "entry_id",
+        "rules",
+        "reference",
+        "qualifiers",
+        "evidence"
+      ],
+      "title": "SourceEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Every reviewed rule variant of one vendor and the entries one consumer needs from it.",
+  "properties": {
+    "catalogue_id": {
+      "title": "Catalogue Id",
+      "type": "string"
+    },
+    "catalogue_version": {
+      "title": "Catalogue Version",
+      "type": "string"
+    },
+    "software_name": {
+      "title": "Software Name",
+      "type": "string"
+    },
+    "variants": {
+      "items": {
+        "$ref": "#/$defs/RuleVariant"
+      },
+      "title": "Variants",
+      "type": "array"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/SourceEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "catalogue_id",
+    "catalogue_version",
+    "software_name",
+    "variants",
+    "entries"
+  ],
+  "title": "SourceCatalogue",
+  "type": "object"
+}

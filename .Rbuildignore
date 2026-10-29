@@ -1,0 +1,16 @@
+^LICENSE\.md$
+^Makefile$
+^make$
+^\.githooks$
+^air\.toml$
+^\.lintr$
+^\.github$
+^AGENTS\.md$
+^CLAUDE\.md$
+^.*\.BiocCheck$
+^.*\.Rcheck$
+^doc$
+^Meta$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

@@ -1,0 +1,8 @@
+inst/doc
+.Rhistory
+.Rproj.user
+*.Rcheck
+*.BiocCheck
+doc
+Meta
+docs

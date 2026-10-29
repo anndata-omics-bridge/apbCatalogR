@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "Qualifier": {
+      "additionalProperties": false,
+      "description": "One dimension of a set's meanings and the meanings of its admitted values.",
+      "properties": {
+        "definition": {
+          "title": "Definition",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "definition",
+        "values"
+      ],
+      "title": "Qualifier",
+      "type": "object"
+    },
+    "SetVocabulary": {
+      "additionalProperties": false,
+      "description": "What one set's entries mean, with every qualifier they must be described by.\n\nEvery set has a ``kind`` qualifier.",
+      "properties": {
+        "definition": {
+          "title": "Definition",
+          "type": "string"
+        },
+        "qualifiers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Qualifier"
+          },
+          "title": "Qualifiers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "definition",
+        "qualifiers"
+      ],
+      "title": "SetVocabulary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The versioned vocabularies of the packaged sets, by set name.",
+  "properties": {
+    "vocabulary_version": {
+      "title": "Vocabulary Version",
+      "type": "string"
+    },
+    "sets": {
+      "additionalProperties": {
+        "$ref": "#/$defs/SetVocabulary"
+      },
+      "title": "Sets",
+      "type": "object"
+    }
+  },
+  "required": [
+    "vocabulary_version",
+    "sets"
+  ],
+  "title": "Vocabulary",
+  "type": "object"
+}

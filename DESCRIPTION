@@ -1,0 +1,43 @@
+Package: apbCatalogR
+Title: Look Up APB Result Fields by Meaning
+Version: 0.99.0
+Authors@R: 
+    person("Witold", "Wolski", , "wew@fgcz.ethz.ch", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6468-120X"))
+Description: Reimplements the apb-catalog API on the bundle apb-catalog
+    releases: apb2 parse rules, reviewed catalogues and expected answers.
+    Reads Parquet results of the AnnData Proteomics Bridge into anndataR
+    objects and finds the column holding a meaning, such as a PEP or an
+    unnormalized intensity, without naming vendor columns.
+License: MIT + file LICENSE
+URL: https://anndata-omics-bridge.github.io/apbCatalogR/, https://github.com/anndata-omics-bridge/apbCatalogR
+BugReports: https://github.com/anndata-omics-bridge/apbCatalogR/issues
+biocViews: Proteomics, MassSpectrometry, DataImport, Infrastructure
+Depends:
+    R (>= 4.5.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Suggests: 
+    BiocStyle,
+    covr,
+    cyclocomp,
+    devtools,
+    knitr,
+    lintr,
+    rcmdcheck,
+    rmarkdown,
+    roxygen2,
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Imports: 
+    anndataR,
+    arrow,
+    jsonlite,
+    Matrix,
+    R6,
+    stats,
+    tools,
+    utils

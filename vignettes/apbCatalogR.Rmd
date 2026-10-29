@@ -1,0 +1,108 @@
+---
+title: "Looking up APB fields by meaning"
+author: "Witold Wolski"
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Looking up APB fields by meaning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Introduction
+
+The AnnData Proteomics Bridge (APB) converts the reports of quantification software such as DIA-NN, Spectronaut or MaxQuant into one result layout. The columns keep the vendors' names, so a posterior error probability is `PEP` in MaxQuant and `EG_PEP` in Spectronaut. apb-catalog records what each column means; `r Biocpkg("apbCatalogR")` implements its API in R, so an R application asks for a meaning and gets the column or its data.
+
+The package works on a bundle apb-catalog releases: the APB parse rules, the reviewed catalogue sets and the answers apb-catalog gives on synthetic results. One bundle ships with the package.
+
+# Installation
+
+```{r install, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+BiocManager::install("apbCatalogR")
+```
+
+```{r version}
+library(apbCatalogR)
+catalog_version()
+```
+
+# Catalogue sets
+
+Each catalogue set serves one kind of consumer:
+
+```{r sets}
+catalogues()[, c("catalogue", "has_requirements", "entries")]
+```
+
+# Which column a software version reports
+
+`Catalog` answers from the rules alone, without data:
+
+```{r catalog}
+diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+diann$layer("peptidoform_ion", kind = "intensity", normalization = "none")
+diann$kinds("peptidoform_ion", "layers")
+```
+
+# The data of a result
+
+`read_parsed_levels()` reads a Parquet result apb2 wrote, one anndataR `AnnData` per level. The bundle carries synthetic results; this one has MaxQuant's peptidoform-ion level.
+
+```{r read}
+results <- tempfile()
+utils::untar(system.file("extdata", "bundle", "results.tar.gz", package = "apbCatalogR"), exdir = results)
+result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
+result
+```
+
+`DataCatalog` answers on the result and hands back the data:
+
+```{r data-catalog}
+confidence <- DataCatalog$new(result, "confidence")
+pep <- confidence$layer("peptidoform_ion", kind = "pep")
+dim(pep)
+```
+
+MaxQuant reports no q-value on this level, so that lookup gives `NULL`:
+
+```{r missing}
+confidence$layer("peptidoform_ion", kind = "q_value")
+```
+
+A lookup that several fields answer signals `UnresolvedField` rather than choosing silently. DIA-NN 1.8 reports more than one unnormalized and normalized intensity per precursor:
+
+```{r unresolved}
+tryCatch(
+  Catalog$new("DIA-NN", "1.8.1", "abundance")$layer("peptidoform_ion", kind = "intensity"),
+  UnresolvedField = function(condition) conditionMessage(condition)
+)
+```
+
+# Rule coverage
+
+`rule_coverage()` checks every rule against one set; a set with requirements judges each level:
+
+```{r coverage}
+coverage <- rule_coverage("abundance")
+unique(coverage[, c("software", "version", "level", "verdict")])[1:5, ]
+```
+
+# A newer catalog
+
+`update_catalog()` downloads the bundle of the latest apb-catalog release into the user cache; later sessions use the newest bundle, shipped or downloaded.
+
+```{r update, eval = FALSE}
+update_catalog()
+```
+
+# Session information
+
+```{r session}
+sessionInfo()
+```

@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "Location": {
+      "enum": [
+        "obs",
+        "layers",
+        "var",
+        "varm"
+      ],
+      "type": "string"
+    },
+    "Requirement": {
+      "enum": [
+        "MUST",
+        "SHOULD",
+        "MAY"
+      ],
+      "type": "string"
+    },
+    "RequirementRow": {
+      "additionalProperties": false,
+      "description": "How strongly a consumer needs one meaning on one level: a field location, a kind and\nthe other qualifiers the field must carry.",
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "qualifiers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Qualifiers",
+          "type": "object"
+        },
+        "requirement": {
+          "$ref": "#/$defs/Requirement"
+        }
+      },
+      "required": [
+        "level",
+        "location",
+        "kind",
+        "requirement"
+      ],
+      "title": "RequirementRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": {
+    "items": {
+      "$ref": "#/$defs/RequirementRow"
+    },
+    "type": "array"
+  },
+  "type": "object"
+}
