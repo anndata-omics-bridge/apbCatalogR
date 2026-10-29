@@ -264,7 +264,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>What one result’s fields mean to one consumer</p>
 <p>What one result’s fields mean to one consumer</p>
 </section><section id="details" class="level3"><h3 class="anchored" data-anchor-id="details">Details</h3>
-<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly. A lookup of a field the result’s stored rule declares differently from the catalog’s rule signals <code>StaleField</code>; ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
+<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly. A lookup of a field the result’s stored rule declares differently from the catalog’s rule signals <code>StaleField</code>; ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>DataCatalog$new()</code> returns a <code>DataCatalog</code>.</p>
 </section><section id="active-bindings" class="level3"><h3 class="anchored" data-anchor-id="active-bindings">Active bindings</h3>
@@ -335,7 +335,7 @@ A ParsedLevels object.
 <code>catalog</code>
 </dt>
 <dd>
-The catalogue set, such as <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogues.html">catalogues()</a></code>.
+The catalogue set, such as <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
@@ -514,7 +514,7 @@ Returns
 <h4 class="anchored">
 Method <code>fields()</code>
 </h4>
-<p>Every catalogued field of the result, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
+<p>Every catalogued field of the result, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
 <h5 class="anchored">
 Usage
 </h5>
@@ -582,8 +582,8 @@ Whether to make a deep clone.
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">archive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"bundle"</span>, <span class="st">"results.tar.gz"</span>, package <span class="op">=</span> <span class="st">"apbCatalogR"</span><span class="op">)</span></span>
 <span><span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html">untar</a></span><span class="op">(</span><span class="va">archive</span>, exdir <span class="op">=</span> <span class="va">results</span><span class="op">)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform_ion.parquet"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform_ion.parquet"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"pep"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2 3</code></pre>

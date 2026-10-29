@@ -284,13 +284,134 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="apbcatalogr" class="level1">
 <h1>apbCatalogR</h1>
 <p>apb-catalog’s API in R: look up the fields of an <a href="https://github.com/anndata-omics-bridge/apb2">APB</a> result by meaning, such as a PEP or an unnormalized intensity, without naming vendor columns.</p>
-<p>The package works on the bundle <a href="https://anndata-omics-bridge.github.io/apb-catalog/">apb-catalog</a> releases: apb2’s parse rules, the reviewed catalogue sets and the answers apb-catalog gives on synthetic results. It reads APB Parquet results into anndataR objects; it does not convert vendor files.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apbCatalogR)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>catalog <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>catalog<span class="sc">$</span><span class="fu">layer</span>(<span class="st">"peptidoform_ion"</span>, <span class="at">kind =</span> <span class="st">"intensity"</span>, <span class="at">normalization =</span> <span class="st">"none"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>update_catalog()</code> downloads the bundle of the latest apb-catalog release; <code>catalog_version()</code> reports the one in use.</p>
+<p>Documentation: <a href="https://anndata-omics-bridge.github.io/apbCatalogR/">anndata-omics-bridge.github.io/apbCatalogR</a>, with the <a href="https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html">vignette</a> as the walkthrough.</p>
+<section id="apb" class="level2">
+<h2 class="anchored" data-anchor-id="apb">APB</h2>
+<p>The AnnData Proteomics Bridge, <a href="https://anndata-omics-bridge.github.io/apb2/">apb2</a>, converts the reports of proteomics quantification software into one result layout. Declarative parse rules describe each vendor table, so one parser reads them all.</p>
+<ul>
+<li>Software: AlphaDIA, DIA-NN, FragPipe, MaxQuant, PEAKS, Sage, Spectronaut and <a href="https://anndata-omics-bridge.github.io/apb2/supported_software/">more</a></li>
+<li>Levels: peptidoform ion, peptidoform, peptide, protein, peptidoform fragment</li>
+<li>Per level: one AnnData, runs as <code>obs</code>, features as <code>var</code>, measurements as layers</li>
+<li>Formats: h5ad, h5mu, Parquet, DuckDB</li>
+</ul>
+<p>Columns keep the vendor’s names: the posterior error probability is <code>PEP</code> in MaxQuant and DIA-NN, <code>EG_PEP</code> in Spectronaut.</p>
+</section>
+<section id="apb-catalog" class="level2">
+<h2 class="anchored" data-anchor-id="apb-catalog">apb-catalog</h2>
+<p><a href="https://anndata-omics-bridge.github.io/apb-catalog/">apb-catalog</a> records what those columns mean, in reviewed catalogue sets. A consumer asks a set for a kind, such as <code>pep</code> or <code>intensity</code>, and gets the column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Set</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>abundance</code></td>
+<td>Intensities, and whether the software normalizes them across runs</td>
+</tr>
+<tr class="even">
+<td><code>confidence</code></td>
+<td>PEP and q-values per run and per feature</td>
+</tr>
+<tr class="odd">
+<td><code>proteobench_entrapment</code></td>
+<td>Precursor q-values for ProteoBench’s entrapment scoring</td>
+</tr>
+<tr class="even">
+<td><code>apb</code></td>
+<td>Fields APB writes for every vendor: ProForma identifiers, decoy and contaminant flags, sample annotations</td>
+</tr>
+<tr class="odd">
+<td><code>chromatography</code></td>
+<td>Retention times, peak bounds and widths, with their unit</td>
+</tr>
+</tbody>
+</table>
+<p>A lookup answers one of three ways:</p>
+<ul>
+<li>One field: the column, or its data</li>
+<li>Software does not report it: <code>NULL</code></li>
+<li>Several fields: an <code>UnresolvedField</code> error, never a silent choice</li>
+</ul>
+</section>
+<section id="this-package" class="level2">
+<h2 class="anchored" data-anchor-id="this-package">This package</h2>
+<p>apbCatalogR is apb-catalog’s Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: <code>DataCatalog$snapshot()</code>, <code>$resolve()</code>, <code>attach_snapshot()</code>, <code>stored_snapshot()</code>, <code>stale_levels()</code> and <code>ResolutionSnapshot</code> have no R counterpart. It needs no Python: the rules and catalogues come from a bundle shipped with the package.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Catalog$new(software, version, set)</code></td>
+<td>From the rules alone, without data</td>
+</tr>
+<tr class="even">
+<td><code>DataCatalog$new(result, set)</code></td>
+<td>On one result, and returns the data</td>
+</tr>
+<tr class="odd">
+<td><code>catalogues()</code>, <code>rule_coverage()</code>, <code>catalogue_table()</code></td>
+<td>The sets, how each rule covers a set, every entry as a table</td>
+</tr>
+<tr class="even">
+<td><code>read_parsed_levels(path)</code></td>
+<td>An APB Parquet result as <code>ParsedLevels</code>, one anndataR <code>AnnData</code> per level</td>
+</tr>
+</tbody>
+</table>
+<p>It does not convert vendor files. Convert with apb2, as Parquet:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apb2</span> convert DATA <span class="at">--params</span> PARAMETER_FILE <span class="at">--format</span> parquet <span class="at">--output</span> result   <span class="co"># writes result.parquet</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="install" class="level2">
+<h2 class="anchored" data-anchor-id="install">Install</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"BiocManager"</span>, <span class="st">"remotes"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">"anndata-omics-bridge/apbCatalogR"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="use" class="level2">
+<h2 class="anchored" data-anchor-id="use">Use</h2>
+<p>Ask the rules which column a software version reports:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apbCatalogR)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span><span class="fu">kinds</span>(<span class="st">"peptidoform_ion"</span>, <span class="st">"layers"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "intensity"     "ms1_intensity"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span><span class="fu">layer</span>(<span class="st">"peptidoform_ion"</span>, <span class="at">kind =</span> <span class="st">"intensity"</span>, <span class="at">normalization =</span> <span class="st">"none"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get the data of a result:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">read_parsed_levels</span>(<span class="st">"result.parquet"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>confidence <span class="ot">&lt;-</span> DataCatalog<span class="sc">$</span><span class="fu">new</span>(result, <span class="st">"confidence"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pep <span class="ot">&lt;-</span> confidence<span class="sc">$</span><span class="fu">layer</span>(<span class="st">"peptidoform_ion"</span>, <span class="at">kind =</span> <span class="st">"pep"</span>)   <span class="co"># runs x features matrix</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="the-bundle" class="level2">
+<h2 class="anchored" data-anchor-id="the-bundle">The bundle</h2>
+<p>apb-catalog builds a bundle at each release:</p>
+<ul>
+<li>apb2’s parse rules</li>
+<li>the reviewed catalogue sets</li>
+<li>synthetic results, with apb-catalog’s answers on them; the tests check that R gives the same answers</li>
+</ul>
+<p>How R gets the latest one:</p>
+<ul>
+<li>Shipped: <code>inst/extdata/bundle/</code>, replaced by a pull request from each apb-catalog release</li>
+<li><code>update_catalog()</code>: downloads the latest release’s bundle into the user cache; works from the next apb-catalog release, the first to ship the bundle</li>
+<li>Each session uses the newest bundle, shipped or downloaded; <code>catalog_version()</code> reports which</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

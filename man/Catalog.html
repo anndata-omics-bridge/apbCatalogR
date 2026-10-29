@@ -341,7 +341,7 @@ The software version, such as <code>“2.2.0”</code>.
 <code>catalog</code>
 </dt>
 <dd>
-The catalogue set, such as <code>“abundance”</code> or <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogues.html">catalogues()</a></code>.
+The catalogue set, such as <code>“abundance”</code> or <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
@@ -520,7 +520,7 @@ Returns
 <h4 class="anchored">
 Method <code>fields()</code>
 </h4>
-<p>Every catalogued field the rule declares, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
+<p>Every catalogued field the rule declares, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
 <h5 class="anchored">
 Usage
 </h5>
@@ -585,7 +585,7 @@ Whether to make a deep clone.
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/reference/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span><span class="op">)</span></span>
+<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span><span class="op">)</span></span>
 <span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"intensity"</span>, normalization <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</code></pre>
