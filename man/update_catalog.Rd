@@ -14,7 +14,8 @@ The \code{\link[=catalog_version]{catalog_version()}} now in use, invisibly.
 }
 \description{
 Downloads the bundle of an apb-catalog release from GitHub into the user cache, so lookups use it without a
-package update. Later sessions keep using the newest bundle, shipped or downloaded.
+package update. Later sessions keep using the newest bundle, shipped or downloaded. It works from the next
+apb-catalog release, the first to ship the bundle.
 }
 \examples{
 if (interactive()) {

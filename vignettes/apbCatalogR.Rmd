@@ -21,10 +21,8 @@ The package works on a bundle apb-catalog releases: the APB parse rules, the rev
 # Installation
 
 ```{r install, eval = FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-BiocManager::install("apbCatalogR")
+install.packages(c("BiocManager", "remotes"))
+BiocManager::install("anndata-omics-bridge/apbCatalogR")
 ```
 
 ```{r version}
@@ -75,7 +73,7 @@ MaxQuant reports no q-value on this level, so that lookup gives `NULL`:
 confidence$layer("peptidoform_ion", kind = "q_value")
 ```
 
-A lookup that several fields answer signals `UnresolvedField` rather than choosing silently. DIA-NN 1.8 reports more than one unnormalized and normalized intensity per precursor:
+A lookup that several fields answer signals `UnresolvedField` rather than choosing silently. DIA-NN 1.8 reports both an unnormalized and a normalized intensity per precursor:
 
 ```{r unresolved}
 tryCatch(
@@ -95,7 +93,7 @@ unique(coverage[, c("software", "version", "level", "verdict")])[1:5, ]
 
 # A newer catalog
 
-`update_catalog()` downloads the bundle of the latest apb-catalog release into the user cache; later sessions use the newest bundle, shipped or downloaded.
+`update_catalog()` downloads the bundle of the latest apb-catalog release into the user cache; later sessions use the newest bundle, shipped or downloaded. It works from the next apb-catalog release, the first to ship the bundle.
 
 ```{r update, eval = FALSE}
 update_catalog()

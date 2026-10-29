@@ -35,7 +35,7 @@ A lookup answers one of three ways:
 
 ## This package
 
-apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. It needs no Python: the rules and catalogues come from a bundle shipped with the package.
+apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()`, `stored_snapshot()`, `stale_levels()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the rules and catalogues come from a bundle shipped with the package.
 
 | Call | Answers |
 | --- | --- |
@@ -89,5 +89,5 @@ apb-catalog builds a bundle at each release:
 How R gets the latest one:
 
 - Shipped: `inst/extdata/bundle/`, replaced by a pull request from each apb-catalog release
-- `update_catalog()`: downloads the latest release's bundle into the user cache
+- `update_catalog()`: downloads the latest release's bundle into the user cache; works from the next apb-catalog release, the first to ship the bundle
 - Each session uses the newest bundle, shipped or downloaded; `catalog_version()` reports which
