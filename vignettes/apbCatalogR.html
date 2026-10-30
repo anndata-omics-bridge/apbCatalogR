@@ -293,7 +293,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">apbCatalogR</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalog_version.html">catalog_version</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $version</span></span>
-<span><span class="co">#&gt; [1] "0.1.3"</span></span>
+<span><span class="co">#&gt; [1] "0.1.4"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $origin</span></span>
 <span><span class="co">#&gt; [1] "shipped"</span></span>
@@ -309,7 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"catalogue"</span>, <span class="st">"has_requirements"</span>, <span class="st">"entries"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;                catalogue has_requirements entries</span></span>
-<span><span class="co">#&gt; 1              abundance             TRUE      47</span></span>
+<span><span class="co">#&gt; 1              abundance             TRUE      40</span></span>
 <span><span class="co">#&gt; 2             confidence            FALSE      22</span></span>
 <span><span class="co">#&gt; 3 proteobench_entrapment            FALSE       7</span></span>
 <span><span class="co">#&gt; 4                    apb             TRUE      66</span></span>
@@ -319,10 +319,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>Catalog</code> answers from the rules alone, without data:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">diann</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span><span class="op">)</span></span>
-<span><span class="va">diann</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"intensity"</span>, normalization <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">diann</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"intensity"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</span></span>
 <span><span class="va">diann</span><span class="op">$</span><span class="fu">kinds</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, <span class="st">"layers"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "intensity"     "ms1_intensity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt; [1] "intensity"                "ms1_intensity"           </span></span>
+<span><span class="co">#&gt; [3] "normalized_intensity"     "normalized_ms1_intensity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="the-data-of-a-result" class="level1"><h1>The data of a result</h1>
 <p><code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> reads a Parquet result apb2 wrote, one anndataR <code>AnnData</code> per level. The test bundle carries synthetic results; this one has MaxQuant’s peptidoform-ion level.</p>
@@ -352,7 +353,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"1.8.1"</span>, <span class="st">"abundance"</span><span class="op">)</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"intensity"</span><span class="op">)</span>,</span>
 <span>  UnresolvedField <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">condition</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">condition</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "kind=intensity on peptidoform_ion is ambiguous: 2 entries match: Precursor_Quantity, Precursor_Normalised; candidates: Precursor_Quantity, Precursor_Normalised"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt; &lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="rule-coverage" class="level1"><h1>Rule coverage</h1>
 <p><code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/rule_coverage.html">rule_coverage()</a></code> checks every rule against one set; a set with requirements judges each level:</p>
