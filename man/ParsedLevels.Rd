@@ -20,7 +20,7 @@ other layers in \code{layers}, obs and var frames named by their key columns, an
 }
 \examples{
 results <- tempfile()
-archive <- system.file("extdata", "bundle", "results.tar.gz", package = "apbCatalogR")
+archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "apbCatalogR")
 utils::untar(archive, exdir = results)
 result <- read_parsed_levels(file.path(results, "edge-two-levels.parquet"))
 names(result$levels)

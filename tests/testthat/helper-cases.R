@@ -1,11 +1,15 @@
-# The bundle's expected answers, computed by apb-catalog in Python, and ways to compare R's answers with them.
+# The test bundle's expected answers, computed by apb-catalog in Python, and ways to compare R's answers with them.
 
 bundle_file <- function(...) {
   system.file("extdata", "bundle", ..., package = "apbCatalogR", mustWork = TRUE)
 }
 
+test_bundle_file <- function(...) {
+  system.file("extdata", "test-bundle", ..., package = "apbCatalogR", mustWork = TRUE)
+}
+
 read_cases <- function(name) {
-  jsonlite::fromJSON(bundle_file("cases", name), simplifyVector = FALSE)
+  jsonlite::fromJSON(test_bundle_file("cases", name), simplifyVector = FALSE)
 }
 
 results <- new.env(parent = emptyenv())
@@ -14,7 +18,7 @@ results <- new.env(parent = emptyenv())
 results_dir <- function() {
   if (is.null(results$dir)) {
     results$dir <- tempfile("results")
-    utils::untar(bundle_file("results.tar.gz"), exdir = results$dir)
+    utils::untar(test_bundle_file("results.tar.gz"), exdir = results$dir)
   }
   results$dir
 }

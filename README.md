@@ -2,6 +2,8 @@
 
 apb-catalog's API in R: look up the fields of an [APB](https://github.com/anndata-omics-bridge/apb2) result by meaning, such as a PEP or an unnormalized intensity, without naming vendor columns.
 
+> **New API.** This package is new, and its API may still change between releases. Feedback is very welcome: open an [issue](https://github.com/anndata-omics-bridge/apbCatalogR/issues) with what you need, what surprised you, or what broke.
+
 Documentation: [anndata-omics-bridge.github.io/apbCatalogR](https://anndata-omics-bridge.github.io/apbCatalogR/), with the [vignette](https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html) as the walkthrough.
 
 ## APB
@@ -80,14 +82,13 @@ pep <- confidence$layer("peptidoform_ion", kind = "pep")   # runs x features mat
 
 ## The bundle
 
-apb-catalog builds a bundle at each release:
+apb-catalog builds two bundles at each release:
 
-- apb2's parse rules
-- the reviewed catalogue sets
-- synthetic results, with apb-catalog's answers on them; the tests check that R gives the same answers
+- Bundle: apb2's parse rules and the reviewed catalogue sets; lookups read only this
+- Test bundle: synthetic results, with apb-catalog's answers on them; the tests check that R gives the same answers
 
-How R gets the latest one:
+How R gets the latest bundle:
 
-- Shipped: `inst/extdata/bundle/`, replaced by a pull request from each apb-catalog release
+- Shipped: `inst/extdata/bundle/`, with the test bundle in `inst/extdata/test-bundle/`, both replaced by a pull request from each apb-catalog release
 - `update_catalog()`: downloads the latest release's bundle into the user cache; works from the next apb-catalog release, the first to ship the bundle
 - Each session uses the newest bundle, shipped or downloaded; `catalog_version()` reports which

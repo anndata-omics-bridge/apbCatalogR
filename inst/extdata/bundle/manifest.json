@@ -11,9 +11,6 @@
     "chromatography"
   ],
   "files": [
-    "cases/catalog.json",
-    "cases/data_catalog.json",
-    "cases/tables.json",
     "catalogues/annotations/apb/prolfquapp.json",
     "catalogues/annotations/apb/sdrf.json",
     "catalogues/catalogues.json",
@@ -80,7 +77,6 @@
     "catalogues/sources/proteobench_entrapment/spectronaut.json",
     "catalogues/sources/proteobench_entrapment/wombat.json",
     "catalogues/vocabulary.json",
-    "results.tar.gz",
     "rules/declarations.json",
     "rules/version_labels.json",
     "schemas/annotation-catalogue.schema.json",

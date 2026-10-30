@@ -1,7 +1,7 @@
 #' apbCatalogR: look up APB result fields by meaning
 #'
-#' The R implementation of apb-catalog. It works on the bundle apb-catalog releases: apb2's effective parse rules,
-#' the reviewed catalogue sets and the answers apb-catalog gives on synthetic results. [Catalog] answers which
+#' The R implementation of apb-catalog. It works on the bundle apb-catalog releases: apb2's effective parse rules
+#' and the reviewed catalogue sets. [Catalog] answers which
 #' column one software version reports for a meaning, without data; [DataCatalog] answers on a result read with
 #' [read_parsed_levels()].
 #'

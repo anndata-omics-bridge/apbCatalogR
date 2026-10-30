@@ -1,0 +1,19 @@
+{
+  "bundle_format": 1,
+  "version": "0.1.1",
+  "apb_catalog_version": "0.1.1",
+  "apb2_version": "0.1.1",
+  "catalogues": [
+    "abundance",
+    "confidence",
+    "proteobench_entrapment",
+    "apb",
+    "chromatography"
+  ],
+  "files": [
+    "cases/catalog.json",
+    "cases/data_catalog.json",
+    "cases/tables.json",
+    "results.tar.gz"
+  ]
+}

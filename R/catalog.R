@@ -370,7 +370,7 @@ Catalog <- R6::R6Class(
 #' @export
 #' @examples
 #' results <- tempfile()
-#' archive <- system.file("extdata", "bundle", "results.tar.gz", package = "apbCatalogR")
+#' archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "apbCatalogR")
 #' utils::untar(archive, exdir = results)
 #' result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
 #' catalog <- DataCatalog$new(result, "confidence")

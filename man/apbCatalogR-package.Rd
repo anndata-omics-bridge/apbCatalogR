@@ -6,8 +6,8 @@
 \alias{apbCatalogR-package}
 \title{apbCatalogR: look up APB result fields by meaning}
 \description{
-The R implementation of apb-catalog. It works on the bundle apb-catalog releases: apb2's effective parse rules,
-the reviewed catalogue sets and the answers apb-catalog gives on synthetic results. \link{Catalog} answers which
+The R implementation of apb-catalog. It works on the bundle apb-catalog releases: apb2's effective parse rules
+and the reviewed catalogue sets. \link{Catalog} answers which
 column one software version reports for a meaning, without data; \link{DataCatalog} answers on a result read with
 \code{\link[=read_parsed_levels]{read_parsed_levels()}}.
 }
