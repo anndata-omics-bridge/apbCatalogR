@@ -219,7 +219,7 @@ Lookups <- R6::R6Class(
 qualifier_arguments <- function(...) {
   qualifiers <- list(...)
   if (length(qualifiers) > 0L && (is.null(names(qualifiers)) || any(names(qualifiers) == ""))) {
-    stop("qualifiers are named, such as normalization = \"none\"", call. = FALSE)
+    stop("qualifiers are named, such as stage = \"quantification\"", call. = FALSE)
   }
   qualifiers
 }
@@ -239,7 +239,7 @@ fields_frame <- function(rows, set) {
 #' @export
 #' @examples
 #' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-#' catalog$layer("peptidoform_ion", kind = "intensity", normalization = "none")
+#' catalog$layer("peptidoform_ion", kind = "intensity")
 #' catalog$kinds("peptidoform_ion", "layers")
 Catalog <- R6::R6Class(
   "Catalog",
@@ -290,7 +290,7 @@ Catalog <- R6::R6Class(
     #' @description The kinds the level offers at one location, given the other qualifiers.
     #' @param level The quantification level.
     #' @param location `"layers"`, `"var"` or `"obs"`.
-    #' @param ... Other qualifiers by name, such as `normalization = "none"`.
+    #' @param ... Other qualifiers by name, such as `stage = "quantification"`.
     #' @return A character vector.
     kinds = function(level, location, ...) {
       private$lookups$kinds(level, location, qualifier_arguments(...))

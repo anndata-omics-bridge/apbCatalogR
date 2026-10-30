@@ -18,7 +18,7 @@ signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-catalog$layer("peptidoform_ion", kind = "intensity", normalization = "none")
+catalog$layer("peptidoform_ion", kind = "intensity")
 catalog$kinds("peptidoform_ion", "layers")
 }
 \section{Active bindings}{
@@ -81,7 +81,7 @@ The kinds the level offers at one location, given the other qualifiers.
 
 \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
 
-\item{\code{...}}{Other qualifiers by name, such as \code{normalization = "none"}.}
+\item{\code{...}}{Other qualifiers by name, such as \code{stage = "quantification"}.}
 }
 \if{html}{\out{</div>}}
 }

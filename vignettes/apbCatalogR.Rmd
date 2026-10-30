@@ -44,7 +44,7 @@ catalogues()[, c("catalogue", "has_requirements", "entries")]
 
 ```{r catalog}
 diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-diann$layer("peptidoform_ion", kind = "intensity", normalization = "none")
+diann$layer("peptidoform_ion", kind = "intensity")
 diann$kinds("peptidoform_ion", "layers")
 ```
 

@@ -74,7 +74,7 @@ library(apbCatalogR)
 diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
 diann$kinds("peptidoform_ion", "layers")
 #> [1] "intensity"     "ms1_intensity"
-diann$layer("peptidoform_ion", kind = "intensity", normalization = "none")
+diann$layer("peptidoform_ion", kind = "intensity")
 #> <Reference peptidoform_ion layers: Precursor_Quantity>
 ```
 
