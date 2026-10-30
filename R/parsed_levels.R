@@ -83,12 +83,13 @@ ParsedLevels <- R6::R6Class(
   )
 )
 
-#' Read an APB Parquet result
+#' Read an APB result
 #'
-#' Reads the directory apb2 writes for a `.parquet` result into a [ParsedLevels] object, one anndataR `AnnData` per
-#' level.
+#' Reads a result apb2 wrote into a [ParsedLevels] object, one anndataR `AnnData` per level, the same for every
+#' format: a `.h5ad` file, a `.duckdb` file, or the directory apb2 writes for a `.parquet` result. Reading DuckDB
+#' needs the `duckdb` and `DBI` packages.
 #'
-#' @param path The result directory, such as `converted.parquet`.
+#' @param path The result, such as `converted.h5ad`, `converted.duckdb` or the directory `converted.parquet`.
 #' @return A [ParsedLevels] object.
 #' @export
 #' @examples
@@ -97,6 +98,12 @@ ParsedLevels <- R6::R6Class(
 #' utils::untar(archive, exdir = results)
 #' read_parsed_levels(file.path(results, "edge-two-levels.parquet"))
 read_parsed_levels <- function(path) {
+  if (grepl("\\.h5ad$", path)) {
+    return(read_h5ad_levels(path))
+  }
+  if (grepl("\\.duckdb$", path)) {
+    return(read_duckdb_levels(path))
+  }
   manifest_path <- file.path(path, "manifest.json")
   if (!file.exists(manifest_path)) {
     stop(sprintf("%s is not an APB Parquet result directory", path), call. = FALSE)
@@ -115,8 +122,13 @@ read_parsed_levels <- function(path) {
       call. = FALSE
     )
   }
+  manifest_levels(manifest, path, read_table)
+}
+
+# The result a Parquet or DuckDB manifest describes; read(directory, entry) returns the table an entry names.
+manifest_levels <- function(manifest, path, read) {
   order <- as.character(unlist(manifest$level_order))
-  levels <- stats::setNames(lapply(order, function(name) read_level(path, manifest$levels[[name]], name)), order)
+  levels <- stats::setNames(lapply(order, function(name) read_level(path, manifest$levels[[name]], name, read)), order)
   apb <- manifest$apb %||% list()
   ParsedLevels$new(
     levels = levels,
@@ -126,12 +138,14 @@ read_parsed_levels <- function(path) {
     annotation_tables = read_named_tables(
       file.path(path, "annotation_tables"),
       manifest$annotation_table_order,
-      manifest$annotation_tables
+      manifest$annotation_tables,
+      read
     ),
     feature_relations = read_named_tables(
       file.path(path, "feature_relations"),
       manifest$feature_relation_order,
-      manifest$feature_relations
+      manifest$feature_relations,
+      read
     )
   )
 }
@@ -140,12 +154,29 @@ read_table <- function(directory, entry) {
   as.data.frame(arrow::read_parquet(file.path(directory, entry$file)))
 }
 
-read_named_tables <- function(directory, order, entries) {
+# A table with the text and category columns its schema declares, for a store that keeps neither: anndata stores
+# repeated strings as categories, DuckDB stores categories as text. Categories are ordered, as Parquet stores them.
+declared_types <- function(frame, table) {
+  columns <- as.character(unlist(table$columns))
+  for (index in seq_along(columns)) {
+    dtype <- table$schema[[index]]
+    column <- columns[[index]]
+    if (!is.null(dtype$enum_categories)) {
+      categories <- as.character(unlist(dtype$enum_categories))
+      frame[[column]] <- factor(as.character(frame[[column]]), levels = categories, ordered = TRUE)
+    } else if (identical(dtype$name, "String") && is.factor(frame[[column]])) {
+      frame[[column]] <- as.character(frame[[column]])
+    }
+  }
+  frame[columns]
+}
+
+read_named_tables <- function(directory, order, entries, read) {
   names <- as.character(unlist(order))
   stats::setNames(
     lapply(names, function(name) {
       entry <- entries[[name]]
-      table <- read_table(directory, entry)
+      table <- read(directory, entry)
       attr(table, "apb") <- entry[setdiff(names(entry), c("file", "columns", "schema"))]
       table
     }),
@@ -161,12 +192,12 @@ axis_names <- function(frame, keys) {
   do.call(paste, c(lapply(keys, function(key) as.character(frame[[key]])), sep = "|"))
 }
 
-read_level <- function(path, entry, name) {
-  directory <- file.path(path, "levels", entry$directory)
+read_level <- function(path, entry, name, read) {
+  directory <- file.path(path, "levels", entry$directory %||% name)
   obs_keys <- as.character(unlist(entry$obs$key_columns))
   var_keys <- as.character(unlist(entry$var$key_columns))
-  obs <- read_table(directory, entry$obs)
-  var <- read_table(directory, entry$var)
+  obs <- read(directory, entry$obs)
+  var <- read(directory, entry$var)
   obs_names <- axis_names(obs, obs_keys)
   var_names <- axis_names(var, var_keys)
   rownames(obs) <- obs_names
@@ -174,7 +205,7 @@ read_level <- function(path, entry, name) {
   layer_order <- as.character(unlist(entry$layer_order))
   layers <- stats::setNames(
     lapply(layer_order, function(layer) {
-      values <- as.matrix(read_table(file.path(directory, "layers"), entry$layers[[layer]]))
+      values <- as.matrix(read(file.path(directory, "layers"), entry$layers[[layer]]))
       matrix <- t(values)
       dimnames(matrix) <- list(obs_names, var_names)
       matrix
@@ -195,17 +226,17 @@ read_level <- function(path, entry, name) {
     obs = obs,
     var = var,
     layers = layers[setdiff(layer_order, primary)],
-    obsm = read_aligned(directory, entry, "obsm", obs_names),
-    varm = read_aligned(directory, entry, "varm", var_names),
-    obsp = read_pairwise(directory, entry, "obsp", obs_names),
-    varp = read_pairwise(directory, entry, "varp", var_names),
+    obsm = read_aligned(directory, entry, "obsm", obs_names, read),
+    varm = read_aligned(directory, entry, "varm", var_names, read),
+    obsp = read_pairwise(directory, entry, "obsp", obs_names, read),
+    varp = read_pairwise(directory, entry, "varp", var_names, read),
     uns = c(list(apb = apb), entry$export_uns %||% list())
   )
 }
 
 # The obsm or varm tables of one level, named like the axis they align with.
-read_aligned <- function(directory, entry, slot, names) {
-  tables <- read_named_tables(file.path(directory, slot), entry[[paste0(slot, "_order")]], entry[[slot]])
+read_aligned <- function(directory, entry, slot, names, read) {
+  tables <- read_named_tables(file.path(directory, slot), entry[[paste0(slot, "_order")]], entry[[slot]], read)
   lapply(tables, function(table) {
     rownames(table) <- names
     table
@@ -213,8 +244,8 @@ read_aligned <- function(directory, entry, slot, names) {
 }
 
 # The obsp or varp tables of one level: row, column and value of each stored cell, as sparse matrices.
-read_pairwise <- function(directory, entry, slot, names) {
-  tables <- read_named_tables(file.path(directory, slot), entry[[paste0(slot, "_order")]], entry[[slot]])
+read_pairwise <- function(directory, entry, slot, names, read) {
+  tables <- read_named_tables(file.path(directory, slot), entry[[paste0(slot, "_order")]], entry[[slot]], read)
   lapply(tables, function(table) {
     Matrix::sparseMatrix(
       i = table$row + 1L,

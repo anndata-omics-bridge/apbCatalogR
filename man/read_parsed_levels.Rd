@@ -2,19 +2,20 @@
 % Please edit documentation in R/parsed_levels.R
 \name{read_parsed_levels}
 \alias{read_parsed_levels}
-\title{Read an APB Parquet result}
+\title{Read an APB result}
 \usage{
 read_parsed_levels(path)
 }
 \arguments{
-\item{path}{The result directory, such as \code{converted.parquet}.}
+\item{path}{The result, such as \code{converted.h5ad}, \code{converted.duckdb} or the directory \code{converted.parquet}.}
 }
 \value{
 A \link{ParsedLevels} object.
 }
 \description{
-Reads the directory apb2 writes for a \code{.parquet} result into a \link{ParsedLevels} object, one anndataR \code{AnnData} per
-level.
+Reads a result apb2 wrote into a \link{ParsedLevels} object, one anndataR \code{AnnData} per level, the same for every
+format: a \code{.h5ad} file, a \code{.duckdb} file, or the directory apb2 writes for a \code{.parquet} result. Reading DuckDB
+needs the \code{duckdb} and \code{DBI} packages.
 }
 \examples{
 results <- tempfile()

@@ -44,9 +44,9 @@ apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names 
 | `Catalog$new(software, version, set)` | From the rules alone, without data |
 | `DataCatalog$new(result, set)` | On one result, and returns the data |
 | `catalogues()`, `rule_coverage()`, `catalogue_table()` | The sets, how each rule covers a set, every entry as a table |
-| `read_parsed_levels(path)` | An APB Parquet result as `ParsedLevels`, one anndataR `AnnData` per level |
+| `read_parsed_levels(path)` | An APB result, `.h5ad`, `.parquet` or `.duckdb`, as `ParsedLevels`, one anndataR `AnnData` per level |
 
-It does not convert vendor files. Convert with apb2, as Parquet:
+It does not convert vendor files. Convert with apb2; any of its h5ad, Parquet or DuckDB results reads the same:
 
 ```bash
 apb2 convert DATA --params PARAMETER_FILE --format parquet --output result   # writes result.parquet
