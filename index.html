@@ -284,6 +284,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="apbcatalogr" class="level1">
 <h1>apbCatalogR</h1>
 <p>apb-catalog’s API in R: look up the fields of an <a href="https://github.com/anndata-omics-bridge/apb2">APB</a> result by meaning, such as a PEP or an unnormalized intensity, without naming vendor columns.</p>
+<blockquote class="blockquote">
+<p><strong>New API.</strong> This package is new, and its API may still change between releases. Feedback is very welcome: open an <a href="https://github.com/anndata-omics-bridge/apbCatalogR/issues">issue</a> with what you need, what surprised you, or what broke.</p>
+</blockquote>
 <p>Documentation: <a href="https://anndata-omics-bridge.github.io/apbCatalogR/">anndata-omics-bridge.github.io/apbCatalogR</a>, with the <a href="https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html">vignette</a> as the walkthrough.</p>
 <section id="apb" class="level2">
 <h2 class="anchored" data-anchor-id="apb">APB</h2>
@@ -397,15 +400,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-bundle" class="level2">
 <h2 class="anchored" data-anchor-id="the-bundle">The bundle</h2>
-<p>apb-catalog builds a bundle at each release:</p>
+<p>apb-catalog builds two bundles at each release:</p>
 <ul>
-<li>apb2’s parse rules</li>
-<li>the reviewed catalogue sets</li>
-<li>synthetic results, with apb-catalog’s answers on them; the tests check that R gives the same answers</li>
+<li>Bundle: apb2’s parse rules and the reviewed catalogue sets; lookups read only this</li>
+<li>Test bundle: synthetic results, with apb-catalog’s answers on them; the tests check that R gives the same answers</li>
 </ul>
-<p>How R gets the latest one:</p>
+<p>How R gets the latest bundle:</p>
 <ul>
-<li>Shipped: <code>inst/extdata/bundle/</code>, replaced by a pull request from each apb-catalog release</li>
+<li>Shipped: <code>inst/extdata/bundle/</code>, with the test bundle in <code>inst/extdata/test-bundle/</code>, both replaced by a pull request from each apb-catalog release</li>
 <li><code>update_catalog()</code>: downloads the latest release’s bundle into the user cache; works from the next apb-catalog release, the first to ship the bundle</li>
 <li>Each session uses the newest bundle, shipped or downloaded; <code>catalog_version()</code> reports which</li>
 </ul>
