@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>read_parsed_levels – apbCatalogR</title>
 <style>
@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-f9e134fc734154af1dcb07b86de50c3c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
@@ -259,9 +259,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/read_parsed_levels.html">read_parsed_levels</a></li></ol></nav></header><section id="read-an-apb-parquet-result" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="read-an-apb-parquet-result">Read an APB Parquet result</h2>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/read_parsed_levels.html">read_parsed_levels</a></li></ol></nav></header><section id="read-an-apb-result" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="read-an-apb-result">Read an APB result</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Reads the directory apb2 writes for a <code>.parquet</code> result into a ParsedLevels object, one anndataR <code>AnnData</code> per level.</p>
+<p>Reads a result apb2 wrote into a ParsedLevels object, one anndataR <code>AnnData</code> per level, the same for every format: a <code>.h5ad</code> file, a <code>.duckdb</code> file, or the directory apb2 writes for a <code>.parquet</code> result. Reading DuckDB needs the <code>duckdb</code> and <code>DBI</code> packages.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">read_parsed_levels(path)
 </code></pre>
@@ -271,7 +271,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <code id="path">path</code>
 </td>
 <td>
-The result directory, such as <code>converted.parquet</code>.
+The result, such as <code>converted.h5ad</code>, <code>converted.duckdb</code> or the directory <code>converted.parquet</code>.
 </td>
 </tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>A ParsedLevels object.</p>

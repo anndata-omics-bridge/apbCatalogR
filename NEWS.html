@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.10.20">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -42,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-f9e134fc734154af1dcb07b86de50c3c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -250,7 +250,7 @@ ul.task-list li input[type="checkbox"] {
 <h1>apbCatalogR 0.99.0</h1>
 <ul>
 <li>First version: apb-catalog’s API in R on the apb-catalog bundle: the R6 classes <code>Catalog</code>, <code>DataCatalog</code> and <code>Reference</code>, <code>catalogues()</code>, <code>rule_coverage()</code>, <code>catalogue_table()</code> and the conditions <code>UnresolvedField</code>, <code>StaleField</code> and <code>MissingRequiredField</code>.</li>
-<li><code>read_parsed_levels()</code> reads an APB Parquet result into <code>ParsedLevels</code>, one anndataR <code>AnnData</code> per level.</li>
+<li><code>read_parsed_levels()</code> reads an APB Parquet result into <code>ParsedLevels</code>, one anndataR <code>AnnData</code> per level. It also reads apb2’s <code>.h5ad</code> and <code>.duckdb</code> results into the same <code>ParsedLevels</code>; DuckDB needs the suggested <code>duckdb</code> and <code>DBI</code> packages.</li>
 <li><code>update_catalog()</code> downloads the bundle of an apb-catalog release; <code>catalog_version()</code> reports the bundle in use.</li>
 <li>The bundle holds only the rules and catalogue sets; the synthetic results and expected answers ship as a separate test bundle in <code>inst/extdata/test-bundle/</code>.</li>
 <li>Snapshots are not ported: <code>DataCatalog$snapshot()</code>, <code>$resolve()</code>, <code>attach_snapshot()</code>, <code>stored_snapshot()</code>, <code>stale_levels()</code> and <code>ResolutionSnapshot</code> have no R counterpart.</li>
