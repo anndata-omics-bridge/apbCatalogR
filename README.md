@@ -59,6 +59,12 @@ install.packages(c("BiocManager", "remotes"))
 BiocManager::install("anndata-omics-bridge/apbCatalogR")
 ```
 
+Reading `.h5ad` results needs nothing more. Parquet results need `arrow`, DuckDB results `duckdb` and `DBI`:
+
+```r
+install.packages(c("arrow", "duckdb", "DBI"))
+```
+
 ## Use
 
 Ask the rules which column a software version reports:

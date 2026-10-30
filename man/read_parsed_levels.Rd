@@ -14,8 +14,8 @@ A \link{ParsedLevels} object.
 }
 \description{
 Reads a result apb2 wrote into a \link{ParsedLevels} object, one anndataR \code{AnnData} per level, the same for every
-format: a \code{.h5ad} file, a \code{.duckdb} file, or the directory apb2 writes for a \code{.parquet} result. Reading DuckDB
-needs the \code{duckdb} and \code{DBI} packages.
+format: a \code{.h5ad} file, a \code{.duckdb} file, or the directory apb2 writes for a \code{.parquet} result. Reading Parquet
+needs the \code{arrow} package, DuckDB the \code{duckdb} and \code{DBI} packages; \code{.h5ad} needs nothing beyond anndataR.
 }
 \examples{
 results <- tempfile()

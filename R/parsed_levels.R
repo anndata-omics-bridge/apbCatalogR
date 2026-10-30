@@ -86,8 +86,8 @@ ParsedLevels <- R6::R6Class(
 #' Read an APB result
 #'
 #' Reads a result apb2 wrote into a [ParsedLevels] object, one anndataR `AnnData` per level, the same for every
-#' format: a `.h5ad` file, a `.duckdb` file, or the directory apb2 writes for a `.parquet` result. Reading DuckDB
-#' needs the `duckdb` and `DBI` packages.
+#' format: a `.h5ad` file, a `.duckdb` file, or the directory apb2 writes for a `.parquet` result. Reading Parquet
+#' needs the `arrow` package, DuckDB the `duckdb` and `DBI` packages; `.h5ad` needs nothing beyond anndataR.
 #'
 #' @param path The result, such as `converted.h5ad`, `converted.duckdb` or the directory `converted.parquet`.
 #' @return A [ParsedLevels] object.
@@ -151,6 +151,9 @@ manifest_levels <- function(manifest, path, read) {
 }
 
 read_table <- function(directory, entry) {
+  if (!requireNamespace("arrow", quietly = TRUE)) {
+    stop("reading a Parquet result needs the arrow package", call. = FALSE)
+  }
   as.data.frame(arrow::read_parquet(file.path(directory, entry$file)))
 }
 

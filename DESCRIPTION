@@ -22,6 +22,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests: 
     altdoc,
+    arrow,
     BiocStyle,
     covr,
     cyclocomp,
@@ -38,8 +39,7 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports: 
-    anndataR,
-    arrow,
+    anndataR (>= 1.2.2),
     jsonlite,
     Matrix,
     R6,
