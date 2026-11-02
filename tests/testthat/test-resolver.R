@@ -27,10 +27,11 @@ test_that("a request a pending producer would answer is unknown, with what to ru
       table = "fasta",
       prefix = NA_character_
     ),
+    key = "contaminant",
     qualifiers = c(kind = "contaminant")
   )
   pending <- list(list(entry = entry, reason = apbCatalogR:::pending_reason(producer)))
-  request <- apbCatalogR:::field_request("protein", "var", list(kind = "contaminant"))
+  request <- apbCatalogR:::field_request("protein", "var", "contaminant", list(kind = "contaminant"))
   resolution <- apbCatalogR:::resolve_entries(list(), pending, request, "missing")
   expect_identical(resolution$status, "unknown")
   expect_identical(resolution$reasons, "apb-fasta has not run on this result; run apb-fasta verify")

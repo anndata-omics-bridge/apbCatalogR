@@ -1,9 +1,10 @@
 # Answer a request for a meaning from reviewed entries, without choosing silently; apb_catalog.resolver.
 
-# A consumer's question: one level and location, constrained by accepted qualifier values (a named list of character
-# vectors). Qualifiers left out accept any value; accepting "unknown" admits entries that leave it unknown.
-field_request <- function(level, location, qualifiers) {
-  list(level = level, location = location, qualifiers = qualifiers)
+# A consumer's question: one level and location, the key asked for (NULL to ask for every key) and the qualifier
+# values accepted (a named list of character vectors): the key's kind and fixed values, and any further qualifiers.
+# Qualifiers left out accept any value; accepting "unknown" admits entries that leave it unknown.
+field_request <- function(level, location, key, qualifiers) {
+  list(level = level, location = location, key = key, qualifiers = qualifiers)
 }
 
 request_admits <- function(request, entry) {
@@ -32,7 +33,13 @@ request_undecided <- function(request, qualifiers) {
 }
 
 new_candidate <- function(entry, undecided = character(0)) {
-  list(entry_id = entry$entry_id, reference = entry$reference, qualifiers = entry$qualifiers, undecided = undecided)
+  list(
+    entry_id = entry$entry_id,
+    reference = entry$reference,
+    key = entry$key,
+    qualifiers = entry$qualifiers,
+    undecided = undecided
+  )
 }
 
 # The answer to one request; only a resolved one carries a reference. `requirement` records the requirement a missing
@@ -55,13 +62,12 @@ Resolution <- R6::R6Class(
       self$reasons <- reasons
     },
 
-    # The distinct values the candidates carry; an unreviewed level signals UnresolvedField.
-    offered = function(qualifier) {
+    # The distinct keys the candidates have; an unreviewed level signals UnresolvedField.
+    offered = function() {
       if (self$status == "unknown" && length(self$candidates) == 0L) {
         stop(unresolved_field(self))
       }
-      values <- vapply(self$candidates, function(candidate) candidate$qualifiers[[qualifier]], character(1))
-      sort_c(unique(values))
+      sort_c(unique(vapply(self$candidates, function(candidate) candidate$key, character(1))))
     },
 
     # The reference, NULL when the field is missing; ambiguous and unknown answers signal UnresolvedField.

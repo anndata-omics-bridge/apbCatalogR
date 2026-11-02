@@ -7,8 +7,9 @@
 The class generator; \code{DataCatalog$new()} returns a \code{DataCatalog}.
 }
 \description{
-Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly. Ambiguous or unreviewed
-answers signal \code{UnresolvedField}.
+Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly. A lookup asks by one of the
+set's keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or unreviewed answers signal
+\code{UnresolvedField}.
 }
 \examples{
 results <- tempfile()
@@ -16,7 +17,14 @@ archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "ap
 utils::untar(archive, exdir = results)
 result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
 catalog <- DataCatalog$new(result, "confidence")
-dim(catalog$layer("peptidoform_ion", kind = "pep"))
+dim(catalog$layer("peptidoform_ion", "pep"))
+}
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{levels}}{One \link{Level} per level of the result, with anndataR's slots looked up by key.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
@@ -29,7 +37,7 @@ dim(catalog$layer("peptidoform_ion", kind = "pep"))
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-DataCatalog-initialize}{\code{DataCatalog$new()}}
-    \item \href{#method-DataCatalog-kinds}{\code{DataCatalog$kinds()}}
+    \item \href{#method-DataCatalog-keys}{\code{DataCatalog$keys()}}
     \item \href{#method-DataCatalog-layer}{\code{DataCatalog$layer()}}
     \item \href{#method-DataCatalog-var}{\code{DataCatalog$var()}}
     \item \href{#method-DataCatalog-obs}{\code{DataCatalog$obs()}}
@@ -42,18 +50,18 @@ dim(catalog$layer("peptidoform_ion", kind = "pep"))
 \if{html}{\out{<a id="method-DataCatalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-initialize}{}}}
 \subsection{\code{DataCatalog$new()}}{
-  Bind a catalogue set to the levels of one result.
+  Bind catalogue sets to the levels of one result; \code{apb}, APB's own fields, is always in.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$new(result, catalog, enforce = NULL)}
+    \preformatted{DataCatalog$new(result, ..., enforce = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{result}}{A \link{ParsedLevels} object.}
-      \item{\code{catalog}}{The catalogue set, such as \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal \code{MissingRequiredField} when a field the set requires
+      \item{\code{...}}{The catalogue sets, such as \code{"abundance"} and \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal \code{MissingRequiredField} when a field a set requires
 at that strength is missing.}
     }
     \if{html}{\out{</div>}}
@@ -61,13 +69,14 @@ at that strength is missing.}
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataCatalog-kinds"></a>}}
-\if{latex}{\out{\hypertarget{method-DataCatalog-kinds}{}}}
-\subsection{\code{DataCatalog$kinds()}}{
-  The kinds the level offers at one location, given the other qualifiers.
+\if{html}{\out{<a id="method-DataCatalog-keys"></a>}}
+\if{latex}{\out{\hypertarget{method-DataCatalog-keys}{}}}
+\subsection{\code{DataCatalog$keys()}}{
+  The keys the level offers at one location, given further qualifiers, from every set that
+declares those qualifiers.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$kinds(level, location, ...)}
+    \preformatted{DataCatalog$keys(level, location, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -75,7 +84,7 @@ at that strength is missing.}
     \describe{
       \item{\code{level}}{The quantification level.}
       \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -91,15 +100,15 @@ at that strength is missing.}
   The layer with this meaning.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$layer(level, kind, ...)}
+    \preformatted{DataCatalog$layer(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind, such as \code{"pep"}.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key, such as \code{"pep"}; see \code{\link[=catalogue_table]{catalogue_table()}}.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -115,15 +124,15 @@ at that strength is missing.}
   The per-feature column with this meaning, from \code{var} or a \code{varm} table.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$var(level, kind, ...)}
+    \preformatted{DataCatalog$var(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -139,15 +148,15 @@ at that strength is missing.}
   The per-sample column with this meaning.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$obs(level, kind, ...)}
+    \preformatted{DataCatalog$obs(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -160,7 +169,8 @@ at that strength is missing.}
 \if{html}{\out{<a id="method-DataCatalog-fields"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-fields}{}}}
 \subsection{\code{DataCatalog$fields()}}{
-  Every catalogued field of the result, one row per field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
+  Every catalogued field of the result in every composed set, one row per field, as
+\code{\link[=catalogue_table]{catalogue_table()}} shows them.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$fields()}

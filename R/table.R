@@ -11,7 +11,12 @@ field_name <- function(entry) {
   paste0("prefix:", reference$prefix)
 }
 
-# One table row: where the entry's field lives, its qualifiers and its requirement.
+# The set's qualifiers besides kind, in vocabulary order.
+other_qualifiers <- function(set) {
+  setdiff(names(set$vocabulary$qualifiers), "kind")
+}
+
+# One table row: where the entry's field lives, its key and qualifiers, and its requirement.
 entry_row <- function(set_name, set, source, software_version_pattern, entry) {
   reference <- entry$reference
   requirement <- NA_character_
@@ -21,7 +26,7 @@ entry_row <- function(set_name, set, source, software_version_pattern, entry) {
       break
     }
   }
-  qualifiers <- names(set$vocabulary$qualifiers)
+  qualifiers <- other_qualifiers(set)
   c(
     list(
       set = set_name,
@@ -30,9 +35,11 @@ entry_row <- function(set_name, set, source, software_version_pattern, entry) {
       level = reference$level,
       location = reference$location,
       table = reference$table,
-      name = field_name(entry)
+      name = field_name(entry),
+      key = entry$key,
+      kind = entry$qualifiers[["kind"]]
     ),
-    stats::setNames(as.list(unname(entry$qualifiers[qualifiers])), paste0("qualifier.", qualifiers)),
+    stats::setNames(as.list(unname(entry$qualifiers[qualifiers])), sprintf("qualifier.%s", qualifiers)),
     list(requirement = requirement, entry_id = entry$entry_id)
   )
 }
@@ -56,7 +63,7 @@ set_rows <- function(set_name, set) {
 }
 
 set_columns <- function(set) {
-  c(KEY_COLUMNS, paste0("qualifier.", names(set$vocabulary$qualifiers)), "requirement", "entry_id")
+  c(KEY_COLUMNS, "key", "kind", sprintf("qualifier.%s", other_qualifiers(set)), "requirement", "entry_id")
 }
 
 # A data frame from rows given as named lists; a column a row lacks is NA there. `lists` names list columns.
@@ -84,8 +91,8 @@ records_frame <- function(rows, columns, lists = character(0)) {
 #' @param catalogue One set's name; `NULL` lists every set of the bundle.
 #' @return A data frame with columns `set`, `source` (the conversion software, an app or `annotation:<convention>`),
 #'   `software_version_pattern` (`NA` for an entry of every software version), `level`, `location`, `table`, `name`
-#'   (`prefix:<prefix>` for a field found by column-name prefix), one `qualifier.<name>` column per qualifier,
-#'   `requirement` and `entry_id`.
+#'   (`prefix:<prefix>` for a field found by column-name prefix), `key`, `kind`, one `qualifier.<name>` column per
+#'   other qualifier, `requirement` and `entry_id`.
 #' @export
 #' @examples
 #' head(catalogue_table("confidence"))
@@ -99,5 +106,5 @@ catalogue_table <- function(catalogue = NULL) {
     columns <- union(columns, set_columns(set))
   }
   qualifiers <- columns[startsWith(columns, "qualifier.")]
-  records_frame(rows, c(KEY_COLUMNS, qualifiers, "requirement", "entry_id"))
+  records_frame(rows, c(KEY_COLUMNS, "key", "kind", qualifiers, "requirement", "entry_id"))
 }

@@ -98,17 +98,16 @@ outcome_of <- function(lookup) {
 }
 
 lookup_arguments <- function(request) {
-  qualifiers <- request$qualifiers
-  c(list(request$level, kind = qualifiers$kind), qualifiers[names(qualifiers) != "kind"])
+  c(list(request$level, request$key), request$qualifiers)
 }
 
 method_for <- function(location) {
   switch(location, layers = "layer", obs = "obs", var = "var")
 }
 
-kinds_outcome <- function(catalog, case) {
+keys_outcome <- function(catalog, case) {
   tryCatch(
-    list(kinds = as.list(catalog$kinds(case$level, case$location))),
+    list(keys = as.list(catalog$keys(case$level, case$location))),
     UnresolvedField = function(condition) list(error = "UnresolvedField", status = condition$resolution$status)
   )
 }

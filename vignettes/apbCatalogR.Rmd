@@ -44,8 +44,8 @@ catalogues()[, c("catalogue", "has_requirements", "entries")]
 
 ```{r catalog}
 diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-diann$layer("peptidoform_ion", kind = "intensity")
-diann$kinds("peptidoform_ion", "layers")
+diann$layer("peptidoform_ion", "intensity")
+diann$keys("peptidoform_ion", "layers")
 ```
 
 # The data of a result
@@ -63,21 +63,30 @@ result
 
 ```{r data-catalog}
 confidence <- DataCatalog$new(result, "confidence")
-pep <- confidence$layer("peptidoform_ion", kind = "pep")
+pep <- confidence$layer("peptidoform_ion", "pep")
 dim(pep)
+```
+
+Each level of the catalog has anndataR's slots. A name is read as a key first, then as the level's own layer or column, as cf_xarray reads `ds.cf[...]`; `apb`, APB's own fields, is always in:
+
+```{r levels}
+ion <- confidence$levels$peptidoform_ion
+dim(ion$layers[["pep"]])
+ion$layers$keys()
+head(ion$var[["peptidoform_ion"]])
 ```
 
 MaxQuant reports no q-value on this level, so that lookup gives `NULL`:
 
 ```{r missing}
-confidence$layer("peptidoform_ion", kind = "q_value")
+confidence$layer("peptidoform_ion", "q_value")
 ```
 
-A lookup that several fields answer signals `UnresolvedField` rather than choosing silently. DIA-NN 1.8 reports both an unnormalized and a normalized intensity per precursor:
+A lookup the catalogue cannot answer with one field signals `UnresolvedField` rather than choosing silently. FragPipe does not document whether its intensity is normalized, so the key `intensity`, never normalized, is unknown there:
 
 ```{r unresolved}
 tryCatch(
-  Catalog$new("DIA-NN", "1.8.1", "abundance")$layer("peptidoform_ion", kind = "intensity"),
+  Catalog$new("FragPipe", "22.0", "abundance")$layer("peptidoform_ion", "intensity"),
   UnresolvedField = function(condition) conditionMessage(condition)
 )
 ```

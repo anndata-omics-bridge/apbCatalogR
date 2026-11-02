@@ -19,7 +19,7 @@ Columns keep the vendor's names: the posterior error probability is `PEP` in Max
 
 ## apb-catalog
 
-[apb-catalog](https://anndata-omics-bridge.github.io/apb-catalog/) records what those columns mean, in reviewed catalogue sets. A consumer asks a set for a kind, such as `pep` or `intensity`, and gets the column.
+[apb-catalog](https://anndata-omics-bridge.github.io/apb-catalog/) records what those columns mean, in reviewed catalogue sets. A consumer asks a set by key, such as `pep` or `intensity`, and gets the column.
 
 | Set | Fields |
 | --- | --- |
@@ -72,9 +72,10 @@ Ask the catalogue which column a software version reports:
 ```r
 library(apbCatalogR)
 diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-diann$kinds("peptidoform_ion", "layers")
-#> [1] "intensity"     "ms1_intensity"
-diann$layer("peptidoform_ion", kind = "intensity")
+diann$keys("peptidoform_ion", "layers")
+#> [1] "intensity"                "ms1_intensity"            "normalized_intensity"
+#> [4] "normalized_ms1_intensity"
+diann$layer("peptidoform_ion", "intensity")
 #> <Reference peptidoform_ion layers: Precursor_Quantity>
 ```
 
@@ -83,7 +84,7 @@ Get the data of a result:
 ```r
 result <- read_parsed_levels("result.parquet")
 confidence <- DataCatalog$new(result, "confidence")
-pep <- confidence$layer("peptidoform_ion", kind = "pep")   # runs x features matrix
+pep <- confidence$layer("peptidoform_ion", "pep")   # runs x features matrix
 ```
 
 ## The bundle

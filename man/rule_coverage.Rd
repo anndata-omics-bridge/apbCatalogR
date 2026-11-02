@@ -10,8 +10,8 @@ rule_coverage(catalogue)
 \item{catalogue}{The set's name.}
 }
 \value{
-A data frame with columns \code{software}, \code{version} (the label), \code{software_version_pattern}, \code{level}, \code{kind},
-\code{qualifiers} (the other qualifiers as \code{key=value}), \code{origin}, \code{producer} (the app, \code{NA} for the conversion
+A data frame with columns \code{software}, \code{version} (the label), \code{software_version_pattern}, \code{level}, \code{key},
+\code{kind}, \code{qualifiers} (the other qualifiers as \code{name=value}), \code{origin}, \code{producer} (the app, \code{NA} for the conversion
 software's fields), \code{requirement}, \code{location}, \code{table}, \code{column} (\code{NA} when unsupported), \code{needs} (what to run
 before the field exists) and \code{verdict} (\code{NA} for a set without requirements).
 }

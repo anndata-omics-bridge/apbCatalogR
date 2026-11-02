@@ -8,13 +8,14 @@ The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 }
 \description{
 Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
-levels; the set's entries for that pattern give each level's fields. Lookups that several fields answer, or that an
-unreviewed level cannot, signal \code{UnresolvedField}.
+levels; the set's entries for that pattern give each level's fields. A lookup asks by one of the set's keys, such as
+\code{"normalized_intensity"}; further qualifiers, such as \code{unit}, narrow it. Lookups that several fields answer, or that
+an unreviewed level cannot, signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-catalog$layer("peptidoform_ion", kind = "intensity")
-catalog$kinds("peptidoform_ion", "layers")
+catalog$layer("peptidoform_ion", "intensity")
+catalog$keys("peptidoform_ion", "layers")
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
@@ -27,7 +28,7 @@ catalog$kinds("peptidoform_ion", "layers")
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-Catalog-initialize}{\code{Catalog$new()}}
-    \item \href{#method-Catalog-kinds}{\code{Catalog$kinds()}}
+    \item \href{#method-Catalog-keys}{\code{Catalog$keys()}}
     \item \href{#method-Catalog-layer}{\code{Catalog$layer()}}
     \item \href{#method-Catalog-var}{\code{Catalog$var()}}
     \item \href{#method-Catalog-obs}{\code{Catalog$obs()}}
@@ -60,13 +61,13 @@ at that strength is missing.}
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Catalog-kinds"></a>}}
-\if{latex}{\out{\hypertarget{method-Catalog-kinds}{}}}
-\subsection{\code{Catalog$kinds()}}{
-  The kinds the level offers at one location, given the other qualifiers.
+\if{html}{\out{<a id="method-Catalog-keys"></a>}}
+\if{latex}{\out{\hypertarget{method-Catalog-keys}{}}}
+\subsection{\code{Catalog$keys()}}{
+  The keys the level offers at one location, given further qualifiers.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$kinds(level, location, ...)}
+    \preformatted{Catalog$keys(level, location, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -74,7 +75,7 @@ at that strength is missing.}
     \describe{
       \item{\code{level}}{The quantification level.}
       \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{...}}{Other qualifiers by name, such as \code{stage = "quantification"}.}
+      \item{\code{...}}{Further qualifiers by name, such as \code{unit = "minute"}.}
     }
     \if{html}{\out{</div>}}
   }
@@ -90,15 +91,15 @@ at that strength is missing.}
   Where the sample-by-feature layer with this meaning lives.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$layer(level, kind, ...)}
+    \preformatted{Catalog$layer(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind, such as \code{"intensity"}.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key, such as \code{"intensity"}; see \code{\link[=catalogue_table]{catalogue_table()}}.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -114,15 +115,15 @@ at that strength is missing.}
   Where the per-feature column with this meaning lives, in \code{var} or a \code{varm} table.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$var(level, kind, ...)}
+    \preformatted{Catalog$var(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }
@@ -138,15 +139,15 @@ at that strength is missing.}
   Where the per-sample column with this meaning lives.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$obs(level, kind, ...)}
+    \preformatted{Catalog$obs(level, key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{level}}{The quantification level.}
-      \item{\code{kind}}{The kind.}
-      \item{\code{...}}{Other qualifiers by name.}
+      \item{\code{key}}{The key.}
+      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
     }
     \if{html}{\out{</div>}}
   }

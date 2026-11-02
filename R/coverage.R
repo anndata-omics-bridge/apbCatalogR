@@ -5,6 +5,7 @@ COVERAGE_COLUMNS <- c(
   "version",
   "software_version_pattern",
   "level",
+  "key",
   "kind",
   "qualifiers",
   "origin",
@@ -49,8 +50,8 @@ catalogues <- function() {
 #' `fail` when a MUST field is unsupported, `warn` when a SHOULD or MAY field is, `pass` otherwise.
 #'
 #' @param catalogue The set's name.
-#' @return A data frame with columns `software`, `version` (the label), `software_version_pattern`, `level`, `kind`,
-#'   `qualifiers` (the other qualifiers as `key=value`), `origin`, `producer` (the app, `NA` for the conversion
+#' @return A data frame with columns `software`, `version` (the label), `software_version_pattern`, `level`, `key`,
+#'   `kind`, `qualifiers` (the other qualifiers as `name=value`), `origin`, `producer` (the app, `NA` for the conversion
 #'   software's fields), `requirement`, `location`, `table`, `column` (`NA` when unsupported), `needs` (what to run
 #'   before the field exists) and `verdict` (`NA` for a set without requirements).
 #' @export
@@ -106,8 +107,9 @@ variant_rows <- function(set, software, variant, vendor_entries) {
       c(
         base,
         list(
-          kind = row$kind,
-          qualifiers = qualifier_pairs(row$qualifiers),
+          key = row$key,
+          kind = set$key(row$key)$kind,
+          qualifiers = qualifier_pairs(set$key(row$key)$fixed),
           location = row$location,
           requirement = row$requirement
         )
@@ -130,13 +132,13 @@ producer_fields <- function(producers, variant) {
   )
 }
 
-# Rows in the order of the requirements their kind answers, vendor fields before producer fields; stable otherwise.
+# Rows in the order of the requirements their key answers, vendor fields before producer fields; stable otherwise.
 required_order <- function(rows, required) {
-  kinds <- vapply(required, function(row) row$kind, character(1))
+  keys <- vapply(required, function(row) row$key, character(1))
   ranks <- vapply(
     rows,
     function(row) {
-      index <- match(row$kind %||% NA_character_, kinds)
+      index <- match(row$key %||% NA_character_, keys)
       if (is.na(index)) length(required) else index - 1L
     },
     numeric(1)
@@ -176,6 +178,7 @@ coverage_field <- function(entry, producer) {
   origin <- if ("origin" %in% names(others)) others[["origin"]] else NA_character_
   others <- others[names(others) != "origin"]
   list(
+    key = entry$key,
     kind = entry$qualifiers[["kind"]],
     qualifiers = qualifier_pairs(others),
     origin = origin,

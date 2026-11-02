@@ -12,8 +12,8 @@ catalogue_table(catalogue = NULL)
 \value{
 A data frame with columns \code{set}, \code{source} (the conversion software, an app or \verb{annotation:<convention>}),
 \code{software_version_pattern} (\code{NA} for an entry of every software version), \code{level}, \code{location}, \code{table}, \code{name}
-(\verb{prefix:<prefix>} for a field found by column-name prefix), one \verb{qualifier.<name>} column per qualifier,
-\code{requirement} and \code{entry_id}.
+(\verb{prefix:<prefix>} for a field found by column-name prefix), \code{key}, \code{kind}, one \verb{qualifier.<name>} column per
+other qualifier, \code{requirement} and \code{entry_id}.
 }
 \description{
 One row per entry and software version it applies to, as \verb{apb-catalog table} prints it.

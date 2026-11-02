@@ -21,11 +21,11 @@ test_that("Catalog answers every bundle case as apb-catalog does", {
       }
       expect_json_equal(outcome, request$outcome, paste(label, request$level, jsonlite::toJSON(request$qualifiers)))
     }
-    for (kinds in case$kinds) {
+    for (keys in case$keys) {
       expect_json_equal(
-        kinds_outcome(catalog, kinds),
-        kinds$outcome,
-        paste(label, "kinds", kinds$level, kinds$location)
+        keys_outcome(catalog, keys),
+        keys$outcome,
+        paste(label, "keys", keys$level, keys$location)
       )
     }
     expect_json_equal(frame_records(catalog$fields()), case$fields, paste(label, "fields"))
@@ -52,10 +52,10 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
     label <- paste(case$result, case$catalogue, case$enforce %||% "")
     result <- synthetic_result(case$result)
     if (!is.null(case$error)) {
-      expect_error(DataCatalog$new(result, case$catalogue, case$enforce), label = label)
+      expect_error(DataCatalog$new(result, case$catalogue, enforce = case$enforce), label = label)
       next
     }
-    catalog <- DataCatalog$new(result, case$catalogue, case$enforce)
+    catalog <- DataCatalog$new(result, case$catalogue, enforce = case$enforce)
     for (request in case$requests) {
       method <- catalog[[method_for(request$location)]]
       outcome <- outcome_of(function() do.call(method, lookup_arguments(request)))
@@ -68,11 +68,11 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
       expect_identical(outcome$value, referenced_data(result, expected$reference), label = request_label)
       expect_identical(outcome$warning, expected$warning, label = request_label)
     }
-    for (kinds in case$kinds) {
+    for (keys in case$keys) {
       expect_json_equal(
-        kinds_outcome(catalog, kinds),
-        kinds$outcome,
-        paste(label, "kinds", kinds$level, kinds$location)
+        keys_outcome(catalog, keys),
+        keys$outcome,
+        paste(label, "keys", keys$level, keys$location)
       )
     }
     if (!is.null(case$fields)) {

@@ -1,16 +1,18 @@
 # The conditions apb-catalog raises as exceptions in Python.
 
-wanted_text <- function(qualifiers) {
-  paste(
+# The key asked for and the qualifiers the request accepts, for messages.
+wanted_text <- function(request) {
+  accepted <- paste(
     vapply(
-      names(qualifiers),
+      names(request$qualifiers),
       function(name) {
-        paste0(name, "=", paste(qualifiers[[name]], collapse = "|"))
+        paste0(name, "=", paste(request$qualifiers[[name]], collapse = "|"))
       },
       character(1)
     ),
     collapse = ", "
   )
+  if (is.null(request$key)) accepted else sprintf("%s (%s)", request$key, accepted)
 }
 
 unresolved_field <- function(resolution) {
@@ -18,7 +20,7 @@ unresolved_field <- function(resolution) {
   names <- vapply(resolution$candidates, function(candidate) candidate$reference$name, character(1))
   message <- sprintf(
     "%s on %s is %s: %s%s",
-    wanted_text(request$qualifiers),
+    wanted_text(request),
     request$level,
     resolution$status,
     paste(resolution$reasons, collapse = "; "),
@@ -31,7 +33,7 @@ missing_required_text <- function(resolution, row) {
   sprintf(
     "%s field %s on %s is missing: %s",
     row$requirement,
-    wanted_text(resolution$request$qualifiers),
+    wanted_text(resolution$request),
     row$level,
     paste(resolution$reasons, collapse = "; ")
   )
