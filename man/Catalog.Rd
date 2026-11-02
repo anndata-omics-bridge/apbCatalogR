@@ -7,9 +7,9 @@
 The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 }
 \description{
-Answers from the rules alone, without data. The rule of the software whose version pattern admits the version
-decides which fields each level has. Lookups that several fields answer, or that an unreviewed level cannot,
-signal \code{UnresolvedField}.
+Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
+levels; the set's entries for that pattern give each level's fields. Lookups that several fields answer, or that an
+unreviewed level cannot, signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")

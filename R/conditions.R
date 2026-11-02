@@ -56,13 +56,3 @@ missing_required_warning <- function(resolution, row) {
     call = NULL
   )
 }
-
-stale_field <- function(reference, stored, current) {
-  message <- sprintf(
-    "%s: this result reads %s, the catalog's rule %s; reconvert the result, or run update_catalog() if it is newer",
-    reference$name,
-    stored,
-    current
-  )
-  errorCondition(message, reference = reference, class = "StaleField", call = NULL)
-}

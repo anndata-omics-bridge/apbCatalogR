@@ -1,24 +1,18 @@
-# Every catalogue set as one long table: one row per entry and rule it applies to; apb_catalog.table.
+# Every catalogue set as one long table: one row per entry and software version it applies to; apb_catalog.table.
 
-KEY_COLUMNS <- c("set", "source", "version_pattern", "rule", "level", "location", "table", "name")
+KEY_COLUMNS <- c("set", "source", "software_version_pattern", "level", "location", "table", "name")
 
-# The rule of an entry that applies to every rule: a producer's or a sample annotation's.
-ANY_RULE <- "*"
-
-# The column an entry names: its name, or the role or prefix it is found by.
+# The column an entry names: its name, or the prefix it is found by.
 field_name <- function(entry) {
   reference <- entry$reference
   if (!is.na(reference$name)) {
     return(reference$name)
   }
-  if (!is.na(reference$role)) {
-    return(paste0("role:", reference$role))
-  }
   paste0("prefix:", reference$prefix)
 }
 
 # One table row: where the entry's field lives, its qualifiers and its requirement.
-entry_row <- function(set_name, set, source, version_pattern, rule, entry) {
+entry_row <- function(set_name, set, source, software_version_pattern, entry) {
   reference <- entry$reference
   requirement <- NA_character_
   for (row in set$requirements) {
@@ -32,8 +26,7 @@ entry_row <- function(set_name, set, source, version_pattern, rule, entry) {
     list(
       set = set_name,
       source = source,
-      version_pattern = version_pattern,
-      rule = rule,
+      software_version_pattern = software_version_pattern,
       level = reference$level,
       location = reference$location,
       table = reference$table,
@@ -44,23 +37,19 @@ entry_row <- function(set_name, set, source, version_pattern, rule, entry) {
   )
 }
 
-# Every row of one set: vendor entries once per rule, the others once.
+# Every row of one set: vendor entries once per software version pattern, the others once, without a pattern.
 set_rows <- function(set_name, set) {
   rows <- list()
   for (vendor in set$catalogues) {
-    patterns <- stats::setNames(
-      vapply(vendor$variants, function(variant) variant$software_version_pattern, character(1)),
-      vapply(vendor$variants, function(variant) variant$rule, character(1))
-    )
     for (entry in vendor$entries) {
-      for (rule in entry$rules) {
-        rows[[length(rows) + 1L]] <- entry_row(set_name, set, vendor$label, patterns[[rule]], rule, entry)
+      for (pattern in entry$software_version_pattern) {
+        rows[[length(rows) + 1L]] <- entry_row(set_name, set, vendor$label, pattern, entry)
       }
     }
   }
   for (source in c(set$producers, set$annotations)) {
     for (entry in source$entries) {
-      rows[[length(rows) + 1L]] <- entry_row(set_name, set, source$label, NA_character_, ANY_RULE, entry)
+      rows[[length(rows) + 1L]] <- entry_row(set_name, set, source$label, NA_character_, entry)
     }
   }
   rows
@@ -90,13 +79,13 @@ records_frame <- function(rows, columns, lists = character(0)) {
 
 #' The catalogue sets as one long table
 #'
-#' One row per entry and rule it applies to, as `apb-catalog table` prints it.
+#' One row per entry and software version it applies to, as `apb-catalog table` prints it.
 #'
 #' @param catalogue One set's name; `NULL` lists every set of the bundle.
-#' @return A data frame with columns `set`, `source` (the vendor, `producer:<name>` or `annotation:<convention>`),
-#'   `version_pattern`, `rule` (`*` for an entry of every rule), `level`, `location`, `table`, `name` (`role:<role>`
-#'   or `prefix:<prefix>` for a field found by role or column-name prefix), one `qualifier.<name>` column per
-#'   qualifier, `requirement` and `entry_id`.
+#' @return A data frame with columns `set`, `source` (the conversion software, an app or `annotation:<convention>`),
+#'   `software_version_pattern` (`NA` for an entry of every software version), `level`, `location`, `table`, `name`
+#'   (`prefix:<prefix>` for a field found by column-name prefix), one `qualifier.<name>` column per qualifier,
+#'   `requirement` and `entry_id`.
 #' @export
 #' @examples
 #' head(catalogue_table("confidence"))

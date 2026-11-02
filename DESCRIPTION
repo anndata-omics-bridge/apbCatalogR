@@ -6,7 +6,7 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-6468-120X")),
     person("Witek", "Wolski", , "wewolski@gmail.com", role = "cre"))
 Description: Reimplements the apb-catalog API on the bundle apb-catalog
-    releases: apb2 parse rules, reviewed catalogues and expected answers.
+    releases: reviewed catalogues, apb2's rule levels and expected answers.
     Reads results of the AnnData Proteomics Bridge, as h5ad, Parquet or
     DuckDB, into anndataR
     objects and finds the column holding a meaning, such as a PEP or an

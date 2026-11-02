@@ -10,13 +10,13 @@ catalogue_table(catalogue = NULL)
 \item{catalogue}{One set's name; \code{NULL} lists every set of the bundle.}
 }
 \value{
-A data frame with columns \code{set}, \code{source} (the vendor, \verb{producer:<name>} or \verb{annotation:<convention>}),
-\code{version_pattern}, \code{rule} (\code{*} for an entry of every rule), \code{level}, \code{location}, \code{table}, \code{name} (\verb{role:<role>}
-or \verb{prefix:<prefix>} for a field found by role or column-name prefix), one \verb{qualifier.<name>} column per
-qualifier, \code{requirement} and \code{entry_id}.
+A data frame with columns \code{set}, \code{source} (the conversion software, an app or \verb{annotation:<convention>}),
+\code{software_version_pattern} (\code{NA} for an entry of every software version), \code{level}, \code{location}, \code{table}, \code{name}
+(\verb{prefix:<prefix>} for a field found by column-name prefix), one \verb{qualifier.<name>} column per qualifier,
+\code{requirement} and \code{entry_id}.
 }
 \description{
-One row per entry and rule it applies to, as \verb{apb-catalog table} prints it.
+One row per entry and software version it applies to, as \verb{apb-catalog table} prints it.
 }
 \examples{
 head(catalogue_table("confidence"))

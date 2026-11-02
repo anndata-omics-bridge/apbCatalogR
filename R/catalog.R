@@ -50,13 +50,10 @@ reference_of <- function(reference) {
   Reference$new(reference$level, reference$location, reference$name, reference$table)
 }
 
-# The entry bound to the level's column: by name, by the role's column or by prefix. A prefix matching several columns
-# binds to each, so the lookup reports them as ambiguous.
-bind_entry <- function(entry, roles, obs_columns) {
+# The entry bound to the level's column: by name or by prefix. A prefix matching several columns binds to each, so the
+# lookup reports them as ambiguous.
+bind_entry <- function(entry, obs_columns) {
   reference <- entry$reference
-  if (!is.na(reference$role)) {
-    return(if (reference$role %in% names(roles)) list(bound_entry(entry, roles[[reference$role]])) else list())
-  }
   if (!is.na(reference$prefix)) {
     matching <- obs_columns[startsWith(tolower(obs_columns), tolower(reference$prefix))]
     return(lapply(matching, function(column) bound_entry(entry, column)))
@@ -64,10 +61,10 @@ bind_entry <- function(entry, roles, obs_columns) {
   list(entry)
 }
 
-# Bind one level to its set: the reviewed vendor entries, then APB's own fields. Only entries whose field the level
-# holds answer; a producer that has not run leaves its entries pending. A set with vendor catalogues answers only for
-# a reviewed rule.
-level_view <- function(name, software, pattern, rule_level, set, retained, roles, obs_columns, ran, annotations) {
+# Bind one level to its set: the reviewed vendor entries, then the apps' and annotations'. Only entries whose field the
+# level holds answer; an app that has not run leaves its entries pending. A set with vendor catalogues answers only for
+# a reviewed software version.
+level_view <- function(name, software, pattern, rule_level, set, retained, obs_columns, ran, annotations) {
   if (is.null(software) || is.null(pattern) || is.null(rule_level)) {
     return(UnreviewedLevel$new(name, NULL, NULL, "the level records no rule_json software version"))
   }
@@ -80,8 +77,8 @@ level_view <- function(name, software, pattern, rule_level, set, retained, roles
     }
     entries <- held_entries(entries_for(reviewed$catalogue, reviewed$variant), retained)
   }
-  produced <- producer_entries(set$producers, rule_level, retained, roles, obs_columns, ran)
-  entries <- c(entries, produced$entries, annotation_entries(annotations, rule_level, roles, obs_columns))
+  produced <- producer_entries(set$producers, rule_level, retained, obs_columns, ran)
+  entries <- c(entries, produced$entries, annotation_entries(annotations, rule_level, obs_columns))
   if (!is.null(reviewed)) {
     return(ReviewedLevel$new(name, reviewed, entries, produced$pending))
   }
@@ -93,16 +90,23 @@ held_entries <- function(entries, retained) {
   Filter(function(entry) reference_key(entry$reference) %in% retained, entries)
 }
 
-bound_entries <- function(source, rule_level, roles, obs_columns) {
-  unlist(lapply(entries_on(source, rule_level), bind_entry, roles, obs_columns), recursive = FALSE)
+bound_entries <- function(source, rule_level, obs_columns) {
+  unlist(lapply(entries_on(source, rule_level), bind_entry, obs_columns), recursive = FALSE)
 }
 
-# The producers' entries the level holds, and the entries of producers that have not run.
-producer_entries <- function(producers, rule_level, retained, roles, obs_columns, ran) {
+# Every field the set's entries name on one level: without data, the catalogue says what a level holds.
+catalogued_keys <- function(set, level) {
+  entries <- unlist(lapply(set$sources(), function(source) source$entries), recursive = FALSE)
+  named <- Filter(function(entry) entry$reference$level == level && !is.na(entry$reference$name), entries)
+  unique(vapply(named, function(entry) reference_key(entry$reference), character(1)))
+}
+
+# The apps' entries the level holds, and the entries of apps that have not run.
+producer_entries <- function(producers, rule_level, retained, obs_columns, ran) {
   entries <- list()
   pending <- list()
   for (producer in producers) {
-    offered <- bound_entries(producer, rule_level, roles, obs_columns)
+    offered <- bound_entries(producer, rule_level, obs_columns)
     if (ran(producer)) {
       entries <- c(entries, held_entries(offered, retained))
     } else {
@@ -113,8 +117,8 @@ producer_entries <- function(producers, rule_level, retained, roles, obs_columns
   list(entries = entries, pending = pending)
 }
 
-annotation_entries <- function(annotations, rule_level, roles, obs_columns) {
-  unlist(lapply(annotations, bound_entries, rule_level, roles, obs_columns), recursive = FALSE)
+annotation_entries <- function(annotations, rule_level, obs_columns) {
+  unlist(lapply(annotations, bound_entries, rule_level, obs_columns), recursive = FALSE)
 }
 
 check_enforce <- function(name, set, enforce) {
@@ -201,16 +205,9 @@ Lookups <- R6::R6Class(
 
     rows = function(view, entries) {
       labels <- source_labels(self$set)
-      rule <- view$rule_name %||% ANY_RULE
       lapply(entries, function(entry) {
-        entry_row(
-          self$name,
-          self$set,
-          labels[[entry$entry_id]],
-          view$software_version_pattern %||% NA_character_,
-          if (length(entry$rules) > 0L) rule else ANY_RULE,
-          entry
-        )
+        pattern <- view$software_version_pattern %||% NA_character_
+        entry_row(self$name, self$set, labels[[entry$entry_id]], pattern, entry)
       })
     }
   )
@@ -230,9 +227,9 @@ fields_frame <- function(rows, set) {
 
 #' Which column one software version reports for each meaning
 #'
-#' Answers from the rules alone, without data. The rule of the software whose version pattern admits the version
-#' decides which fields each level has. Lookups that several fields answer, or that an unreviewed level cannot,
-#' signal `UnresolvedField`.
+#' Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
+#' levels; the set's entries for that pattern give each level's fields. Lookups that several fields answer, or that an
+#' unreviewed level cannot, signal `UnresolvedField`.
 #'
 #' @field description What this catalogue set holds and who uses it.
 #' @return The class generator; `Catalog$new()` returns a `Catalog`.
@@ -277,8 +274,7 @@ Catalog <- R6::R6Class(
           found$software_version_pattern,
           found$level,
           set,
-          retained = rule_retained(found$rule, found$level),
-          roles = rule_roles(found$rule, found$level),
+          retained = catalogued_keys(set, found$level),
           obs_columns = character(0),
           ran = function(producer) length(producer$requires) == 0L,
           annotations = list()
@@ -361,8 +357,7 @@ Catalog <- R6::R6Class(
 
 #' What one result's fields mean to one consumer
 #'
-#' Answers on a result read with [read_parsed_levels()] and hands the data back directly. A lookup of a field the
-#' result's stored rule declares differently from the catalog's rule signals `StaleField`; ambiguous or unreviewed
+#' Answers on a result read with [read_parsed_levels()] and hands the data back directly. Ambiguous or unreviewed
 #' answers signal `UnresolvedField`.
 #'
 #' @field description What this catalogue set holds and who uses it.
@@ -401,7 +396,6 @@ DataCatalog <- R6::R6Class(
           version$level,
           set,
           retained = level_retained(level),
-          roles = level_roles(level),
           obs_columns = colnames(level$obs),
           ran = function(producer) producer_ran(producer, result$metadata),
           annotations = annotations
@@ -486,38 +480,10 @@ DataCatalog <- R6::R6Class(
     parsed = NULL,
 
     find = function(level, location, kind, qualifiers) {
-      reference <- private$lookups$find(level, location, c(list(kind = kind), qualifiers))
-      if (!is.null(reference)) {
-        check_current(private$lookups$views[[level]], private$parsed$levels[[level]], reference)
-      }
-      reference
+      private$lookups$find(level, location, c(list(kind = kind), qualifiers))
     }
   )
 )
-
-# Signal StaleField when the level's stored rule declares the field differently from the bundle's rule.
-check_current <- function(view, level, reference) {
-  rule <- view$rule_name
-  stored_rule <- level_stored_rule(level)
-  if (is.null(rule) || is.null(stored_rule)) {
-    return(invisible(NULL))
-  }
-  stored <- rule_field(stored_rule, reference$location, reference$name)
-  current <- lapply(
-    rule_declarations(rule, stored_rule$quantification_level),
-    rule_field,
-    reference$location,
-    reference$name
-  )
-  if (
-    any(vapply(current, function(declared) json_equal(stored, declared), logical(1))) ||
-      (is.null(stored) && all(vapply(current, is.null, logical(1))))
-  ) {
-    return(invisible(NULL))
-  }
-  declared <- Find(Negate(is.null), current)
-  stop(stale_field(reference, source_text(stored), source_text(declared)))
-}
 
 # The rows of one level's fields: those it holds, and for a reviewed level those it lacks, with the single value of a
 # field apb2 left out.
@@ -540,15 +506,4 @@ level_fields <- function(lookups, view, level) {
       lookups$rows(view, absent)
     )
   )
-}
-
-source_text <- function(declared) {
-  if (is.null(declared)) {
-    return("no such field")
-  }
-  source <- declared$source
-  if (is.null(source) || identical(source, "")) {
-    source <- declared$inputs
-  }
-  if (!is.null(source) && length(source) > 0L) json_text(source) else json_text(declared[sort_c(names(declared))])
 }

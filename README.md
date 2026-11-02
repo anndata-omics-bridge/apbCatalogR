@@ -37,11 +37,11 @@ A lookup answers one of three ways:
 
 ## This package
 
-apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()`, `stored_snapshot()`, `stale_levels()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the rules and catalogues come from a bundle shipped with the package.
+apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()`, `stored_snapshot()`, `stale_levels()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the catalogues come from a bundle shipped with the package.
 
 | Call | Answers |
 | --- | --- |
-| `Catalog$new(software, version, set)` | From the rules alone, without data |
+| `Catalog$new(software, version, set)` | From the catalogue alone, without data |
 | `DataCatalog$new(result, set)` | On one result, and returns the data |
 | `catalogues()`, `rule_coverage()`, `catalogue_table()` | The sets, how each rule covers a set, every entry as a table |
 | `read_parsed_levels(path)` | An APB result, `.h5ad`, `.parquet` or `.duckdb`, as `ParsedLevels`, one anndataR `AnnData` per level |
@@ -67,7 +67,7 @@ install.packages(c("arrow", "duckdb", "DBI"))
 
 ## Use
 
-Ask the rules which column a software version reports:
+Ask the catalogue which column a software version reports:
 
 ```r
 library(apbCatalogR)
@@ -90,7 +90,7 @@ pep <- confidence$layer("peptidoform_ion", kind = "pep")   # runs x features mat
 
 apb-catalog builds two bundles at each release:
 
-- Bundle: apb2's parse rules and the reviewed catalogue sets; lookups read only this
+- Bundle: the reviewed catalogue sets and the levels apb2 converts for each software version; lookups read only this
 - Test bundle: synthetic results, with apb-catalog's answers on them; the tests check that R gives the same answers
 
 How R gets the latest bundle:

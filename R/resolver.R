@@ -109,8 +109,8 @@ resolve_entries <- function(entries, pending, request, missing) {
   Resolution$new(request, "missing", reasons = missing)
 }
 
-# How a level is bound to its set. Each view answers resolve(request) and carries its level, entries, software version
-# pattern and rule_name (NULL unless reviewed).
+# How a level is bound to its set. Each view answers resolve(request) and carries its level, entries and software
+# version pattern.
 
 # A level with a reviewed rule; `entries` are those whose fields the level holds. `pending` entries belong to producers
 # that have not run; a request they would answer is unknown until the producer runs.
@@ -130,12 +130,17 @@ ReviewedLevel <- R6::R6Class(
     },
 
     resolve = function(request) {
-      missing <- sprintf("no reviewed %s entry on %s matches", self$rule$variant$rule, self$level)
+      variant <- self$rule$variant
+      missing <- sprintf(
+        "no reviewed %s %s entry on %s matches",
+        self$rule$catalogue$software_name,
+        variant$software_version_pattern,
+        self$level
+      )
       resolve_entries(self$entries, self$pending, request, missing)
     }
   ),
   active = list(
-    rule_name = function() self$rule$variant$rule,
     software_version_pattern = function() self$rule$variant$software_version_pattern
   )
 )
@@ -149,7 +154,6 @@ ProducedLevel <- R6::R6Class(
     software_version_pattern = NULL,
     entries = NULL,
     pending = NULL,
-    rule_name = NULL,
 
     initialize = function(level, software, pattern, entries, pending = list()) {
       self$level <- level
@@ -174,7 +178,6 @@ UnreviewedLevel <- R6::R6Class(
     software_version_pattern = NULL,
     reason = NULL,
     entries = list(),
-    rule_name = NULL,
 
     initialize = function(level, software, pattern, reason) {
       self$level <- level

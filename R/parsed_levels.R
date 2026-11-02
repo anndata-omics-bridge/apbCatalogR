@@ -290,10 +290,6 @@ level_rule_version <- function(level) {
   if (all(vapply(found, is.character, logical(1)))) found else list(software = NULL, pattern = NULL, level = NULL)
 }
 
-level_roles <- function(level) {
-  string_map(level_apb(level)$roles$columns)
-}
-
 # The address keys of the fields a level holds.
 level_retained <- function(level) {
   found <- c(

@@ -11,7 +11,7 @@ A list with \code{version}, \code{origin} (\code{"shipped"} or \code{"cache"}), 
 }
 \description{
 Reports the bundle lookups answer from: its version, whether it was shipped with the package or downloaded by
-\code{\link[=update_catalog]{update_catalog()}}, and the apb2 version whose rules it carries.
+\code{\link[=update_catalog]{update_catalog()}}, and the apb2 version its rule levels come from.
 }
 \examples{
 catalog_version()

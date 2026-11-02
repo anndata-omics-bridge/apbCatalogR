@@ -19,13 +19,12 @@ test_that("a producer has run when the metadata records its path", {
 test_that("a request a pending producer would answer is unknown, with what to run", {
   entry <- list(
     entry_id = "fasta-contaminant",
-    rules = character(0),
+    software_version_pattern = character(0),
     reference = list(
       level = "protein",
       location = "varm",
       name = "is_contaminant",
       table = "fasta",
-      role = NA_character_,
       prefix = NA_character_
     ),
     qualifiers = c(kind = "contaminant")

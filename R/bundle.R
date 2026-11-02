@@ -1,4 +1,4 @@
-# The bundle apb-catalog releases: rules, catalogue sets and expected answers. The package ships one; update_catalog()
+# The bundle apb-catalog releases: catalogue tables and expected answers. The package ships one; update_catalog()
 # downloads newer ones into the user cache. The newest readable bundle is used.
 
 BUNDLE_FORMAT <- 2L
@@ -95,7 +95,7 @@ reset_bundle <- function() {
 #' The catalog in use
 #'
 #' Reports the bundle lookups answer from: its version, whether it was shipped with the package or downloaded by
-#' [update_catalog()], and the apb2 version whose rules it carries.
+#' [update_catalog()], and the apb2 version its rule levels come from.
 #'
 #' @return A list with `version`, `origin` (`"shipped"` or `"cache"`), `path` and `apb2_version`.
 #' @export

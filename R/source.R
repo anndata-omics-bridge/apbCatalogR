@@ -1,4 +1,4 @@
-# Reviewed meanings of retained APB fields, per vendor and rule variant; apb_catalog.source and .vocabulary.
+# Reviewed meanings of retained APB fields, per vendor and software version; apb_catalog.source and .vocabulary.
 
 UNKNOWN <- "unknown"
 
@@ -49,7 +49,6 @@ new_reference <- function(found) {
     location = found$location,
     name = found$name %||% NA_character_,
     table = found$table %||% NA_character_,
-    role = found$role %||% NA_character_,
     prefix = found$prefix %||% NA_character_
   )
 }
@@ -76,8 +75,8 @@ cell_list <- function(text, separator = ";") {
 
 # One entry from its entries.csv row and its other qualifiers, a named character vector.
 row_entry <- function(row, qualifiers) {
-  if (!(row$reference_by %in% c("name", "role", "prefix"))) {
-    stop(sprintf("%s: reference_by is name, role or prefix", row$entry_id), call. = FALSE)
+  if (!(row$reference_by %in% c("name", "prefix"))) {
+    stop(sprintf("%s: reference_by is name or prefix", row$entry_id), call. = FALSE)
   }
   reference <- list(level = row$level, location = row$location)
   reference[[row$reference_by]] <- row$reference
@@ -86,7 +85,7 @@ row_entry <- function(row, qualifiers) {
   }
   list(
     entry_id = row$entry_id,
-    rules = cell_list(row$rules),
+    software_version_pattern = cell_list(row$software_version_pattern),
     reference = new_reference(reference),
     qualifiers = c(kind = row$kind, qualifiers)
   )
@@ -100,14 +99,13 @@ bound_entry <- function(entry, name) {
     location = reference$location,
     name = name,
     table = reference$table,
-    role = NA_character_,
     prefix = NA_character_
   )
   entry
 }
 
-# One catalogue per software of apb2's packaged rules, each reviewing every rule level of that software, when the set
-# has vendor entries; none otherwise.
+# One catalogue per software of rule_levels.csv, each reviewing every rule level of that software, when the set has
+# vendor entries; none otherwise.
 vendor_catalogues <- function(name, entries) {
   if (length(entries) == 0L) {
     return(list())
@@ -128,22 +126,21 @@ vendor_catalogues <- function(name, entries) {
       label = vendor,
       software_name = vendor,
       variants = lapply(variants, function(found) {
-        list(rule = found$rule, level = found$level, software_version_pattern = found$software_version_pattern)
+        list(level = found$level, software_version_pattern = found$software_version_pattern)
       }),
       entries = entries[[vendor]] %||% list()
     )
   })
 }
 
-# A producer's catalogue; its producers.csv row, if any, names the run it waits for and what to run.
-producer_catalogue <- function(producer, entries, runs) {
-  run <- runs[runs$producer == producer, , drop = FALSE]
+# An app's catalogue, such as apb-fasta's; its producers.csv row names the run it waits for and what to run.
+producer_catalogue <- function(producer, entries, run) {
   list(
     type = "producer",
-    label = paste0("producer:", producer),
+    label = producer,
     producer = producer,
-    requires = if (nrow(run) == 1L) cell_list(run$requires, ".") else character(0),
-    instruction = if (nrow(run) == 1L) run$instruction else NA_character_,
+    requires = cell_list(run$requires, "."),
+    instruction = if (identical(run$instruction, "")) NA_character_ else run$instruction,
     entries = entries
   )
 }
@@ -167,7 +164,12 @@ set_vocabulary <- function(rows, head) {
 
 # The entries a vendor catalogue reviewed for one of its rule variants.
 entries_for <- function(vendor, variant) {
-  Filter(function(entry) variant$rule %in% entry$rules && entry$reference$level == variant$level, vendor$entries)
+  Filter(
+    function(entry) {
+      variant$software_version_pattern %in% entry$software_version_pattern && entry$reference$level == variant$level
+    },
+    vendor$entries
+  )
 }
 
 # The entries a producer or annotation catalogue supplies on one level.
@@ -232,8 +234,8 @@ row_asked <- function(row, level, location, qualifiers) {
 }
 
 # One packaged catalogue set: its vocabulary, vendor, producer and annotation catalogues and requirements, indexed by
-# software and version. Producers hold the fields APB itself writes and annotations the sample-annotation fields; both
-# apply to every level. A set made only of them has no vendor catalogue and needs no review.
+# software and version. Producers hold the fields apps write after conversion and annotations the sample-annotation
+# fields; both apply to every software version. A set made only of them has no vendor catalogue and needs no review.
 CatalogueSet <- R6::R6Class(
   "CatalogueSet",
   public = list(
@@ -267,19 +269,21 @@ CatalogueSet <- R6::R6Class(
         row_entry(row, stats::setNames(own$value, own$qualifier))
       })
       by_source <- split(entries, factor(entry_rows$source, levels = unique(entry_rows$source)))
-      kinds <- sub(":.*$", "", names(by_source))
-      named <- sub("^[^:]*:", "", names(by_source))
+      sources <- names(by_source)
       runs <- rows("producers")
+      annotation <- startsWith(sources, "annotation:")
+      app <- !annotation & sources %in% runs$producer
       self$name <- name
       self$vocabulary <- set_vocabulary(vocabulary, head)
       self$vocabulary_version <- bundle$json("catalogues", "datapackage.json")$version
       self$description <- list(purpose = head$purpose, used_by = cell_list(head$used_by))
-      self$catalogues <- vendor_catalogues(name, by_source[!(kinds %in% c("producer", "annotation"))])
-      self$producers <- lapply(which(kinds == "producer"), function(index) {
-        producer_catalogue(named[[index]], by_source[[index]], runs)
+      self$catalogues <- vendor_catalogues(name, by_source[!annotation & !app])
+      self$producers <- lapply(which(app), function(index) {
+        run <- runs[runs$producer == sources[[index]], , drop = FALSE]
+        producer_catalogue(sources[[index]], by_source[[index]], run)
       })
-      self$annotations <- lapply(which(kinds == "annotation"), function(index) {
-        annotation_catalogue(named[[index]], by_source[[index]])
+      self$annotations <- lapply(which(annotation), function(index) {
+        annotation_catalogue(sub("^annotation:", "", sources[[index]]), by_source[[index]])
       })
       requirement_rows <- rows("requirements")
       self$requirements <- lapply(seq_len(nrow(requirement_rows)), function(index) {

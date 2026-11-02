@@ -7,8 +7,7 @@
 The class generator; \code{DataCatalog$new()} returns a \code{DataCatalog}.
 }
 \description{
-Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly. A lookup of a field the
-result's stored rule declares differently from the catalog's rule signals \code{StaleField}; ambiguous or unreviewed
+Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly. Ambiguous or unreviewed
 answers signal \code{UnresolvedField}.
 }
 \examples{

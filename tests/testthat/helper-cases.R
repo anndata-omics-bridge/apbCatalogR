@@ -89,7 +89,6 @@ outcome_of <- function(lookup) {
       }
     ),
     UnresolvedField = function(condition) list(error = "UnresolvedField", status = condition$resolution$status),
-    StaleField = function(condition) list(error = "StaleField"),
     MissingRequiredField = function(condition) list(error = "MissingRequiredField")
   )
   if (!is.null(answer$error)) {

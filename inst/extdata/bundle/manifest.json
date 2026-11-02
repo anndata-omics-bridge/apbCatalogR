@@ -16,8 +16,7 @@
     "catalogues/entry_qualifiers.csv",
     "catalogues/producers.csv",
     "catalogues/requirements.csv",
-    "catalogues/vocabulary.csv",
-    "rules/declarations.json",
-    "rules/version_labels.json"
+    "catalogues/rule_levels.csv",
+    "catalogues/vocabulary.csv"
   ]
 }
