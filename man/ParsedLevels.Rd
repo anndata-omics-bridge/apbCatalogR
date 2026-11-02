@@ -7,11 +7,6 @@
 The class generator; \code{ParsedLevels$new()} returns a \code{ParsedLevels} object.
 }
 \description{
-One APB result: its levels on one observation axis
-
-One APB result: its levels on one observation axis
-}
-\details{
 The R counterpart of apb2's \code{ParsedLevels}, as \code{\link[=read_parsed_levels]{read_parsed_levels()}} returns it.
 
 Each level is an anndataR \code{AnnData} laid out as apb2's \code{.h5ad} writer lays it out: the primary layer in \code{X}, the
@@ -27,97 +22,98 @@ names(result$levels)
 result$levels$protein
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{levels}}{A named list of anndataR \code{AnnData}, one per level.}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{levels}}{A named list of anndataR \code{AnnData}, one per level.}
 
-\item{\code{uns}}{The root parse record.}
+    \item{\code{uns}}{The root parse record.}
 
-\item{\code{metadata}}{The root post-parse records, such as \code{sdrf} or \code{fasta}.}
+    \item{\code{metadata}}{The root post-parse records, such as \code{sdrf} or \code{fasta}.}
 
-\item{\code{hierarchy}}{How the levels nest, or \code{NULL}.}
+    \item{\code{hierarchy}}{How the levels nest, or \code{NULL}.}
 
-\item{\code{annotation_tables}}{A named list of data frames; each carries its metadata as the attribute \code{apb}.}
+    \item{\code{annotation_tables}}{A named list of data frames; each carries its metadata as the attribute \code{apb}.}
 
-\item{\code{feature_relations}}{A named list of data frames of \code{source}, \code{row}, \code{target}, \code{column} and \code{value}; each
+    \item{\code{feature_relations}}{A named list of data frames of \code{source}, \code{row}, \code{target}, \code{column} and \code{value}; each
 carries its metadata as the attribute \code{apb}.}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-ParsedLevels-new}{\code{ParsedLevels$new()}}
-\item \href{#method-ParsedLevels-print}{\code{ParsedLevels$print()}}
-\item \href{#method-ParsedLevels-clone}{\code{ParsedLevels$clone()}}
-}
+  \itemize{
+    \item \href{#method-ParsedLevels-initialize}{\code{ParsedLevels$new()}}
+    \item \href{#method-ParsedLevels-print}{\code{ParsedLevels$print()}}
+    \item \href{#method-ParsedLevels-clone}{\code{ParsedLevels$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ParsedLevels-new"></a>}}
-\if{latex}{\out{\hypertarget{method-ParsedLevels-new}{}}}
-\subsection{Method \code{new()}}{
-Collect the levels and records of one result.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParsedLevels$new(
+\if{html}{\out{<a id="method-ParsedLevels-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-ParsedLevels-initialize}{}}}
+\subsection{\code{ParsedLevels$new()}}{
+  Collect the levels and records of one result.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ParsedLevels$new(
   levels,
   uns = list(),
   metadata = list(),
   hierarchy = NULL,
   annotation_tables = list(),
   feature_relations = list()
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{levels}}{A named list of anndataR \code{AnnData}.}
+      \item{\code{uns}}{The root parse record.}
+      \item{\code{metadata}}{The root post-parse records.}
+      \item{\code{hierarchy}}{How the levels nest, or \code{NULL}.}
+      \item{\code{annotation_tables}}{A named list of data frames.}
+      \item{\code{feature_relations}}{A named list of data frames.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{levels}}{A named list of anndataR \code{AnnData}.}
-
-\item{\code{uns}}{The root parse record.}
-
-\item{\code{metadata}}{The root post-parse records.}
-
-\item{\code{hierarchy}}{How the levels nest, or \code{NULL}.}
-
-\item{\code{annotation_tables}}{A named list of data frames.}
-
-\item{\code{feature_relations}}{A named list of data frames.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ParsedLevels-print"></a>}}
 \if{latex}{\out{\hypertarget{method-ParsedLevels-print}{}}}
-\subsection{Method \code{print()}}{
-Print the levels and their shapes.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParsedLevels$print(...)}\if{html}{\out{</div>}}
+\subsection{\code{ParsedLevels$print()}}{
+  Print the levels and their shapes.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ParsedLevels$print(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Ignored.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Ignored.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ParsedLevels-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-ParsedLevels-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParsedLevels$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{ParsedLevels$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ParsedLevels$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -7,11 +7,6 @@
 The class generator; \code{Reference$new()} returns a \code{Reference}.
 }
 \description{
-Where a field lives
-
-Where a field lives
-}
-\details{
 The answer of a \link{Catalog} lookup: the level, the location (\code{"layers"}, \code{"var"}, \code{"varm"} or \code{"obs"}), the column
 name and, for a \code{varm} field, its table.
 }
@@ -19,81 +14,84 @@ name and, for a \code{varm} field, its table.
 Reference$new("peptidoform_ion", "layers", "PEP")
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{level}}{The quantification level, such as \code{"peptidoform_ion"}.}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{level}}{The quantification level, such as \code{"peptidoform_ion"}.}
 
-\item{\code{location}}{\code{"layers"}, \code{"var"}, \code{"varm"} or \code{"obs"}.}
+    \item{\code{location}}{\code{"layers"}, \code{"var"}, \code{"varm"} or \code{"obs"}.}
 
-\item{\code{name}}{The layer or column name.}
+    \item{\code{name}}{The layer or column name.}
 
-\item{\code{table}}{The \code{varm} table, \code{NA} elsewhere.}
-}
-\if{html}{\out{</div>}}
+    \item{\code{table}}{The \code{varm} table, \code{NA} elsewhere.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-Reference-new}{\code{Reference$new()}}
-\item \href{#method-Reference-print}{\code{Reference$print()}}
-\item \href{#method-Reference-clone}{\code{Reference$clone()}}
-}
+  \itemize{
+    \item \href{#method-Reference-initialize}{\code{Reference$new()}}
+    \item \href{#method-Reference-print}{\code{Reference$print()}}
+    \item \href{#method-Reference-clone}{\code{Reference$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Reference-new"></a>}}
-\if{latex}{\out{\hypertarget{method-Reference-new}{}}}
-\subsection{Method \code{new()}}{
-Where one field lives.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Reference$new(level, location, name, table = NA_character_)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-Reference-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-Reference-initialize}{}}}
+\subsection{\code{Reference$new()}}{
+  Where one field lives.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Reference$new(level, location, name, table = NA_character_)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{level}}{The quantification level.}
+      \item{\code{location}}{\code{"layers"}, \code{"var"}, \code{"varm"} or \code{"obs"}.}
+      \item{\code{name}}{The layer or column name.}
+      \item{\code{table}}{The \code{varm} table, \code{NA} elsewhere.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{level}}{The quantification level.}
-
-\item{\code{location}}{\code{"layers"}, \code{"var"}, \code{"varm"} or \code{"obs"}.}
-
-\item{\code{name}}{The layer or column name.}
-
-\item{\code{table}}{The \code{varm} table, \code{NA} elsewhere.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Reference-print"></a>}}
 \if{latex}{\out{\hypertarget{method-Reference-print}{}}}
-\subsection{Method \code{print()}}{
-Print the reference.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Reference$print(...)}\if{html}{\out{</div>}}
+\subsection{\code{Reference$print()}}{
+  Print the reference.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Reference$print(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Ignored.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Ignored.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Reference-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-Reference-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Reference$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{Reference$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Reference$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

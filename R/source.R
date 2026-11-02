@@ -5,7 +5,7 @@ UNKNOWN <- "unknown"
 # The locations a request reads: var and varm both hold one value per feature.
 READS <- list(obs = "obs", layers = "layers", var = c("var", "varm"), varm = "varm")
 
-# A request accepts any subset of the qualifiers, each with admitted values or "unknown".
+# A request accepts any subset of the qualifiers, each with admitted values; every qualifier admits "unknown".
 check_predicate <- function(vocabulary, qualifiers) {
   for (name in names(qualifiers)) {
     accepted <- qualifiers[[name]]
@@ -30,7 +30,7 @@ check_value <- function(vocabulary, name, value) {
       call. = FALSE
     )
   }
-  if (value != UNKNOWN && !(value %in% names(qualifier$values))) {
+  if (!(value %in% names(qualifier$values))) {
     stop(
       sprintf(
         "qualifier '%s' does not admit '%s'; admitted: %s",
@@ -69,12 +69,26 @@ reference_key <- function(reference) {
   address_key(reference$location, reference$table, reference$name)
 }
 
-new_entry <- function(found) {
+# A ";"-separated list of one CSV cell; none when the cell is empty.
+cell_list <- function(text, separator = ";") {
+  if (identical(text, "")) character(0) else strsplit(text, separator, fixed = TRUE)[[1L]]
+}
+
+# One entry from its entries.csv row and its other qualifiers, a named character vector.
+row_entry <- function(row, qualifiers) {
+  if (!(row$reference_by %in% c("name", "role", "prefix"))) {
+    stop(sprintf("%s: reference_by is name, role or prefix", row$entry_id), call. = FALSE)
+  }
+  reference <- list(level = row$level, location = row$location)
+  reference[[row$reference_by]] <- row$reference
+  if (row$table != "") {
+    reference$table <- row$table
+  }
   list(
-    entry_id = found$entry_id,
-    rules = as.character(unlist(found$rules)),
-    reference = new_reference(found$reference),
-    qualifiers = string_map(found$qualifiers)
+    entry_id = row$entry_id,
+    rules = cell_list(row$rules),
+    reference = new_reference(reference),
+    qualifiers = c(kind = row$kind, qualifiers)
   )
 }
 
@@ -92,48 +106,63 @@ bound_entry <- function(entry, name) {
   entry
 }
 
-new_vendor <- function(found) {
-  list(
-    type = "vendor",
-    label = found$software_name,
-    catalogue_id = found$catalogue_id,
-    catalogue_version = found$catalogue_version,
-    software_name = found$software_name,
-    variants = lapply(found$variants, function(variant) {
-      list(rule = variant$rule, level = variant$level, software_version_pattern = variant$software_version_pattern)
-    }),
-    entries = lapply(found$entries, new_entry)
-  )
+# One catalogue per software of apb2's packaged rules, each reviewing every rule level of that software, when the set
+# has vendor entries; none otherwise.
+vendor_catalogues <- function(name, entries) {
+  if (length(entries) == 0L) {
+    return(list())
+  }
+  levels <- rule_levels()
+  software <- unique(vapply(levels, function(found) found$software_name, character(1)))
+  unknown <- setdiff(names(entries), software)
+  if (length(unknown) > 0L) {
+    stop(
+      sprintf("%s: no packaged rule declares the software %s", name, paste(sort_c(unknown), collapse = ", ")),
+      call. = FALSE
+    )
+  }
+  lapply(software, function(vendor) {
+    variants <- Filter(function(found) found$software_name == vendor, levels)
+    list(
+      type = "vendor",
+      label = vendor,
+      software_name = vendor,
+      variants = lapply(variants, function(found) {
+        list(rule = found$rule, level = found$level, software_version_pattern = found$software_version_pattern)
+      }),
+      entries = entries[[vendor]] %||% list()
+    )
+  })
 }
 
-new_producer <- function(found) {
+# A producer's catalogue; its producers.csv row, if any, names the run it waits for and what to run.
+producer_catalogue <- function(producer, entries, runs) {
+  run <- runs[runs$producer == producer, , drop = FALSE]
   list(
     type = "producer",
-    label = paste0("producer:", found$producer),
-    producer = found$producer,
-    requires = as.character(unlist(found$requires)),
-    instruction = found$instruction %||% NA_character_,
-    entries = lapply(found$entries, new_entry)
+    label = paste0("producer:", producer),
+    producer = producer,
+    requires = if (nrow(run) == 1L) cell_list(run$requires, ".") else character(0),
+    instruction = if (nrow(run) == 1L) run$instruction else NA_character_,
+    entries = entries
   )
 }
 
-new_annotation <- function(found) {
-  list(
-    type = "annotation",
-    label = paste0("annotation:", found$convention),
-    convention = found$convention,
-    entries = lapply(found$entries, new_entry)
-  )
+annotation_catalogue <- function(convention, entries) {
+  list(type = "annotation", label = paste0("annotation:", convention), convention = convention, entries = entries)
 }
 
-new_requirement <- function(found) {
-  list(
-    level = found$level,
-    location = found$location,
-    kind = found$kind,
-    qualifiers = string_map(found$qualifiers),
-    requirement = found$requirement
-  )
+# A set's vocabulary from its vocabulary.csv rows, shaped as apb_catalog's SetVocabulary.
+set_vocabulary <- function(rows, head) {
+  qualifier_rows <- rows[rows$qualifier != "" & rows$value == "", , drop = FALSE]
+  qualifiers <- lapply(seq_len(nrow(qualifier_rows)), function(index) {
+    values <- rows[rows$qualifier == qualifier_rows$qualifier[[index]] & rows$value != "", , drop = FALSE]
+    list(
+      definition = qualifier_rows$definition[[index]],
+      values = stats::setNames(as.list(values$definition), values$value)
+    )
+  })
+  list(definition = head$definition, qualifiers = stats::setNames(qualifiers, qualifier_rows$qualifier))
 }
 
 # The entries a vendor catalogue reviewed for one of its rule variants.
@@ -218,28 +247,51 @@ CatalogueSet <- R6::R6Class(
     requirements = NULL,
 
     initialize = function(bundle, name) {
-      descriptions <- bundle$json("catalogues", "catalogues.json")
-      if (!(name %in% names(descriptions))) {
+      rows <- function(table) {
+        found <- catalogue_rows(bundle, table)
+        found[found$set == name, , drop = FALSE]
+      }
+      vocabulary <- rows("vocabulary")
+      head <- vocabulary[vocabulary$qualifier == "", , drop = FALSE]
+      if (nrow(head) != 1L) {
         stop(
-          sprintf("unknown catalogue '%s'; packaged: %s", name, paste(names(descriptions), collapse = ", ")),
+          sprintf("unknown catalogue '%s'; packaged: %s", name, paste(set_names(), collapse = ", ")),
           call. = FALSE
         )
       }
-      vocabularies <- bundle$json("catalogues", "vocabulary.json")
-      read_folder <- function(kind, make) {
-        folder <- file.path(bundle$dir, "catalogues", kind, name)
-        files <- sort_c(list.files(folder, pattern = "\\.json$"))
-        lapply(files, function(file) make(bundle$json("catalogues", kind, name, file)))
-      }
-      description <- descriptions[[name]]
+      qualifier_rows <- rows("entry_qualifiers")
+      entry_rows <- rows("entries")
+      entries <- lapply(seq_len(nrow(entry_rows)), function(index) {
+        row <- as.list(entry_rows[index, , drop = FALSE])
+        own <- qualifier_rows[qualifier_rows$entry_id == row$entry_id, , drop = FALSE]
+        row_entry(row, stats::setNames(own$value, own$qualifier))
+      })
+      by_source <- split(entries, factor(entry_rows$source, levels = unique(entry_rows$source)))
+      kinds <- sub(":.*$", "", names(by_source))
+      named <- sub("^[^:]*:", "", names(by_source))
+      runs <- rows("producers")
       self$name <- name
-      self$vocabulary <- vocabularies$sets[[name]]
-      self$vocabulary_version <- vocabularies$vocabulary_version
-      self$description <- list(purpose = description$purpose, used_by = as.character(unlist(description$used_by)))
-      self$catalogues <- read_folder("sources", new_vendor)
-      self$producers <- read_folder("producers", new_producer)
-      self$annotations <- read_folder("annotations", new_annotation)
-      self$requirements <- lapply(bundle$json("catalogues", "requirements.json")[[name]], new_requirement)
+      self$vocabulary <- set_vocabulary(vocabulary, head)
+      self$vocabulary_version <- bundle$json("catalogues", "datapackage.json")$version
+      self$description <- list(purpose = head$purpose, used_by = cell_list(head$used_by))
+      self$catalogues <- vendor_catalogues(name, by_source[!(kinds %in% c("producer", "annotation"))])
+      self$producers <- lapply(which(kinds == "producer"), function(index) {
+        producer_catalogue(named[[index]], by_source[[index]], runs)
+      })
+      self$annotations <- lapply(which(kinds == "annotation"), function(index) {
+        annotation_catalogue(named[[index]], by_source[[index]])
+      })
+      requirement_rows <- rows("requirements")
+      self$requirements <- lapply(seq_len(nrow(requirement_rows)), function(index) {
+        row <- requirement_rows[index, , drop = FALSE]
+        list(
+          level = row$level,
+          location = row$location,
+          kind = row$kind,
+          qualifiers = string_map(NULL),
+          requirement = row$requirement
+        )
+      })
       for (vendor in self$catalogues) {
         for (variant in vendor$variants) {
           key <- paste(vendor$software_name, variant$software_version_pattern, variant$level, sep = "\x1f")
@@ -281,5 +333,35 @@ catalogue_set <- function(name) {
 }
 
 set_names <- function() {
-  names(current_bundle()$json("catalogues", "catalogues.json"))
+  found <- catalogue_rows(current_bundle(), "vocabulary")
+  found$set[found$qualifier == ""]
+}
+
+# One catalogue table of the bundle, as a data frame of strings with empty cells as "", read once; its columns must be
+# those datapackage.json declares.
+catalogue_rows <- function(bundle, table) {
+  bundle$memo(paste0("table:", table), function() {
+    found <- utils::read.csv(
+      file.path(bundle$dir, "catalogues", paste0(table, ".csv")),
+      colClasses = "character",
+      na.strings = character(0),
+      check.names = FALSE,
+      encoding = "UTF-8"
+    )
+    resources <- bundle$json("catalogues", "datapackage.json")$resources
+    resource <- Filter(function(found) identical(found$name, table), resources)[[1L]]
+    declared <- vapply(resource$schema$fields, function(field) field$name, character(1))
+    if (!identical(names(found), declared)) {
+      stop(
+        sprintf(
+          "%s.csv has the columns %s, not %s",
+          table,
+          paste(names(found), collapse = ", "),
+          paste(declared, collapse = ", ")
+        ),
+        call. = FALSE
+      )
+    }
+    found
+  })
 }

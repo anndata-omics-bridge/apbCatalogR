@@ -1,7 +1,7 @@
 # The bundle apb-catalog releases: rules, catalogue sets and expected answers. The package ships one; update_catalog()
 # downloads newer ones into the user cache. The newest readable bundle is used.
 
-BUNDLE_FORMAT <- 1L
+BUNDLE_FORMAT <- 2L
 BUNDLE_NAME <- "apb-catalog-bundle"
 RELEASES <- "https://github.com/anndata-omics-bridge/apb-catalog/releases"
 
@@ -49,11 +49,13 @@ shipped_dir <- function() {
   system.file("extdata", "bundle", package = "apbCatalogR", mustWork = TRUE)
 }
 
-# The bundle to use: the newest of the shipped and cached bundles this package can read.
+# The bundle to use: the newest of the shipped and cached bundles this package can read, those of its format; an
+# older format is passed over, a newer one with a warning.
 choose_bundle <- function(dirs, origins) {
   manifests <- lapply(dirs, function(dir) read_json_file(file.path(dir, "manifest.json")))
-  readable <- vapply(manifests, function(manifest) manifest$bundle_format <= BUNDLE_FORMAT, logical(1))
-  for (index in which(!readable)) {
+  formats <- vapply(manifests, function(manifest) as.integer(manifest$bundle_format), integer(1))
+  readable <- formats == BUNDLE_FORMAT
+  for (index in which(formats > BUNDLE_FORMAT)) {
     warning(
       sprintf(
         "bundle %s in %s has format %s; update apbCatalogR to read it",
@@ -144,6 +146,17 @@ install_bundle <- function(archive) {
   if (manifest$bundle_format > BUNDLE_FORMAT) {
     stop(
       sprintf("bundle %s has format %s; update apbCatalogR to read it", manifest$version, manifest$bundle_format),
+      call. = FALSE
+    )
+  }
+  if (manifest$bundle_format < BUNDLE_FORMAT) {
+    stop(
+      sprintf(
+        "bundle %s has format %s; this apbCatalogR reads format %s",
+        manifest$version,
+        manifest$bundle_format,
+        BUNDLE_FORMAT
+      ),
       call. = FALSE
     )
   }
