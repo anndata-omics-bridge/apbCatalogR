@@ -289,6 +289,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>New API.</strong> This package is new, and its API may still change between releases. Feedback is very welcome: open an <a href="https://github.com/anndata-omics-bridge/apbCatalogR/issues">issue</a> with what you need, what surprised you, or what broke.</p>
 </blockquote>
 <p>Documentation: <a href="https://anndata-omics-bridge.github.io/apbCatalogR/">anndata-omics-bridge.github.io/apbCatalogR</a>, with the <a href="https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html">vignette</a> as the walkthrough.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="vignettes/figures/apb_actors.png" class="img-fluid figure-img"></p>
+<figcaption>Who does what: apb2 converts the results of quantification software into an APB result and the integrator fills the catalog; Bioconductor applications such as prolfqua, exploreDE and QFeatures read the result by meaning through the apb-catalog API, in R with apbCatalogR.</figcaption>
+</figure>
+</div>
 <section id="apb" class="level2">
 <h2 class="anchored" data-anchor-id="apb">APB</h2>
 <p>The AnnData Proteomics Bridge, <a href="https://anndata-omics-bridge.github.io/apb2/">apb2</a>, converts the reports of proteomics quantification software into one result layout. Declarative parse rules describe each vendor table, so one parser reads them all.</p>

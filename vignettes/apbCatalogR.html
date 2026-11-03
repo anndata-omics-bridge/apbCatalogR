@@ -285,6 +285,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header><section id="introduction" class="level1"><h1>Introduction</h1>
 <p>The AnnData Proteomics Bridge (APB) converts the reports of quantification software such as DIA-NN, Spectronaut or MaxQuant into one result layout. The columns keep the vendors’ names, so a posterior error probability is <code>PEP</code> in MaxQuant and <code>EG_PEP</code> in Spectronaut. apb-catalog records what each column means; apbCatalogR implements its API in R, so an R application asks for a meaning and gets the column or its data.</p>
 <p>The package works on a bundle apb-catalog releases: the reviewed catalogue sets and the levels apb2 converts for each software version. One bundle ships with the package, together with a test bundle of synthetic results and the answers apb-catalog gives on them.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="figures/apb_actors.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<figcaption>Who does what. The integrator converts the results of quantification software such as DIA-NN, Spectronaut, AlphaDIA and Sage with apb2 and its parsing rules into an APB result, and fills the catalog. Bioconductor applications such as prolfqua, exploreDE and QFeatures read the result by meaning through the apb-catalog API: apbCatalogR in R, apb-catalog in Python, apb-catalog-ts in TypeScript.</figcaption></figure>
+</div>
+</div>
+</div>
 <p>The main calls:</p>
 <ul>
 <li>
