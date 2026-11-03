@@ -16,3 +16,4 @@
 ^_quarto$
 ^\.zenodo\.json$
 ^CITATION\.cff$
+^tools$

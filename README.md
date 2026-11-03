@@ -6,6 +6,8 @@ apb-catalog's API in R: look up the fields of an [APB](https://github.com/anndat
 
 Documentation: [anndata-omics-bridge.github.io/apbCatalogR](https://anndata-omics-bridge.github.io/apbCatalogR/), with the [vignette](https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html) as the walkthrough.
 
+![Who does what: apb2 converts the results of quantification software into an APB result and the integrator fills the catalog; Bioconductor applications such as prolfqua, exploreDE and QFeatures read the result by meaning through the apb-catalog API, in R with apbCatalogR.](vignettes/figures/apb_actors.png)
+
 ## APB
 
 The AnnData Proteomics Bridge, [apb2](https://anndata-omics-bridge.github.io/apb2/), converts the reports of proteomics quantification software into one result layout. Declarative parse rules describe each vendor table, so one parser reads them all.

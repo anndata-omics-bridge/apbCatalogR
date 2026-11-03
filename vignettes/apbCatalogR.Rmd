@@ -26,6 +26,17 @@ and the levels apb2 converts for each software version. One bundle ships with
 the package, together with a test bundle of synthetic results and the answers
 apb-catalog gives on them.
 
+```{r actors, echo = FALSE, out.width = "100%"}
+#| fig.cap: >
+#|   Who does what. The integrator converts the results of quantification
+#|   software such as DIA-NN, Spectronaut, AlphaDIA and Sage with apb2 and its
+#|   parsing rules into an APB result, and fills the catalog. Bioconductor
+#|   applications such as prolfqua, exploreDE and QFeatures read the result by
+#|   meaning through the apb-catalog API: apbCatalogR in R, apb-catalog in
+#|   Python, apb-catalog-ts in TypeScript.
+knitr::include_graphics("figures/apb_actors.png")
+```
+
 The main calls:
 
 - `Catalog$new(software, version, set)`: the fields a version reports
