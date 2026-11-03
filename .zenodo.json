@@ -1,0 +1,40 @@
+{
+  "title": "apbCatalogR: Look Up APB Result Fields by Meaning",
+  "upload_type": "software",
+  "description": "<p>apbCatalogR looks up the fields of AnnData Proteomics Bridge (APB) results by meaning, such as a posterior error probability or an unnormalized intensity, without naming vendor columns. It is the R implementation of the apb-catalog API and works on the catalogue bundle apb-catalog releases.</p><p>apb2 converts the reports of quantification software such as AlphaDIA, DIA-NN, FragPipe, MaxQuant, PEAKS, Sage and Spectronaut into one layout: one AnnData per level, runs as obs, features as var, measurements as layers. The columns keep the vendors' names, so a posterior error probability is PEP in MaxQuant and EG_PEP in Spectronaut; apb-catalog records what each column means.</p><ul><li><code>Catalog$new(software, version, set)</code>: the fields a software version reports, from the catalogue alone</li><li><code>read_parsed_levels(path)</code>: an APB result, h5ad, Parquet or DuckDB, as anndataR AnnData objects, one per level</li><li><code>DataCatalog$new(result, ...)</code>: the data of a result, looked up by key through anndataR's slots</li><li><code>catalogues()</code>, <code>catalogue_table()</code>, <code>rule_coverage()</code>: the catalogue sets, their entries, and how each software version covers them</li></ul><p>Documentation: <a href=\"https://anndata-omics-bridge.github.io/apbCatalogR/\">anndata-omics-bridge.github.io/apbCatalogR</a></p>",
+  "creators": [
+    {
+      "name": "Wolski, Witold E.",
+      "affiliation": "Functional Genomics Center Zurich, ETH Zurich / University of Zurich; SIB Swiss Institute of Bioinformatics",
+      "orcid": "0000-0002-6468-120X"
+    }
+  ],
+  "keywords": [
+    "proteomics",
+    "mass spectrometry",
+    "AnnData",
+    "anndataR",
+    "Bioconductor",
+    "R package",
+    "metadata",
+    "semantic lookup"
+  ],
+  "license": "mit-license",
+  "language": "eng",
+  "related_identifiers": [
+    {
+      "identifier": "https://anndata-omics-bridge.github.io/apbCatalogR/",
+      "relation": "isDocumentedBy"
+    },
+    {
+      "identifier": "10.5281/zenodo.23151456",
+      "relation": "isDerivedFrom",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.5281/zenodo.23151445",
+      "relation": "references",
+      "resource_type": "software"
+    }
+  ]
+}

@@ -4,18 +4,25 @@
 \alias{ParsedLevels}
 \title{One APB result: its levels on one observation axis}
 \value{
-The class generator; \code{ParsedLevels$new()} returns a \code{ParsedLevels} object.
+The class generator; \code{ParsedLevels$new()} returns a \code{ParsedLevels}
+object.
 }
 \description{
-The R counterpart of apb2's \code{ParsedLevels}, as \code{\link[=read_parsed_levels]{read_parsed_levels()}} returns it.
+The R counterpart of apb2's \code{ParsedLevels}, as \code{\link[=read_parsed_levels]{read_parsed_levels()}} returns
+it.
 
-Each level is an anndataR \code{AnnData} laid out as apb2's \code{.h5ad} writer lays it out: the primary layer in \code{X}, the
-other layers in \code{layers}, obs and var frames named by their key columns, and the level's APB part in
-\code{uns$apb}: \code{parse} (with \code{provenance$rule_json}), \code{roles}, \code{storage} and post-parse records.
+Each level is an anndataR \code{AnnData} laid out as apb2's \code{.h5ad} writer lays it
+out: the primary layer in \code{X}, the other layers in \code{layers}, obs and var
+frames named by their key columns, and the level's APB part in \code{uns$apb}:
+\code{parse} (with \code{provenance$rule_json}), \code{roles}, \code{storage} and post-parse
+records.
 }
 \examples{
 results <- tempfile()
-archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "apbCatalogR")
+archive <- system.file(
+    "extdata", "test-bundle", "results.tar.gz",
+    package = "apbCatalogR"
+)
 utils::untar(archive, exdir = results)
 result <- read_parsed_levels(file.path(results, "edge-two-levels.parquet"))
 names(result$levels)
@@ -32,10 +39,12 @@ result$levels$protein
 
     \item{\code{hierarchy}}{How the levels nest, or \code{NULL}.}
 
-    \item{\code{annotation_tables}}{A named list of data frames; each carries its metadata as the attribute \code{apb}.}
+    \item{\code{annotation_tables}}{A named list of data frames; each carries its
+metadata as the attribute \code{apb}.}
 
-    \item{\code{feature_relations}}{A named list of data frames of \code{source}, \code{row}, \code{target}, \code{column} and \code{value}; each
-carries its metadata as the attribute \code{apb}.}
+    \item{\code{feature_relations}}{A named list of data frames of \code{source}, \code{row},
+\code{target}, \code{column} and \code{value}; each carries its metadata as the attribute
+\code{apb}.}
   }
   \if{html}{\out{</div>}}
 }

@@ -7,15 +7,17 @@
 update_catalog(version = NULL)
 }
 \arguments{
-\item{version}{The apb-catalog release, such as \code{"0.2.0"}; \code{NULL} downloads the latest release.}
+\item{version}{The apb-catalog release, such as \code{"0.2.0"}; \code{NULL} downloads
+the latest release.}
 }
 \value{
 The \code{\link[=catalog_version]{catalog_version()}} now in use, invisibly.
 }
 \description{
-Downloads the bundle of an apb-catalog release from GitHub into the user cache, so lookups use it without a
-package update. Later sessions keep using the newest bundle, shipped or downloaded. It works from the next
-apb-catalog release, the first to ship the bundle.
+Downloads the bundle of an apb-catalog release from GitHub into the user
+cache, so lookups use it without a package update. Later sessions keep using
+the newest bundle, shipped or downloaded. It works from the next apb-catalog
+release, the first to ship the bundle.
 }
 \examples{
 if (interactive()) {

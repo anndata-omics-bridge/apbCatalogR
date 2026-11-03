@@ -5,18 +5,17 @@ Authors@R: c(
     person("Witold E.", "Wolski", , "witold.wolski@fgcz.uzh.ch", role = "aut",
            comment = c(ORCID = "0000-0002-6468-120X")),
     person("Witek", "Wolski", , "wewolski@gmail.com", role = "cre"))
-Description: Reimplements the apb-catalog API on the bundle apb-catalog
+Description: Looks up the fields of AnnData Proteomics Bridge (APB) results
+    by meaning, such as a PEP or an unnormalized intensity, without naming
+    vendor columns. Reimplements the apb-catalog API on the bundle apb-catalog
     releases: reviewed catalogues, apb2's rule levels and expected answers.
-    Reads results of the AnnData Proteomics Bridge, as h5ad, Parquet or
-    DuckDB, into anndataR
-    objects and finds the column holding a meaning, such as a PEP or an
-    unnormalized intensity, without naming vendor columns.
+    Reads APB results, as h5ad, Parquet or DuckDB, into anndataR objects.
 License: MIT + file LICENSE
 URL: https://anndata-omics-bridge.github.io/apbCatalogR/, https://github.com/anndata-omics-bridge/apbCatalogR
 BugReports: https://github.com/anndata-omics-bridge/apbCatalogR/issues
 biocViews: Proteomics, MassSpectrometry, DataImport, Infrastructure
 Depends:
-    R (>= 4.5.0)
+    R (>= 4.6.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests: 

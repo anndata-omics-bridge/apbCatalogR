@@ -7,8 +7,9 @@
 The class generator; a \link{Level}'s \code{layers} is its object.
 }
 \description{
-As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb{$keys()} lists the catalog's keys only.
-\verb{$get()} returns \code{NULL} where \code{[[} signals an error, \verb{$name()} the field's name; both take the qualifiers a key
+As cf_xarray's accessor: \code{[[} reads a key, else the level's own name;
+\verb{$keys()} lists the catalog's keys only. \verb{$get()} returns \code{NULL} where \code{[[}
+signals an error, \verb{$name()} the field's name; both take the qualifiers a key
 leaves open.
 }
 \keyword{internal}
@@ -37,7 +38,8 @@ leaves open.
     \describe{
       \item{\code{level}}{The level's name.}
       \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
+\code{offered} and \code{known}.}
       \item{\code{read}}{The value of a field the slot holds.}
       \item{\code{named}}{The level's own names in this slot.}
     }
@@ -49,7 +51,8 @@ leaves open.
 \if{html}{\out{<a id="method-Slot-get"></a>}}
 \if{latex}{\out{\hypertarget{method-Slot-get}{}}}
 \subsection{\code{Slot$get()}}{
-  The field a key names, narrowed by further qualifiers, else the level's own field of that name.
+  The field a key names, narrowed by further qualifiers,
+else the level's own field of that name.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Slot$get(key, ...)}
@@ -64,7 +67,8 @@ leaves open.
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A matrix for layers, a vector for var and obs, a name without data; \code{NULL} when it is neither.
+    A matrix for layers, a vector for var and obs, a name without
+data; \code{NULL} when it is neither.
   }
 }
 
@@ -72,8 +76,8 @@ leaves open.
 \if{html}{\out{<a id="method-Slot-name"></a>}}
 \if{latex}{\out{\hypertarget{method-Slot-name}{}}}
 \subsection{\code{Slot$name()}}{
-  The name of the field \code{get} reads; an error when the name is neither a key the level answers nor
-one of its own names.
+  The name of the field \code{get} reads; an error when the
+name is neither a key the level answers nor one of its own names.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Slot$name(key, ...)}
@@ -88,7 +92,8 @@ one of its own names.
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    The field's name, such as \code{"PEP"}; \code{table/column} for a column of a \code{varm} table.
+    The field's name, such as \code{"PEP"}; \code{table/column} for a
+column of a \code{varm} table.
   }
 }
 

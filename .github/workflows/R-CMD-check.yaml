@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest,  r: 'release'}
-          - {os: macos-latest,   r: 'release'}
+          - {os: ubuntu-latest,  r: '4.6'}
+          - {os: macos-latest,   r: '4.6'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +57,9 @@ jobs:
       - name: Run BiocCheck
         if: ${{ runner.os == 'Linux' }}
         run: |
-          install.packages("BiocManager")
-          BiocManager::install("BiocCheck")
+          # BiocCheck devel, as Bioconductor checks a new submission; release
+          # 1.48 misses roxygen2 8's Config/roxygen2/version and checks man/.
+          install.packages(c("BiocManager", "remotes"))
+          BiocManager::install("Bioconductor/BiocCheck@devel")
           BiocCheck::BiocCheck(".", `quit-with-status` = TRUE, `no-check-bioc-help` = TRUE)
         shell: Rscript {0}

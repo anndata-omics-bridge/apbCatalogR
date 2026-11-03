@@ -7,11 +7,13 @@
 The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 }
 \description{
-Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
-levels; the set's entries for that pattern give each level's fields. \code{levels} have the slots of a \link{DataCatalog}'s
-levels, holding names: a slot answers one of the set's keys, such as \code{"normalized_intensity"}, with the field's name,
-and its \verb{$get()} takes further qualifiers, such as \code{unit}. Lookups that several fields answer, or that an
-unreviewed level cannot, signal \code{UnresolvedField}.
+Answers from the catalogue alone, without data. The rule levels whose version
+pattern admits the version give the levels; the set's entries for that
+pattern give each level's fields. \code{levels} have the slots of a
+\link{DataCatalog}'s levels, holding names: a slot answers one of the set's keys,
+such as \code{"normalized_intensity"}, with the field's name, and its \verb{$get()}
+takes further qualifiers, such as \code{unit}. Lookups that several fields answer,
+or that an unreviewed level cannot, signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
@@ -21,7 +23,8 @@ catalog$levels$peptidoform_ion$layers$keys()
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{
-    \item{\code{levels}}{One level per rule level, with a \link{DataCatalog}'s slots holding names.}
+    \item{\code{levels}}{One level per rule level, with a \link{DataCatalog}'s slots
+holding names.}
   }
   \if{html}{\out{</div>}}
 }
@@ -45,7 +48,8 @@ catalog$levels$peptidoform_ion$layers$keys()
 \if{html}{\out{<a id="method-Catalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-Catalog-initialize}{}}}
 \subsection{\code{Catalog$new()}}{
-  Bind a catalogue set to the rule levels of one software version.
+  Bind a catalogue set to the rule levels of one software
+version.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Catalog$new(software, version, catalog, enforce = NULL)}
@@ -56,9 +60,11 @@ catalog$levels$peptidoform_ion$layers$keys()
     \describe{
       \item{\code{software}}{The software name, such as \code{"DIA-NN"}.}
       \item{\code{version}}{The software version, such as \code{"2.2.0"}.}
-      \item{\code{catalog}}{The catalogue set, such as \code{"abundance"} or \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal \code{MissingRequiredField} when a field the set requires
-at that strength is missing.}
+      \item{\code{catalog}}{The catalogue set, such as \code{"abundance"} or
+\code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal
+\code{MissingRequiredField} when a field the set requires at that
+strength is missing.}
     }
     \if{html}{\out{</div>}}
   }
@@ -68,7 +74,8 @@ at that strength is missing.}
 \if{html}{\out{<a id="method-Catalog-fields"></a>}}
 \if{latex}{\out{\hypertarget{method-Catalog-fields}{}}}
 \subsection{\code{Catalog$fields()}}{
-  Every catalogued field the rule declares, one row per field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
+  Every catalogued field the rule declares, one row per
+field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Catalog$fields()}

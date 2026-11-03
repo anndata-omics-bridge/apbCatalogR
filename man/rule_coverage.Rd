@@ -10,15 +10,19 @@ rule_coverage(catalogue)
 \item{catalogue}{The set's name.}
 }
 \value{
-A data frame with columns \code{software}, \code{version} (the label), \code{software_version_pattern}, \code{level}, \code{key},
-\code{kind}, \code{qualifiers} (the other qualifiers as \code{name=value}), \code{origin}, \code{producer} (the app, \code{NA} for the conversion
-software's fields), \code{requirement}, \code{location}, \code{table}, \code{column} (\code{NA} when unsupported), \code{needs} (what to run
-before the field exists) and \code{verdict} (\code{NA} for a set without requirements).
+A data frame with columns \code{software}, \code{version} (the label),
+\code{software_version_pattern}, \code{level}, \code{key}, \code{kind}, \code{qualifiers} (the other
+qualifiers as \code{name=value}), \code{origin}, \code{producer} (the app, \code{NA} for the
+conversion software's fields), \code{requirement}, \code{location}, \code{table}, \code{column}
+(\code{NA} when unsupported), \code{needs} (what to run before the field exists) and
+\code{verdict} (\code{NA} for a set without requirements).
 }
 \description{
-One row per catalogued or required field of each rule level the set reviews; a set without vendor catalogues is
-checked against every level the bundle's entries name for each version of \code{versions.csv}. A set with requirements
-judges each level: \code{fail} when a MUST field is unsupported, \code{warn} when a SHOULD or MAY field is, \code{pass} otherwise.
+One row per catalogued or required field of each rule level the set reviews;
+a set without vendor catalogues is checked against every level the bundle's
+entries name for each version of \code{versions.csv}. A set with requirements
+judges each level: \code{fail} when a MUST field is unsupported, \code{warn} when a
+SHOULD or MAY field is, \code{pass} otherwise.
 }
 \examples{
 head(rule_coverage("abundance"))

@@ -14,10 +14,11 @@ apb-catalog's API in R, on the bundle apb-catalog releases. It reimplements the 
 
 Set up with `usethis`; everything else follows prolfquapp and the R package rules of prolfqua_fml's AGENTS.md, except that the vignette uses `BiocStyle`, not `fgczQuartoTemplate`.
 
-- R6 classes, same API as apb-catalog's class-based Python API: `Catalog$new()`, `DataCatalog$new()`, lookups through `levels`, no wrapper functions; snapshots are not ported, so `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()`, `stored_snapshot()`, `stale_levels()` and `ResolutionSnapshot` have no R counterpart
+- R6 classes, same API as apb-catalog's class-based Python API: `Catalog$new()`, `DataCatalog$new()`, lookups through `levels`, no wrapper functions; snapshots are not ported, so `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()` and `ResolutionSnapshot` have no R counterpart
 - Bioconductor-compatible: dependencies from CRAN or Bioconductor only, no `Remotes:`; no network in tests or the vignette
 - roxygen2 writes `NAMESPACE`; `NEWS.md` gets a bullet for every user-visible change
-- 120 characters, 2 spaces (`air.toml`, `.lintr`)
+- 80 characters, 4 spaces, as BiocCheck asks (`air.toml`, `.lintr`); the vignette's prose is wrapped at 80 too, since BiocCheck counts every line of it
+- `make check-bioc` runs BiocCheck on the built tarball, as Bioconductor's builder does, so local site folders such as `_quarto/` are not checked; use BiocCheck devel (`BiocManager::install("Bioconductor/BiocCheck@devel")`), as CI does: release 1.48 misses roxygen2 8's `Config/roxygen2/version` and style-checks `man/`
 
 ## Commands
 

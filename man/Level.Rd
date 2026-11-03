@@ -7,11 +7,13 @@
 The class generator; a \link{DataCatalog}'s \code{levels} hold its objects.
 }
 \description{
-anndataR's slots of one level: \code{X}, \code{layers}, \code{var}, \code{obs}, \code{obs_names} and \code{var_names}. \code{X} is the level's
-primary layer and \code{layers} its other layers, observations by variables; a key may name the primary layer, and then
-answers \code{X}. \code{cat$levels$protein$layers[["maxlfq"]]} looks the name up as one of the catalog's keys first, then as
-the level's own name in that slot, and signals an error when it is neither. \code{obs[c("group", "Run")]} reads every
-column the names name as a data frame.
+anndataR's slots of one level: \code{X}, \code{layers}, \code{var}, \code{obs}, \code{obs_names} and
+\code{var_names}. \code{X} is the level's primary layer and \code{layers} its other layers,
+observations by variables; a key may name the primary layer, and then answers
+\code{X}. \code{cat$levels$protein$layers[["maxlfq"]]} looks the name up as one of the
+catalog's keys first, then as the level's own name in that slot, and signals
+an error when it is neither. \code{obs[c("group", "Run")]} reads every column the
+names name as a data frame.
 }
 \keyword{internal}
 \section{Public fields}{
@@ -19,10 +21,11 @@ column the names name as a data frame.
   \describe{
     \item{\code{name}}{The level's name.}
 
-    \item{\code{layers}}{The level's layers, read with \code{[[} or \verb{$get()}; \verb{$name()} names the field, \verb{$keys()} lists the keys it
-offers.}
+    \item{\code{layers}}{The level's layers, read with \code{[[} or \verb{$get()}; \verb{$name()} names
+the field, \verb{$keys()} lists the keys it offers.}
 
-    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table, read with \code{[[}, \code{[} or \verb{$get()}.}
+    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table,
+read with \code{[[}, \code{[} or \verb{$get()}.}
 
     \item{\code{obs}}{The level's per-sample columns, read with \code{[[} or \code{[}.}
   }
@@ -33,9 +36,11 @@ offers.}
   \describe{
     \item{\code{X}}{The primary layer, observations by variables.}
 
-    \item{\code{obs_names}}{One name per observation: its key columns, joined by \code{|}.}
+    \item{\code{obs_names}}{One name per observation: its key columns, joined by
+\code{|}.}
 
-    \item{\code{var_names}}{One name per variable: its key columns, joined by \code{|}.}
+    \item{\code{var_names}}{One name per variable: its key columns, joined by
+\code{|}.}
   }
   \if{html}{\out{</div>}}
 }
@@ -61,7 +66,8 @@ offers.}
     \describe{
       \item{\code{name}}{The level's name.}
       \item{\code{level}}{The level, an anndataR \code{AnnData}.}
-      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
+\code{offered} and \code{known}.}
     }
     \if{html}{\out{</div>}}
   }

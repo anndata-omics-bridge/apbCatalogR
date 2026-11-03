@@ -7,8 +7,9 @@
 The class generator; a \link{Catalog}'s \code{levels} hold its objects.
 }
 \description{
-The slots of a \link{Level} without data: \code{layers}, \code{var} and \code{obs} answer a key with the field's name, a \code{varm} column
-as \code{table/column}. There is no \code{X}, \code{obs_names}, \code{var_names} or own name: a name that is no key the level answers
+The slots of a \link{Level} without data: \code{layers}, \code{var} and \code{obs} answer a key
+with the field's name, a \code{varm} column as \code{table/column}. There is no \code{X},
+\code{obs_names}, \code{var_names} or own name: a name that is no key the level answers
 signals an error.
 }
 \keyword{internal}
@@ -17,7 +18,8 @@ signals an error.
   \describe{
     \item{\code{name}}{The level's name.}
 
-    \item{\code{layers}}{The level's layer names, read with \code{[[}; \verb{$keys()} lists the keys it offers.}
+    \item{\code{layers}}{The level's layer names, read with \code{[[}; \verb{$keys()} lists the
+keys it offers.}
 
     \item{\code{var}}{The level's per-feature column names, read with \code{[[} or \code{[}.}
 
@@ -46,7 +48,8 @@ signals an error.
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{name}}{The level's name.}
-      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
+\code{offered} and \code{known}.}
     }
     \if{html}{\out{</div>}}
   }

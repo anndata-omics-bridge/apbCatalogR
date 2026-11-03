@@ -7,8 +7,8 @@
 The class generator; a \link{Level}'s \code{var} and \code{obs} are its objects.
 }
 \description{
-\code{obs[c("group")]} holds every column the key names, each under its own name, where \code{obs[["group"]]} signals
-\code{UnresolvedField} because there are several.
+\code{obs[c("group")]} holds every column the key names, each under its own name,
+where \code{obs[["group"]]} signals \code{UnresolvedField} because there are several.
 }
 \keyword{internal}
 \section{Super class}{
@@ -44,7 +44,8 @@ The class generator; a \link{Level}'s \code{var} and \code{obs} are its objects.
     \describe{
       \item{\code{level}}{The level's name.}
       \item{\code{location}}{\code{"var"} or \code{"obs"}.}
-      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
+\code{offered} and \code{known}.}
       \item{\code{read}}{The value of a field the slot holds.}
       \item{\code{named}}{The level's own names in this slot.}
       \item{\code{combine}}{The fields read, a named list, as one value.}
@@ -57,7 +58,8 @@ The class generator; a \link{Level}'s \code{var} and \code{obs} are its objects.
 \if{html}{\out{<a id="method-Columns-get_all"></a>}}
 \if{latex}{\out{\hypertarget{method-Columns-get_all}{}}}
 \subsection{\code{Columns$get_all()}}{
-  Every field the names name, in order; an error for a name that is neither a key nor the level's own.
+  Every field the names name, in order; an error for a
+name that is neither a key nor the level's own.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Columns$get_all(names)}

@@ -7,15 +7,21 @@
 The class generator; \code{DataCatalog$new()} returns a \code{DataCatalog}.
 }
 \description{
-Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly: \code{levels} give each level's
-slots, looked up by one of the set's keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or
+Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back
+directly: \code{levels} give each level's slots, looked up by one of the set's
+keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or
 unreviewed answers signal \code{UnresolvedField}.
 }
 \examples{
 results <- tempfile()
-archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "apbCatalogR")
+archive <- system.file(
+    "extdata", "test-bundle", "results.tar.gz",
+    package = "apbCatalogR"
+)
 utils::untar(archive, exdir = results)
-result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
+result <- read_parsed_levels(
+    file.path(results, "maxquant_wide-peptidoform_ion.parquet")
+)
 catalog <- DataCatalog$new(result, "confidence")
 dim(catalog$levels$peptidoform_ion$layers[["pep"]])
 catalog$levels$peptidoform_ion$layers$name("pep")
@@ -23,7 +29,8 @@ catalog$levels$peptidoform_ion$layers$name("pep")
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{
-    \item{\code{levels}}{One \link{Level} per level of the result, with anndataR's slots looked up by key.}
+    \item{\code{levels}}{One \link{Level} per level of the result, with anndataR's
+slots looked up by key.}
   }
   \if{html}{\out{</div>}}
 }
@@ -47,7 +54,8 @@ catalog$levels$peptidoform_ion$layers$name("pep")
 \if{html}{\out{<a id="method-DataCatalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-initialize}{}}}
 \subsection{\code{DataCatalog$new()}}{
-  Bind catalogue sets to the levels of one result; \code{apb}, APB's own fields, is always in.
+  Bind catalogue sets to the levels of one result; \code{apb},
+APB's own fields, is always in.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$new(result, ..., enforce = NULL)}
@@ -57,9 +65,11 @@ catalog$levels$peptidoform_ion$layers$name("pep")
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{result}}{A \link{ParsedLevels} object.}
-      \item{\code{...}}{The catalogue sets, such as \code{"abundance"} and \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal \code{MissingRequiredField} when a field a set requires
-at that strength is missing.}
+      \item{\code{...}}{The catalogue sets, such as \code{"abundance"} and
+\code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal
+\code{MissingRequiredField} when a field a set requires at that strength
+is missing.}
     }
     \if{html}{\out{</div>}}
   }
@@ -69,16 +79,16 @@ at that strength is missing.}
 \if{html}{\out{<a id="method-DataCatalog-fields"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-fields}{}}}
 \subsection{\code{DataCatalog$fields()}}{
-  Every catalogued field of the result in every composed set, one row per field, as
-\code{\link[=catalogue_table]{catalogue_table()}} shows them.
+  Every catalogued field of the result in every composed
+set, one row per field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$fields()}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A data frame with \code{present} and, for a field apb2 left out because it held one value, that
-\code{constant}.
+    A data frame with \code{present} and, for a field apb2 left out
+because it held one value, that \code{constant}.
   }
 }
 

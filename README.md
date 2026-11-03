@@ -37,7 +37,7 @@ A lookup answers one of three ways:
 
 ## This package
 
-apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()`, `stored_snapshot()`, `stale_levels()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the catalogues come from a bundle shipped with the package.
+apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the catalogues come from a bundle shipped with the package.
 
 | Call | Answers |
 | --- | --- |

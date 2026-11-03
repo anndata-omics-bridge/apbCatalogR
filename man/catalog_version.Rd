@@ -7,11 +7,13 @@
 catalog_version()
 }
 \value{
-A list with \code{version}, \code{origin} (\code{"shipped"} or \code{"cache"}), \code{path} and \code{apb2_version}.
+A list with \code{version}, \code{origin} (\code{"shipped"} or \code{"cache"}), \code{path}
+and \code{apb2_version}.
 }
 \description{
-Reports the bundle lookups answer from: its version, whether it was shipped with the package or downloaded by
-\code{\link[=update_catalog]{update_catalog()}}, and the apb2 version its rule levels come from.
+Reports the bundle lookups answer from: its version, whether it was shipped
+with the package or downloaded by \code{\link[=update_catalog]{update_catalog()}}, and the apb2 version
+its rule levels come from.
 }
 \examples{
 catalog_version()

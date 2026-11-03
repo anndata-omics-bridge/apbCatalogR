@@ -6,26 +6,29 @@
 \alias{apbCatalogR-package}
 \title{apbCatalogR: look up APB result fields by meaning}
 \description{
-The R implementation of apb-catalog. It works on the bundle apb-catalog releases: the reviewed catalogue sets and
-the levels apb2 converts for each software version. \link{Catalog} answers which
-column one software version reports for a meaning, without data; \link{DataCatalog} answers on a result read with
+The R implementation of apb-catalog. It works on the bundle apb-catalog
+releases: the reviewed catalogue sets and the levels apb2 converts for each
+software version. \link{Catalog} answers which column one software version reports
+for a meaning, without data; \link{DataCatalog} answers on a result read with
 \code{\link[=read_parsed_levels]{read_parsed_levels()}}.
 }
 \details{
-The package ships a bundle; \code{\link[=update_catalog]{update_catalog()}} downloads a newer one and \code{\link[=catalog_version]{catalog_version()}} reports the one in
-use.
+The package ships a bundle; \code{\link[=update_catalog]{update_catalog()}} downloads a newer one and
+\code{\link[=catalog_version]{catalog_version()}} reports the one in use.
 }
 \section{Conditions}{
 
 Lookups signal conditions of the classes apb-catalog raises in Python:
 \itemize{
-\item \code{UnresolvedField}: the catalogue cannot answer with one field; the request is ambiguous or unknown. Its
-\code{resolution} holds the candidates and reasons.
-\item \code{MissingRequiredField}: a field the set requires is missing, under \code{enforce}. Signalled as an error, or as a
-warning for a \code{SHOULD} field when \code{enforce = "MUST"}.
+\item \code{UnresolvedField}: the catalogue cannot answer with one field; the request
+is ambiguous or unknown. Its \code{resolution} holds the candidates and reasons.
+\item \code{MissingRequiredField}: a field the set requires is missing, under
+\code{enforce}. Signalled as an error, or as a warning for a \code{SHOULD} field when
+\code{enforce = "MUST"}.
 }
 
-Catch them with \code{\link[=tryCatch]{tryCatch()}}, for example \code{tryCatch(..., UnresolvedField = function(condition) NULL)}.
+Catch them with \code{\link[=tryCatch]{tryCatch()}}, for example
+\code{tryCatch(..., UnresolvedField = function(condition) NULL)}.
 }
 
 \seealso{
