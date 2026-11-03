@@ -18,6 +18,14 @@ The AnnData Proteomics Bridge (APB) converts the reports of quantification softw
 
 The package works on a bundle apb-catalog releases: the reviewed catalogue sets and the levels apb2 converts for each software version. One bundle ships with the package, together with a test bundle of synthetic results and the answers apb-catalog gives on them.
 
+| Call | Answers |
+| --- | --- |
+| `Catalog$new(software, version, set)` | Which field a software version reports, from the catalogue alone |
+| `read_parsed_levels(path)` | An APB result as `ParsedLevels`, one anndataR `AnnData` per level |
+| `DataCatalog$new(result, ...)` | The data of a result, looked up by key |
+| `catalogues()`, `catalogue_table()`, `rule_coverage()` | The sets, their entries, how each software version covers a set |
+| `catalog_version()`, `update_catalog()` | The bundle in use, and a newer one |
+
 # Installation
 
 ```{r install, eval = FALSE}
@@ -38,25 +46,49 @@ Each catalogue set serves one kind of consumer:
 catalogues()[, c("catalogue", "has_requirements", "entries")]
 ```
 
+`catalogue_table()` lists the entries of a set, one row per field and software version pattern:
+
+```{r table}
+entries <- catalogue_table("confidence")
+entries[entries$source == "Spectronaut", c("software_version_pattern", "level", "name", "key")]
+```
+
 # Which column a software version reports
 
-`Catalog` answers from the catalogue alone, without data:
+`Catalog` answers from the catalogue alone, without data. Its `levels` are the levels apb2 converts for that software version, each with the slots `layers`, `var` and `obs`, holding field names:
 
 ```{r catalog}
-diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")$levels$peptidoform_ion
-diann$layers[["intensity"]]
-diann$layers$keys()
+catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+catalog
+catalog$levels$peptidoform_ion$layers$keys()
+catalog$levels$peptidoform_ion$layers[["intensity"]]
+catalog$levels$protein$layers[["maxlfq"]]
+```
+
+`[` on `var` or `obs` names every column the keys read. Spectronaut 21 reports two protein q-values:
+
+```{r catalog-var}
+spectronaut <- Catalog$new("Spectronaut", "21.0", "confidence")
+spectronaut$levels$protein$var$keys()
+spectronaut$levels$protein$var[c("q_value", "library_q_value")]
+```
+
+`$fields()` lists every catalogued field of the version as a table; each entry's id names the software, version, level and slot where the field lives:
+
+```{r catalog-fields}
+spectronaut$fields()[, c("key", "entry_id")]
 ```
 
 # The data of a result
 
-`read_parsed_levels()` reads a Parquet result apb2 wrote, one anndataR `AnnData` per level. The test bundle carries synthetic results; this one has MaxQuant's peptidoform-ion level.
+`read_parsed_levels()` reads a result apb2 wrote, `.parquet`, `.h5ad` or `.duckdb`, into `ParsedLevels`, one anndataR `AnnData` per level. The test bundle carries synthetic Parquet results; this one has MaxQuant's peptidoform-ion level.
 
 ```{r read}
 results <- tempfile()
 utils::untar(system.file("extdata", "test-bundle", "results.tar.gz", package = "apbCatalogR"), exdir = results)
 result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
 result
+result$levels$peptidoform_ion
 ```
 
 `DataCatalog` answers on the result and hands back the data:
@@ -65,6 +97,12 @@ result
 confidence <- DataCatalog$new(result, "confidence")
 pep <- confidence$levels$peptidoform_ion$layers[["pep"]]
 dim(pep)
+```
+
+`$fields()` lists the catalogued fields the result holds, from the `confidence` set and from `apb`, which is always in:
+
+```{r data-fields}
+confidence$fields()[, c("set", "location", "name", "key", "present")]
 ```
 
 Each level of the catalog has anndataR's slots. A name is read as a key first, then as the level's own layer or column, as cf_xarray reads `ds.cf[...]`; `apb`, APB's own fields, is always in:
@@ -105,7 +143,7 @@ tryCatch(
 )
 ```
 
-# One code for every software
+# The same code for every software
 
 The same lookup reads each software's field; the test bundle holds results of many:
 
