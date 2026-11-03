@@ -1,52 +1,5 @@
 # Look up APB fields by meaning, so callers never name vendor columns; apb_catalog.catalog.
 
-#' Where a field lives
-#'
-#' The answer of a [Catalog] lookup: the level, the location (`"layers"`, `"var"`, `"varm"` or `"obs"`), the column
-#' name and, for a `varm` field, its table.
-#'
-#' @field level The quantification level, such as `"peptidoform_ion"`.
-#' @field location `"layers"`, `"var"`, `"varm"` or `"obs"`.
-#' @field name The layer or column name.
-#' @field table The `varm` table, `NA` elsewhere.
-#' @return The class generator; `Reference$new()` returns a `Reference`.
-#' @export
-#' @examples
-#' Reference$new("peptidoform_ion", "layers", "PEP")
-Reference <- R6::R6Class(
-  "Reference",
-  public = list(
-    level = NULL,
-    location = NULL,
-    name = NULL,
-    table = NULL,
-
-    #' @description Where one field lives.
-    #' @param level The quantification level.
-    #' @param location `"layers"`, `"var"`, `"varm"` or `"obs"`.
-    #' @param name The layer or column name.
-    #' @param table The `varm` table, `NA` elsewhere.
-    initialize = function(level, location, name, table = NA_character_) {
-      self$level <- level
-      self$location <- location
-      self$name <- name
-      self$table <- table
-    },
-
-    #' @description Print the reference.
-    #' @param ... Ignored.
-    print = function(...) {
-      table <- if (is.na(self$table)) "" else paste0(" [", self$table, "]")
-      writeLines(sprintf("<Reference %s %s%s: %s>", self$level, self$location, table, self$name))
-      invisible(self)
-    }
-  )
-)
-
-reference_of <- function(reference) {
-  Reference$new(reference$level, reference$location, reference$name, reference$table)
-}
-
 # The entry bound to the level's column: by name or by prefix. A prefix matching several columns binds to each, so the
 # lookup reports them as ambiguous.
 bind_entry <- function(entry, obs_columns) {
@@ -260,8 +213,8 @@ fields_frame <- function(rows, set) {
 #'
 #' Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
 #' levels; the set's entries for that pattern give each level's fields. `levels` have the slots of a [DataCatalog]'s
-#' levels, holding names. The methods ask by one of the set's keys, such as `"normalized_intensity"`, and return a
-#' [Reference]; further qualifiers, such as `unit`, narrow them. Lookups that several fields answer, or that an
+#' levels, holding names: a slot answers one of the set's keys, such as `"normalized_intensity"`, with the field's name,
+#' and its `$get()` takes further qualifiers, such as `unit`. Lookups that several fields answer, or that an
 #' unreviewed level cannot, signal `UnresolvedField`.
 #'
 #' @field description What this catalogue set holds and who uses it.
@@ -270,8 +223,7 @@ fields_frame <- function(rows, set) {
 #' @examples
 #' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
 #' catalog$levels$peptidoform_ion$layers[["intensity"]]
-#' catalog$layer("peptidoform_ion", "intensity")
-#' catalog$keys("peptidoform_ion", "layers")
+#' catalog$levels$peptidoform_ion$layers$keys()
 Catalog <- R6::R6Class(
   "Catalog",
   public = list(
@@ -319,48 +271,12 @@ Catalog <- R6::R6Class(
       }
       private$lookups <- Lookups$new(catalog, set, views, enforce)
       lookup <- list(
-        find = function(level, location, key) private$lookups$find(level, location, key, list()),
+        find = function(level, location, key, qualifiers) private$lookups$find(level, location, key, qualifiers),
         find_all = function(level, location, key) private$lookups$find_all(level, location, key),
-        offered = function(level, location) self$keys(level, location),
+        offered = function(level, location) private$lookups$keys(level, location, list()),
         known = names(set$keys)
       )
       self$levels <- stats::setNames(lapply(names(views), LevelNames$new, lookup = lookup), names(views))
-    },
-
-    #' @description The keys the level offers at one location, given further qualifiers.
-    #' @param level The quantification level.
-    #' @param location `"layers"`, `"var"` or `"obs"`.
-    #' @param ... Further qualifiers by name, such as `unit = "minute"`.
-    #' @return A character vector.
-    keys = function(level, location, ...) {
-      private$lookups$keys(level, location, qualifier_arguments(...))
-    },
-
-    #' @description Where the sample-by-feature layer with this meaning lives.
-    #' @param level The quantification level.
-    #' @param key The key, such as `"intensity"`; see [catalogue_table()].
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A [Reference], or `NULL` when the level has no such layer.
-    layer = function(level, key, ...) {
-      private$found(level, "layers", key, qualifier_arguments(...))
-    },
-
-    #' @description Where the per-feature column with this meaning lives, in `var` or a `varm` table.
-    #' @param level The quantification level.
-    #' @param key The key.
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A [Reference], or `NULL`.
-    var = function(level, key, ...) {
-      private$found(level, "var", key, qualifier_arguments(...))
-    },
-
-    #' @description Where the per-sample column with this meaning lives.
-    #' @param level The quantification level.
-    #' @param key The key.
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A [Reference], or `NULL`.
-    obs = function(level, key, ...) {
-      private$found(level, "obs", key, qualifier_arguments(...))
     },
 
     #' @description Every catalogued field the rule declares, one row per field, as [catalogue_table()] shows them.
@@ -391,19 +307,15 @@ Catalog <- R6::R6Class(
     description = function() private$lookups$set$description
   ),
   private = list(
-    lookups = NULL,
-    found = function(level, location, key, qualifiers) {
-      found <- private$lookups$find(level, location, key, qualifiers)
-      if (is.null(found)) NULL else reference_of(found)
-    }
+    lookups = NULL
   )
 )
 
 #' What one result's fields mean to one consumer
 #'
-#' Answers on a result read with [read_parsed_levels()] and hands the data back directly. A lookup asks by one of the
-#' set's keys, such as `"q_value"` or Sage's `"quantification_q_value"`. Ambiguous or unreviewed answers signal
-#' `UnresolvedField`.
+#' Answers on a result read with [read_parsed_levels()] and hands the data back directly: `levels` give each level's
+#' slots, looked up by one of the set's keys, such as `"q_value"` or Sage's `"quantification_q_value"`. Ambiguous or
+#' unreviewed answers signal `UnresolvedField`.
 #'
 #' @field description What this catalogue set holds and who uses it.
 #' @return The class generator; `DataCatalog$new()` returns a `DataCatalog`.
@@ -414,7 +326,8 @@ Catalog <- R6::R6Class(
 #' utils::untar(archive, exdir = results)
 #' result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
 #' catalog <- DataCatalog$new(result, "confidence")
-#' dim(catalog$layer("peptidoform_ion", "pep"))
+#' dim(catalog$levels$peptidoform_ion$layers[["pep"]])
+#' catalog$levels$peptidoform_ion$layers$name("pep")
 DataCatalog <- R6::R6Class(
   "DataCatalog",
   public = list(
@@ -437,59 +350,15 @@ DataCatalog <- R6::R6Class(
       check_shared_keys(private$sets)
       private$known <- unique(unlist(lapply(private$sets, function(lookups) names(lookups$set$keys))))
       lookup <- list(
-        find = function(level, location, key) private$find(level, location, key, list()),
+        find = function(level, location, key, qualifiers) private$find(level, location, key, qualifiers),
         find_all = function(level, location, key) composed_fields(private$sets, private$known, level, location, key),
-        offered = function(level, location) self$keys(level, location),
+        offered = function(level, location) composed_keys(private$sets, level, location),
         known = private$known
       )
       self$levels <- stats::setNames(
         lapply(names(result$levels), function(name) Level$new(name, result$levels[[name]], lookup)),
         names(result$levels)
       )
-    },
-
-    #' @description The keys the level offers at one location, given further qualifiers, from every set that
-    #'   declares those qualifiers.
-    #' @param level The quantification level.
-    #' @param location `"layers"`, `"var"` or `"obs"`.
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A character vector.
-    keys = function(level, location, ...) {
-      composed_keys(private$sets, level, location, qualifier_arguments(...))
-    },
-
-    #' @description The layer with this meaning.
-    #' @param level The quantification level.
-    #' @param key The key, such as `"pep"`; see [catalogue_table()].
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return An observations-by-features matrix, or `NULL` when the result has no such layer.
-    layer = function(level, key, ...) {
-      reference <- private$find(level, "layers", key, qualifier_arguments(...))
-      if (is.null(reference)) NULL else level_layer(private$parsed$levels[[level]], reference$name)
-    },
-
-    #' @description The per-feature column with this meaning, from `var` or a `varm` table.
-    #' @param level The quantification level.
-    #' @param key The key.
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A vector, or `NULL`.
-    var = function(level, key, ...) {
-      reference <- private$find(level, "var", key, qualifier_arguments(...))
-      if (is.null(reference)) {
-        return(NULL)
-      }
-      found <- private$parsed$levels[[level]]
-      if (is.na(reference$table)) found$var[[reference$name]] else found$varm[[reference$table]][[reference$name]]
-    },
-
-    #' @description The per-sample column with this meaning.
-    #' @param level The quantification level.
-    #' @param key The key.
-    #' @param ... Further qualifiers by name, besides those the key fixes.
-    #' @return A vector, or `NULL`.
-    obs = function(level, key, ...) {
-      reference <- private$find(level, "obs", key, qualifier_arguments(...))
-      if (is.null(reference)) NULL else private$parsed$levels[[level]]$obs[[reference$name]]
     },
 
     #' @description Every catalogued field of the result in every composed set, one row per field, as
@@ -592,16 +461,9 @@ check_composed_enforce <- function(sets, enforce) {
   }
 }
 
-# The keys a level offers at one location in every set that declares the qualifiers asked.
-composed_keys <- function(sets, level, location, qualifiers) {
-  eligible <- Filter(function(lookups) declares(lookups, qualifiers), sets)
-  if (length(eligible) == 0L) {
-    stop(
-      sprintf("no catalogue set declares the qualifiers %s", paste(sort_c(names(qualifiers)), collapse = ", ")),
-      call. = FALSE
-    )
-  }
-  offered <- unlist(lapply(eligible, function(lookups) lookups$keys(level, location, qualifiers)), use.names = FALSE)
+# The keys a level offers at one location, from every set.
+composed_keys <- function(sets, level, location) {
+  offered <- unlist(lapply(sets, function(lookups) lookups$keys(level, location, list())), use.names = FALSE)
   if (is.null(offered)) character(0) else sort_c(unique(offered))
 }
 

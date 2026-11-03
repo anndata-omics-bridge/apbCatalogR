@@ -9,8 +9,9 @@
 #' column the names name as a data frame.
 #'
 #' @field name The level's name.
-#' @field layers The level's layers, read with `[[`; `$keys()` lists the keys it offers.
-#' @field var The level's per-feature columns, from `var` or a `varm` table, read with `[[` or `[`.
+#' @field layers The level's layers, read with `[[` or `$get()`; `$name()` names the field, `$keys()` lists the keys it
+#'   offers.
+#' @field var The level's per-feature columns, from `var` or a `varm` table, read with `[[`, `[` or `$get()`.
 #' @field obs The level's per-sample columns, read with `[[` or `[`.
 #' @return The class generator; a [DataCatalog]'s `levels` hold its objects.
 #' @keywords internal
@@ -102,6 +103,8 @@ LevelNames <- R6::R6Class(
 #' One slot of a level, read by key first
 #'
 #' As cf_xarray's accessor: `[[` reads a key, else the level's own name; `$keys()` lists the catalog's keys only.
+#' `$get()` returns `NULL` where `[[` signals an error, `$name()` the field's name; both take the qualifiers a key
+#' leaves open.
 #'
 #' @return The class generator; a [Level]'s `layers` is its object.
 #' @keywords internal
@@ -122,17 +125,22 @@ Slot <- R6::R6Class(
       private$named <- named
     },
 
-    #' @description The field a key names, else the level's own field of that name; an error when it is neither.
-    #' @param name A key, or the level's own name.
-    #' @return A matrix for layers, a vector for var and obs; a name without data.
-    get = function(name) {
-      if (name %in% private$lookup$known) {
-        found <- private$lookup$find(private$level, private$location, name)
-        if (!is.null(found)) {
-          return(private$read(found))
-        }
-      }
-      private$read(private$own(name))
+    #' @description The field a key names, narrowed by further qualifiers, else the level's own field of that name.
+    #' @param key A key, or the level's own name.
+    #' @param ... Further qualifiers by name, such as `unit = "minute"`.
+    #' @return A matrix for layers, a vector for var and obs, a name without data; `NULL` when it is neither.
+    get = function(key, ...) {
+      reference <- private$reference(key, qualifier_arguments(...))
+      if (is.null(reference)) NULL else private$read(reference)
+    },
+
+    #' @description The name of the field `get` reads; an error when the name is neither a key the level answers nor
+    #'   one of its own names.
+    #' @param key A key, or the level's own name.
+    #' @param ... Further qualifiers by name, such as `unit = "minute"`.
+    #' @return The field's name, such as `"PEP"`; `table/column` for a column of a `varm` table.
+    name = function(key, ...) {
+      slot_name(private$found(key, qualifier_arguments(...)))
     },
 
     #' @description The keys the level offers in this slot.
@@ -148,11 +156,35 @@ Slot <- R6::R6Class(
     read = NULL,
     named = NULL,
 
-    own = function(name) {
-      if (!(name %in% private$named)) {
-        stop(sprintf("%s %s has no key or field '%s'", private$level, private$location, name), call. = FALSE)
+    # What `[[` reads: an error where `get` returns NULL.
+    item = function(key) {
+      private$read(private$found(key, list()))
+    },
+
+    reference = function(key, qualifiers) {
+      if (key %in% private$lookup$known || length(qualifiers) > 0L) {
+        found <- private$lookup$find(private$level, private$location, key, qualifiers)
+        if (!is.null(found)) {
+          return(found)
+        }
       }
-      list(name = name, table = NA_character_)
+      private$own(key)
+    },
+
+    found = function(key, qualifiers) {
+      reference <- private$reference(key, qualifiers)
+      if (is.null(reference)) {
+        private$missing(key)
+      }
+      reference
+    },
+
+    own = function(name) {
+      if (name %in% private$named) list(name = name, table = NA_character_)
+    },
+
+    missing = function(name) {
+      stop(sprintf("%s %s has no key or field '%s'", private$level, private$location, name), call. = FALSE)
     }
   )
 )
@@ -203,7 +235,11 @@ Columns <- R6::R6Class(
           return(found)
         }
       }
-      list(private$own(name))
+      own <- private$own(name)
+      if (is.null(own)) {
+        private$missing(name)
+      }
+      list(own)
     }
   )
 )
@@ -229,7 +265,7 @@ columns_names <- function(columns) {
 #' @return A matrix for layers, a vector for var and obs; a name without data.
 #' @export
 `[[.Slot` <- function(x, i, ...) {
-  x$get(i)
+  x$.__enclos_env__$private$item(i)
 }
 
 #' Read a var or obs slot by several keys

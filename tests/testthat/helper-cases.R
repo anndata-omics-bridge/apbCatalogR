@@ -97,17 +97,18 @@ outcome_of <- function(lookup) {
   c(answer, if (warned) list(warning = "MissingRequiredField"))
 }
 
-lookup_arguments <- function(request) {
-  c(list(request$level, request$key), request$qualifiers)
+# The slot one request reads: a level's layers, var or obs.
+slot_of <- function(catalog, request) {
+  catalog$levels[[request$level]][[request$location]]
 }
 
-method_for <- function(location) {
-  switch(location, layers = "layer", obs = "obs", var = "var")
+slot_arguments <- function(request) {
+  c(list(request$key), request$qualifiers)
 }
 
 keys_outcome <- function(catalog, case) {
   tryCatch(
-    list(keys = as.list(catalog$keys(case$level, case$location))),
+    list(keys = as.list(apbCatalogR:::sort_c(catalog$levels[[case$level]][[case$location]]$keys()))),
     UnresolvedField = function(condition) list(error = "UnresolvedField", status = condition$resolution$status)
   )
 }

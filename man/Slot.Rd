@@ -8,6 +8,8 @@ The class generator; a \link{Level}'s \code{layers} is its object.
 }
 \description{
 As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb{$keys()} lists the catalog's keys only.
+\verb{$get()} returns \code{NULL} where \code{[[} signals an error, \verb{$name()} the field's name; both take the qualifiers a key
+leaves open.
 }
 \keyword{internal}
 \section{Methods}{
@@ -15,6 +17,7 @@ As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb
   \itemize{
     \item \href{#method-Slot-initialize}{\code{Slot$new()}}
     \item \href{#method-Slot-get}{\code{Slot$get()}}
+    \item \href{#method-Slot-name}{\code{Slot$name()}}
     \item \href{#method-Slot-keys}{\code{Slot$keys()}}
     \item \href{#method-Slot-clone}{\code{Slot$clone()}}
   }
@@ -46,21 +49,46 @@ As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb
 \if{html}{\out{<a id="method-Slot-get"></a>}}
 \if{latex}{\out{\hypertarget{method-Slot-get}{}}}
 \subsection{\code{Slot$get()}}{
-  The field a key names, else the level's own field of that name; an error when it is neither.
+  The field a key names, narrowed by further qualifiers, else the level's own field of that name.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Slot$get(name)}
+    \preformatted{Slot$get(key, ...)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{name}}{A key, or the level's own name.}
+      \item{\code{key}}{A key, or the level's own name.}
+      \item{\code{...}}{Further qualifiers by name, such as \code{unit = "minute"}.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A matrix for layers, a vector for var and obs; a name without data.
+    A matrix for layers, a vector for var and obs, a name without data; \code{NULL} when it is neither.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Slot-name"></a>}}
+\if{latex}{\out{\hypertarget{method-Slot-name}{}}}
+\subsection{\code{Slot$name()}}{
+  The name of the field \code{get} reads; an error when the name is neither a key the level answers nor
+one of its own names.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Slot$name(key, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{key}}{A key, or the level's own name.}
+      \item{\code{...}}{Further qualifiers by name, such as \code{unit = "minute"}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The field's name, such as \code{"PEP"}; \code{table/column} for a column of a \code{varm} table.
   }
 }
 

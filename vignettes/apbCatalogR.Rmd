@@ -43,9 +43,9 @@ catalogues()[, c("catalogue", "has_requirements", "entries")]
 `Catalog` answers from the catalogue alone, without data:
 
 ```{r catalog}
-diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-diann$layer("peptidoform_ion", "intensity")
-diann$keys("peptidoform_ion", "layers")
+diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")$levels$peptidoform_ion
+diann$layers[["intensity"]]
+diann$layers$keys()
 ```
 
 # The data of a result
@@ -63,7 +63,7 @@ result
 
 ```{r data-catalog}
 confidence <- DataCatalog$new(result, "confidence")
-pep <- confidence$layer("peptidoform_ion", "pep")
+pep <- confidence$levels$peptidoform_ion$layers[["pep"]]
 dim(pep)
 ```
 
@@ -71,24 +71,78 @@ Each level of the catalog has anndataR's slots. A name is read as a key first, t
 
 ```{r levels}
 ion <- confidence$levels$peptidoform_ion
-dim(ion$layers[["pep"]])
-ion$layers$keys()
-head(ion$var[["peptidoform_ion"]])
+dim(ion$layers[["pep"]])            # a matrix, runs x features
+ion$layers$keys()                   # a character vector
+head(ion$var[["peptidoform_ion"]])  # a vector, one value per feature
 ```
 
-MaxQuant reports no q-value on this level, so that lookup gives `NULL`:
+The slots read the anndataR `AnnData` of the level, so a key gives the same data as the vendor's name in anndataR. A vendor's own name still reads, and `[` gives a data frame, as on anndataR's `obs` and `var`:
+
+```{r anndatar}
+adata <- result$levels$peptidoform_ion                 # the anndataR AnnData
+identical(ion$layers[["pep"]], adata$layers[["PEP"]])
+identical(ion$X, adata$X)
+ion$obs_names
+ion$var_names
+ion$layers[["Score"]]                                  # MaxQuant's own layer, as adata$layers[["Score"]]
+ion$obs[c("Raw_File", "Experiment")]                   # as adata$obs[c("Raw_File", "Experiment")]
+ion$var[c("peptidoform_ion", "decoy", "contaminant")]  # keys, named by the columns they read
+```
+
+MaxQuant reports no q-value on this level, so `$get()` gives `NULL`, where `[[` signals an error; `$name()` names the field a key reads:
 
 ```{r missing}
-confidence$layer("peptidoform_ion", "q_value")
+ion$layers$get("q_value")
+ion$layers$name("pep")
 ```
 
 A lookup the catalogue cannot answer with one field signals `UnresolvedField` rather than choosing silently. FragPipe does not document whether its intensity is normalized, so the key `intensity`, never normalized, is unknown there:
 
 ```{r unresolved}
 tryCatch(
-  Catalog$new("FragPipe", "22.0", "abundance")$layer("peptidoform_ion", "intensity"),
+  Catalog$new("FragPipe", "22.0", "abundance")$levels$peptidoform_ion$layers[["intensity"]],
   UnresolvedField = function(condition) conditionMessage(condition)
 )
+```
+
+# One code for every software
+
+The same lookup reads each software's field; the test bundle holds results of many:
+
+```{r vendors}
+files <- c(
+  MaxQuant = "maxquant_wide-peptidoform_ion.parquet",
+  Spectronaut = "spectronaut_v21-peptidoform_ion.parquet",
+  `DIA-NN` = "diann_v2-peptidoform_ion.parquet"
+)
+pep_field <- function(file) {
+  vendor <- read_parsed_levels(file.path(results, file))
+  DataCatalog$new(vendor, "confidence")$levels$peptidoform_ion$layers$name("pep")
+}
+vapply(files, pep_field, character(1))
+```
+
+A protein level reads the same way; DIA-NN's MaxLFQ intensity is the key `maxlfq`:
+
+```{r protein}
+diann <- read_parsed_levels(file.path(results, "diann_v2-protein.parquet"))
+protein <- DataCatalog$new(diann, "abundance")$levels$protein
+protein$layers$keys()
+protein$layers$name("maxlfq")
+protein$layers[["maxlfq"]]
+```
+
+# Several sets and qualifiers
+
+`DataCatalog$new()` composes several sets on one result. A key may leave a qualifier open, such as the unit of a retention time; `$get()` and `$name()` narrow it, and a lookup no field answers gives `NULL`:
+
+```{r compose}
+both <- DataCatalog$new(result, "confidence", "chromatography")
+both
+rt <- both$levels$peptidoform_ion
+rt$layers$keys()
+rt$layers$name("retention_time", unit = "minute")
+rt$layers$get("retention_time", unit = "second")
 ```
 
 # Rule coverage

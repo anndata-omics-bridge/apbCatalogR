@@ -71,20 +71,23 @@ Ask the catalogue which column a software version reports:
 
 ```r
 library(apbCatalogR)
-diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")
-diann$keys("peptidoform_ion", "layers")
+diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")$levels$peptidoform_ion
+diann$layers$keys()
 #> [1] "intensity"                "ms1_intensity"            "normalized_intensity"
 #> [4] "normalized_ms1_intensity"
-diann$layer("peptidoform_ion", "intensity")
-#> <Reference peptidoform_ion layers: Precursor_Quantity>
+diann$layers[["intensity"]]
+#> [1] "Precursor_Quantity"
 ```
 
 Get the data of a result:
 
 ```r
 result <- read_parsed_levels("result.parquet")
-confidence <- DataCatalog$new(result, "confidence")
-pep <- confidence$layer("peptidoform_ion", "pep")   # runs x features matrix
+ion <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion
+ion$layers                     # key -> matrix, runs x features
+ion$var                        # key -> vector, one value per feature
+pep <- ion$layers$get("pep")   # runs x features matrix, NULL when absent
+ion$var[c("peptidoform_ion")]  # a data.frame
 ```
 
 ## The bundle

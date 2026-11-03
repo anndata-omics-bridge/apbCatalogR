@@ -26,6 +26,7 @@ The class generator; a \link{Level}'s \code{var} and \code{obs} are its objects.
 <ul>
   <li><span class="pkg-link" data-pkg="apbCatalogR" data-topic="Slot" data-id="get"><a href='../../apbCatalogR/html/Slot.html#method-Slot-get'><code>Slot$get()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="apbCatalogR" data-topic="Slot" data-id="keys"><a href='../../apbCatalogR/html/Slot.html#method-Slot-keys'><code>Slot$keys()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="apbCatalogR" data-topic="Slot" data-id="name"><a href='../../apbCatalogR/html/Slot.html#method-Slot-name'><code>Slot$name()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

@@ -7,9 +7,9 @@
 The class generator; \code{DataCatalog$new()} returns a \code{DataCatalog}.
 }
 \description{
-Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly. A lookup asks by one of the
-set's keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or unreviewed answers signal
-\code{UnresolvedField}.
+Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_levels()}} and hands the data back directly: \code{levels} give each level's
+slots, looked up by one of the set's keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or
+unreviewed answers signal \code{UnresolvedField}.
 }
 \examples{
 results <- tempfile()
@@ -17,7 +17,8 @@ archive <- system.file("extdata", "test-bundle", "results.tar.gz", package = "ap
 utils::untar(archive, exdir = results)
 result <- read_parsed_levels(file.path(results, "maxquant_wide-peptidoform_ion.parquet"))
 catalog <- DataCatalog$new(result, "confidence")
-dim(catalog$layer("peptidoform_ion", "pep"))
+dim(catalog$levels$peptidoform_ion$layers[["pep"]])
+catalog$levels$peptidoform_ion$layers$name("pep")
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
@@ -37,10 +38,6 @@ dim(catalog$layer("peptidoform_ion", "pep"))
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-DataCatalog-initialize}{\code{DataCatalog$new()}}
-    \item \href{#method-DataCatalog-keys}{\code{DataCatalog$keys()}}
-    \item \href{#method-DataCatalog-layer}{\code{DataCatalog$layer()}}
-    \item \href{#method-DataCatalog-var}{\code{DataCatalog$var()}}
-    \item \href{#method-DataCatalog-obs}{\code{DataCatalog$obs()}}
     \item \href{#method-DataCatalog-fields}{\code{DataCatalog$fields()}}
     \item \href{#method-DataCatalog-print}{\code{DataCatalog$print()}}
     \item \href{#method-DataCatalog-clone}{\code{DataCatalog$clone()}}
@@ -65,103 +62,6 @@ dim(catalog$layer("peptidoform_ion", "pep"))
 at that strength is missing.}
     }
     \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataCatalog-keys"></a>}}
-\if{latex}{\out{\hypertarget{method-DataCatalog-keys}{}}}
-\subsection{\code{DataCatalog$keys()}}{
-  The keys the level offers at one location, given further qualifiers, from every set that
-declares those qualifiers.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$keys(level, location, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A character vector.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataCatalog-layer"></a>}}
-\if{latex}{\out{\hypertarget{method-DataCatalog-layer}{}}}
-\subsection{\code{DataCatalog$layer()}}{
-  The layer with this meaning.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$layer(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key, such as \code{"pep"}; see \code{\link[=catalogue_table]{catalogue_table()}}.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    An observations-by-features matrix, or \code{NULL} when the result has no such layer.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataCatalog-var"></a>}}
-\if{latex}{\out{\hypertarget{method-DataCatalog-var}{}}}
-\subsection{\code{DataCatalog$var()}}{
-  The per-feature column with this meaning, from \code{var} or a \code{varm} table.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$var(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A vector, or \code{NULL}.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataCatalog-obs"></a>}}
-\if{latex}{\out{\hypertarget{method-DataCatalog-obs}{}}}
-\subsection{\code{DataCatalog$obs()}}{
-  The per-sample column with this meaning.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{DataCatalog$obs(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A vector, or \code{NULL}.
   }
 }
 

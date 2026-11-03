@@ -9,15 +9,14 @@ The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 \description{
 Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
 levels; the set's entries for that pattern give each level's fields. \code{levels} have the slots of a \link{DataCatalog}'s
-levels, holding names. The methods ask by one of the set's keys, such as \code{"normalized_intensity"}, and return a
-\link{Reference}; further qualifiers, such as \code{unit}, narrow them. Lookups that several fields answer, or that an
+levels, holding names: a slot answers one of the set's keys, such as \code{"normalized_intensity"}, with the field's name,
+and its \verb{$get()} takes further qualifiers, such as \code{unit}. Lookups that several fields answer, or that an
 unreviewed level cannot, signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
 catalog$levels$peptidoform_ion$layers[["intensity"]]
-catalog$layer("peptidoform_ion", "intensity")
-catalog$keys("peptidoform_ion", "layers")
+catalog$levels$peptidoform_ion$layers$keys()
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
@@ -37,10 +36,6 @@ catalog$keys("peptidoform_ion", "layers")
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-Catalog-initialize}{\code{Catalog$new()}}
-    \item \href{#method-Catalog-keys}{\code{Catalog$keys()}}
-    \item \href{#method-Catalog-layer}{\code{Catalog$layer()}}
-    \item \href{#method-Catalog-var}{\code{Catalog$var()}}
-    \item \href{#method-Catalog-obs}{\code{Catalog$obs()}}
     \item \href{#method-Catalog-fields}{\code{Catalog$fields()}}
     \item \href{#method-Catalog-print}{\code{Catalog$print()}}
     \item \href{#method-Catalog-clone}{\code{Catalog$clone()}}
@@ -66,102 +61,6 @@ catalog$keys("peptidoform_ion", "layers")
 at that strength is missing.}
     }
     \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Catalog-keys"></a>}}
-\if{latex}{\out{\hypertarget{method-Catalog-keys}{}}}
-\subsection{\code{Catalog$keys()}}{
-  The keys the level offers at one location, given further qualifiers.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$keys(level, location, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{...}}{Further qualifiers by name, such as \code{unit = "minute"}.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A character vector.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Catalog-layer"></a>}}
-\if{latex}{\out{\hypertarget{method-Catalog-layer}{}}}
-\subsection{\code{Catalog$layer()}}{
-  Where the sample-by-feature layer with this meaning lives.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$layer(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key, such as \code{"intensity"}; see \code{\link[=catalogue_table]{catalogue_table()}}.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A \link{Reference}, or \code{NULL} when the level has no such layer.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Catalog-var"></a>}}
-\if{latex}{\out{\hypertarget{method-Catalog-var}{}}}
-\subsection{\code{Catalog$var()}}{
-  Where the per-feature column with this meaning lives, in \code{var} or a \code{varm} table.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$var(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A \link{Reference}, or \code{NULL}.
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Catalog-obs"></a>}}
-\if{latex}{\out{\hypertarget{method-Catalog-obs}{}}}
-\subsection{\code{Catalog$obs()}}{
-  Where the per-sample column with this meaning lives.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$obs(level, key, ...)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{level}}{The quantification level.}
-      \item{\code{key}}{The key.}
-      \item{\code{...}}{Further qualifiers by name, besides those the key fixes.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A \link{Reference}, or \code{NULL}.
   }
 }
 

@@ -19,9 +19,10 @@ column the names name as a data frame.
   \describe{
     \item{\code{name}}{The level's name.}
 
-    \item{\code{layers}}{The level's layers, read with \code{[[}; \verb{$keys()} lists the keys it offers.}
+    \item{\code{layers}}{The level's layers, read with \code{[[} or \verb{$get()}; \verb{$name()} names the field, \verb{$keys()} lists the keys it
+offers.}
 
-    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table, read with \code{[[} or \code{[}.}
+    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table, read with \code{[[}, \code{[} or \verb{$get()}.}
 
     \item{\code{obs}}{The level's per-sample columns, read with \code{[[} or \code{[}.}
   }

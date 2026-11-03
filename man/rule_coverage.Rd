@@ -17,8 +17,8 @@ before the field exists) and \code{verdict} (\code{NA} for a set without require
 }
 \description{
 One row per catalogued or required field of each rule level the set reviews; a set without vendor catalogues is
-checked against every level the bundle's entries name for each version of \code{versions.csv}. A set with requirements judges each level:
-\code{fail} when a MUST field is unsupported, \code{warn} when a SHOULD or MAY field is, \code{pass} otherwise.
+checked against every level the bundle's entries name for each version of \code{versions.csv}. A set with requirements
+judges each level: \code{fail} when a MUST field is unsupported, \code{warn} when a SHOULD or MAY field is, \code{pass} otherwise.
 }
 \examples{
 head(rule_coverage("abundance"))

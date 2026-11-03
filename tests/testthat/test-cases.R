@@ -9,15 +9,10 @@ test_that("Catalog answers every bundle case as apb-catalog does", {
     }
     catalog <- Catalog$new(case$software, case$version, case$catalogue)
     for (request in case$requests) {
-      method <- catalog[[method_for(request$location)]]
-      outcome <- outcome_of(function() do.call(method, lookup_arguments(request)))
+      slot <- slot_of(catalog, request)
+      outcome <- outcome_of(function() do.call(slot$get, slot_arguments(request)))
       if (is.null(outcome$error)) {
-        found <- outcome$value
-        outcome$value <- NULL
-        reference <- if (!is.null(found)) {
-          list(level = found$level, location = found$location, table = found$table, name = found$name)
-        }
-        outcome <- c(list(reference = reference), outcome)
+        outcome <- c(list(name = outcome$value), outcome[setdiff(names(outcome), "value")])
       }
       expect_json_equal(outcome, request$outcome, paste(label, request$level, jsonlite::toJSON(request$qualifiers)))
     }
@@ -32,19 +27,20 @@ test_that("Catalog answers every bundle case as apb-catalog does", {
   }
 })
 
-# The data a reference names on a result, as DataCatalog hands it back.
-referenced_data <- function(result, reference) {
-  if (is.null(reference)) {
+# The data a field's name names on a result, as a level hands it back; `table/column` is a varm column.
+named_data <- function(result, request, name) {
+  if (is.null(name)) {
     return(NULL)
   }
-  level <- result$levels[[reference$level]]
-  switch(
-    reference$location,
-    layers = apbCatalogR:::level_layer(level, reference$name),
-    obs = level$obs[[reference$name]],
-    var = level$var[[reference$name]],
-    varm = level$varm[[reference$table]][[reference$name]]
-  )
+  level <- result$levels[[request$level]]
+  if (request$location == "layers") {
+    return(apbCatalogR:::level_layer(level, name))
+  }
+  if (request$location == "obs") {
+    return(level$obs[[name]])
+  }
+  parts <- strsplit(name, "/", fixed = TRUE)[[1L]]
+  if (length(parts) == 2L) level$varm[[parts[[1L]]]][[parts[[2L]]]] else level$var[[name]]
 }
 
 test_that("DataCatalog answers every bundle case as apb-catalog does", {
@@ -57,16 +53,19 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
     }
     catalog <- DataCatalog$new(result, case$catalogue, enforce = case$enforce)
     for (request in case$requests) {
-      method <- catalog[[method_for(request$location)]]
-      outcome <- outcome_of(function() do.call(method, lookup_arguments(request)))
+      slot <- slot_of(catalog, request)
+      outcome <- outcome_of(function() do.call(slot$get, slot_arguments(request)))
       request_label <- paste(label, request$level, jsonlite::toJSON(request$qualifiers))
       expected <- request$outcome
       if (!is.null(expected$error)) {
         expect_json_equal(outcome, expected, request_label)
         next
       }
-      expect_identical(outcome$value, referenced_data(result, expected$reference), label = request_label)
+      expect_identical(outcome$value, named_data(result, request, expected$name), label = request_label)
       expect_identical(outcome$warning, expected$warning, label = request_label)
+      if (!is.null(expected$name)) {
+        expect_identical(do.call(slot$name, slot_arguments(request)), expected$name, label = request_label)
+      }
     }
     for (keys in case$keys) {
       expect_json_equal(

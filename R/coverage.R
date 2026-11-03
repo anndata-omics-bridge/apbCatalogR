@@ -46,8 +46,8 @@ catalogues <- function() {
 #' Check every rule against one catalogue set
 #'
 #' One row per catalogued or required field of each rule level the set reviews; a set without vendor catalogues is
-#' checked against every level the bundle's entries name for each version of `versions.csv`. A set with requirements judges each level:
-#' `fail` when a MUST field is unsupported, `warn` when a SHOULD or MAY field is, `pass` otherwise.
+#' checked against every level the bundle's entries name for each version of `versions.csv`. A set with requirements
+#' judges each level: `fail` when a MUST field is unsupported, `warn` when a SHOULD or MAY field is, `pass` otherwise.
 #'
 #' @param catalogue The set's name.
 #' @return A data frame with columns `software`, `version` (the label), `software_version_pattern`, `level`, `key`,
