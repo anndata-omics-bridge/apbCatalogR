@@ -224,6 +224,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/sub-.Columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sub-.Columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sub-sub-.Slot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sub-sub-.Slot</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/update_catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">update_catalog</span></a>
   </div>
@@ -256,9 +268,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav></header><section id="what-one-results-fields-mean-to-one-consumer" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-one-results-fields-mean-to-one-consumer">What one result’s fields mean to one consumer</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
+<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly. A lookup asks by one of the set’s keys, such as <code>“q_value”</code> or Sage’s <code>“quantification_q_value”</code>. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>DataCatalog$new()</code> returns a <code>DataCatalog</code>.</p>
+</section><section id="public-fields" class="level3"><h3 class="anchored" data-anchor-id="public-fields">Public fields</h3>
+<div class="r6-fields">
+<dl>
+<dt>
+<code>levels</code>
+</dt>
+<dd>
+One Level per level of the result, with anndataR’s slots looked up by key.
+</dd>
+</dl>
+</div>
 </section><section id="active-bindings" class="level3"><h3 class="anchored" data-anchor-id="active-bindings">Active bindings</h3>
 <div class="r6-active-bindings">
 <dl>
@@ -279,7 +302,7 @@ Public methods
 <p><a href="#method-DataCatalog-initialize"><code>DataCatalog$new()</code></a></p>
 </li>
 <li>
-<p><a href="#method-DataCatalog-kinds"><code>DataCatalog$kinds()</code></a></p>
+<p><a href="#method-DataCatalog-keys"><code>DataCatalog$keys()</code></a></p>
 </li>
 <li>
 <p><a href="#method-DataCatalog-layer"><code>DataCatalog$layer()</code></a></p>
@@ -305,12 +328,12 @@ Public methods
 <h4 class="anchored">
 <code>DataCatalog$new()</code>
 </h4>
-<p>Bind a catalogue set to the levels of one result.</p>
+<p>Bind catalogue sets to the levels of one result; <code>apb</code>, APB’s own fields, is always in.</p>
 <h5 class="anchored">
 Usage
 </h5>
 <div class="r">
-<pre>DataCatalog\$new(result, catalog, enforce = NULL)</pre>
+<pre>DataCatalog\$new(result, ..., enforce = NULL)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -324,30 +347,30 @@ Arguments
 A ParsedLevels object.
 </dd>
 <dt>
-<code>catalog</code>
+<code>…</code>
 </dt>
 <dd>
-The catalogue set, such as <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
+The catalogue sets, such as <code>“abundance”</code> and <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
 </dt>
 <dd>
-<code>NULL</code>, <code>“MUST”</code> or <code>“SHOULD”</code>: signal <code>MissingRequiredField</code> when a field the set requires at that strength is missing.
+<code>NULL</code>, <code>“MUST”</code> or <code>“SHOULD”</code>: signal <code>MissingRequiredField</code> when a field a set requires at that strength is missing.
 </dd>
 </dl>
 </div>
 <hr>
-<p><a id="method-DataCatalog-kinds"></a></p>
+<p><a id="method-DataCatalog-keys"></a></p>
 <h4 class="anchored">
-<code>DataCatalog$kinds()</code>
+<code>DataCatalog$keys()</code>
 </h4>
-<p>The kinds the level offers at one location, given the other qualifiers.</p>
+<p>The keys the level offers at one location, given further qualifiers, from every set that declares those qualifiers.</p>
 <h5 class="anchored">
 Usage
 </h5>
 <div class="r">
-<pre>DataCatalog\$kinds(level, location, ...)</pre>
+<pre>DataCatalog\$keys(level, location, ...)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -370,7 +393,7 @@ The quantification level.
 <code>…</code>
 </dt>
 <dd>
-Other qualifiers by name.
+Further qualifiers by name, besides those the key fixes.
 </dd>
 </dl>
 </div>
@@ -388,7 +411,7 @@ Returns
 Usage
 </h5>
 <div class="r">
-<pre>DataCatalog\$layer(level, kind, ...)</pre>
+<pre>DataCatalog\$layer(level, key, ...)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -402,16 +425,16 @@ Arguments
 The quantification level.
 </dd>
 <dt>
-<code>kind</code>
+<code>key</code>
 </dt>
 <dd>
-The kind, such as <code>“pep”</code>.
+The key, such as <code>“pep”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code>.
 </dd>
 <dt>
 <code>…</code>
 </dt>
 <dd>
-Other qualifiers by name.
+Further qualifiers by name, besides those the key fixes.
 </dd>
 </dl>
 </div>
@@ -429,7 +452,7 @@ Returns
 Usage
 </h5>
 <div class="r">
-<pre>DataCatalog\$var(level, kind, ...)</pre>
+<pre>DataCatalog\$var(level, key, ...)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -443,16 +466,16 @@ Arguments
 The quantification level.
 </dd>
 <dt>
-<code>kind</code>
+<code>key</code>
 </dt>
 <dd>
-The kind.
+The key.
 </dd>
 <dt>
 <code>…</code>
 </dt>
 <dd>
-Other qualifiers by name.
+Further qualifiers by name, besides those the key fixes.
 </dd>
 </dl>
 </div>
@@ -470,7 +493,7 @@ Returns
 Usage
 </h5>
 <div class="r">
-<pre>DataCatalog\$obs(level, kind, ...)</pre>
+<pre>DataCatalog\$obs(level, key, ...)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -484,16 +507,16 @@ Arguments
 The quantification level.
 </dd>
 <dt>
-<code>kind</code>
+<code>key</code>
 </dt>
 <dd>
-The kind.
+The key.
 </dd>
 <dt>
 <code>…</code>
 </dt>
 <dd>
-Other qualifiers by name.
+Further qualifiers by name, besides those the key fixes.
 </dd>
 </dl>
 </div>
@@ -506,7 +529,7 @@ Returns
 <h4 class="anchored">
 <code>DataCatalog$fields()</code>
 </h4>
-<p>Every catalogued field of the result, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
+<p>Every catalogued field of the result in every composed set, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
 <h5 class="anchored">
 Usage
 </h5>
@@ -576,7 +599,7 @@ Whether to make a deep clone.
 <span><span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html">untar</a></span><span class="op">(</span><span class="va">archive</span>, exdir <span class="op">=</span> <span class="va">results</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform_ion.parquet"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, kind <span class="op">=</span> <span class="st">"pep"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, <span class="st">"pep"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2 3</code></pre>
 </div>

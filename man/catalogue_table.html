@@ -224,6 +224,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/sub-.Columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sub-.Columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sub-sub-.Slot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sub-sub-.Slot</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/update_catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">update_catalog</span></a>
   </div>
@@ -269,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 One set’s name; <code>NULL</code> lists every set of the bundle.
 </td>
 </tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A data frame with columns <code>set</code>, <code>source</code> (the conversion software, an app or <code style="white-space: pre;">annotation:&lt;convention&gt;</code>), <code>software_version_pattern</code> (<code>NA</code> for an entry of every software version), <code>level</code>, <code>location</code>, <code>table</code>, <code>name</code> (<code style="white-space: pre;">prefix:&lt;prefix&gt;</code> for a field found by column-name prefix), one <code style="white-space: pre;">qualifier.&lt;name&gt;</code> column per qualifier, <code>requirement</code> and <code>entry_id</code>.</p>
+<p>A data frame with columns <code>set</code>, <code>source</code> (the conversion software, an app or <code style="white-space: pre;">annotation:&lt;convention&gt;</code>), <code>software_version_pattern</code> (<code>NA</code> for an entry of every software version), <code>level</code>, <code>location</code>, <code>table</code>, <code>name</code> (<code style="white-space: pre;">prefix:&lt;prefix&gt;</code> for a field found by column-name prefix), <code>key</code>, <code>kind</code>, one <code style="white-space: pre;">qualifier.&lt;name&gt;</code> column per other qualifier, <code>requirement</code> and <code>entry_id</code>.</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
@@ -283,20 +295,20 @@ One set’s name; <code>NULL</code> lists every set of the bundle.
 4 confidence    DIA-NN        ^1\\.[0-7](\\.|$) peptidoform_ion   layers  &lt;NA&gt;
 5 confidence    DIA-NN         ^1\\.[89](\\.|$) peptidoform_ion   layers  &lt;NA&gt;
 6 confidence    DIA-NN                  ^2\\..* peptidoform_ion   layers  &lt;NA&gt;
-     name qualifier.kind qualifier.stage requirement
-1  QValue        q_value  identification        &lt;NA&gt;
-2  QValue        q_value  identification        &lt;NA&gt;
-3 Q_Value        q_value  identification        &lt;NA&gt;
-4 Q_Value        q_value  identification        &lt;NA&gt;
-5 Q_Value        q_value  identification        &lt;NA&gt;
-6 Q_Value        q_value  identification        &lt;NA&gt;
-                               entry_id
-1 alphadia.v1_12.peptidoform_ion.QValue
-2    alphadia.v2.peptidoform_ion.QValue
-3     alphapept.peptidoform_ion.Q_Value
-4         diann.peptidoform_ion.Q_Value
-5         diann.peptidoform_ion.Q_Value
-6         diann.peptidoform_ion.Q_Value</code></pre>
+     name     key    kind qualifier.stage requirement
+1  QValue q_value q_value  identification        &lt;NA&gt;
+2  QValue q_value q_value  identification        &lt;NA&gt;
+3 Q_Value q_value q_value  identification        &lt;NA&gt;
+4 Q_Value q_value q_value  identification        &lt;NA&gt;
+5 Q_Value q_value q_value  identification        &lt;NA&gt;
+6 Q_Value q_value q_value  identification        &lt;NA&gt;
+                                       entry_id
+1 AlphaDIA/1.12/peptidoform_ion/layers/QValue/-
+2  AlphaDIA/2.x/peptidoform_ion/layers/QValue/-
+3  AlphaPept/*/peptidoform_ion/layers/Q_Value/-
+4     DIA-NN/*/peptidoform_ion/layers/Q_Value/-
+5     DIA-NN/*/peptidoform_ion/layers/Q_Value/-
+6     DIA-NN/*/peptidoform_ion/layers/Q_Value/-</code></pre>
 </div>
 </div>
 
