@@ -193,12 +193,6 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./man/Reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
   </div>
@@ -269,6 +263,9 @@ ul.task-list li input[type="checkbox"] {
 <li><code>var[c(...)]</code> and <code>obs[c(...)]</code> read every column the names name as a data frame, as cf_xarray’s <code>ds.cf[["name"]]</code>: both contaminant flags where the vendor and apb-fasta each set one, every prolfquapp <code>group</code> column; <code>[[</code> still signals <code>UnresolvedField</code> there. A <code>varm</code> column is named <code>table/column</code>.</li>
 <li><code>keys()</code> lists only the keys a field the level holds answers: an app’s keys, such as apb-fasta’s, appear once it has run, so every key listed reads; asking for one before still signals <code>UnresolvedField</code> naming what to run.</li>
 <li><code>Catalog$new()</code> has <code>levels</code> too, with the same slots holding names: <code>catalog$levels$peptidoform_ion$layers[["intensity"]]</code> is <code>"Precursor_Quantity"</code>, and <code>[</code> returns a character vector. Its methods stay for lookups narrowed by qualifiers.</li>
+<li>A level’s slots have <code>$get(key, ...)</code>, which returns <code>NULL</code> where <code>[[</code> signals an error, and <code>$name(key, ...)</code>, the name of the field <code>$get()</code> reads (<code>"PEP"</code>, or <code>table/column</code> for a <code>varm</code> column); both take the qualifiers a key leaves open, such as <code>unit = "minute"</code>. On a <code>Catalog</code>’s levels <code>$get()</code> returns the name.</li>
+<li>Lookups go through <code>levels</code> only: <code>Catalog</code> and <code>DataCatalog</code> no longer have <code>$layer()</code>, <code>$var()</code>, <code>$obs()</code> or <code>$keys()</code>, and <code>Reference</code> is gone. A slot’s <code>$keys()</code> takes no qualifiers.</li>
+<li>The vignette shows a level’s slots beside anndataR’s, one lookup across MaxQuant, Spectronaut and DIA-NN, a protein level, and composed sets with a qualifier.</li>
 <li>Snapshots are not ported: <code>DataCatalog$snapshot()</code>, <code>$resolve()</code>, <code>attach_snapshot()</code>, <code>stored_snapshot()</code>, <code>stale_levels()</code> and <code>ResolutionSnapshot</code> have no R counterpart.</li>
 </ul>
 

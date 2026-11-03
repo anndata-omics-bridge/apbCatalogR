@@ -212,12 +212,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/Reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
   </div>
@@ -268,7 +262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav></header><section id="what-one-results-fields-mean-to-one-consumer" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-one-results-fields-mean-to-one-consumer">What one result’s fields mean to one consumer</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly. A lookup asks by one of the set’s keys, such as <code>“q_value”</code> or Sage’s <code>“quantification_q_value”</code>. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
+<p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly: <code>levels</code> give each level’s slots, looked up by one of the set’s keys, such as <code>“q_value”</code> or Sage’s <code>“quantification_q_value”</code>. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>DataCatalog$new()</code> returns a <code>DataCatalog</code>.</p>
 </section><section id="public-fields" class="level3"><h3 class="anchored" data-anchor-id="public-fields">Public fields</h3>
@@ -300,18 +294,6 @@ Public methods
 <ul>
 <li>
 <p><a href="#method-DataCatalog-initialize"><code>DataCatalog$new()</code></a></p>
-</li>
-<li>
-<p><a href="#method-DataCatalog-keys"><code>DataCatalog$keys()</code></a></p>
-</li>
-<li>
-<p><a href="#method-DataCatalog-layer"><code>DataCatalog$layer()</code></a></p>
-</li>
-<li>
-<p><a href="#method-DataCatalog-var"><code>DataCatalog$var()</code></a></p>
-</li>
-<li>
-<p><a href="#method-DataCatalog-obs"><code>DataCatalog$obs()</code></a></p>
 </li>
 <li>
 <p><a href="#method-DataCatalog-fields"><code>DataCatalog$fields()</code></a></p>
@@ -360,170 +342,6 @@ The catalogue sets, such as <code>“abundance”</code> and <code>“confidence
 </dd>
 </dl>
 </div>
-<hr>
-<p><a id="method-DataCatalog-keys"></a></p>
-<h4 class="anchored">
-<code>DataCatalog$keys()</code>
-</h4>
-<p>The keys the level offers at one location, given further qualifiers, from every set that declares those qualifiers.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>DataCatalog\$keys(level, location, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>location</code>
-</dt>
-<dd>
-<code>“layers”</code>, <code>“var”</code> or <code>“obs”</code>.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A character vector.</p>
-<hr>
-<p><a id="method-DataCatalog-layer"></a></p>
-<h4 class="anchored">
-<code>DataCatalog$layer()</code>
-</h4>
-<p>The layer with this meaning.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>DataCatalog\$layer(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key, such as <code>“pep”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code>.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>An observations-by-features matrix, or <code>NULL</code> when the result has no such layer.</p>
-<hr>
-<p><a id="method-DataCatalog-var"></a></p>
-<h4 class="anchored">
-<code>DataCatalog$var()</code>
-</h4>
-<p>The per-feature column with this meaning, from <code>var</code> or a <code>varm</code> table.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>DataCatalog\$var(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A vector, or <code>NULL</code>.</p>
-<hr>
-<p><a id="method-DataCatalog-obs"></a></p>
-<h4 class="anchored">
-<code>DataCatalog$obs()</code>
-</h4>
-<p>The per-sample column with this meaning.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>DataCatalog\$obs(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A vector, or <code>NULL</code>.</p>
 <hr>
 <p><a id="method-DataCatalog-fields"></a></p>
 <h4 class="anchored">
@@ -599,9 +417,13 @@ Whether to make a deep clone.
 <span><span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html">untar</a></span><span class="op">(</span><span class="va">archive</span>, exdir <span class="op">=</span> <span class="va">results</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform_ion.parquet"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, <span class="st">"pep"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"pep"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2 3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"pep"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "PEP"</code></pre>
 </div>
 </div>
 

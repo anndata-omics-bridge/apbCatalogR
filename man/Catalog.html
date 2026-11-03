@@ -212,12 +212,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../man/Reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
   </div>
@@ -268,7 +262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/Catalog.html">Catalog</a></li></ol></nav></header><section id="which-column-one-software-version-reports-for-each-meaning" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="which-column-one-software-version-reports-for-each-meaning">Which column one software version reports for each meaning</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the levels; the set’s entries for that pattern give each level’s fields. <code>levels</code> have the slots of a DataCatalog’s levels, holding names. The methods ask by one of the set’s keys, such as <code>“normalized_intensity”</code>, and return a Reference; further qualifiers, such as <code>unit</code>, narrow them. Lookups that several fields answer, or that an unreviewed level cannot, signal <code>UnresolvedField</code>.</p>
+<p>Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the levels; the set’s entries for that pattern give each level’s fields. <code>levels</code> have the slots of a DataCatalog’s levels, holding names: a slot answers one of the set’s keys, such as <code>“normalized_intensity”</code>, with the field’s name, and its <code style="white-space: pre;">$get()</code> takes further qualifiers, such as <code>unit</code>. Lookups that several fields answer, or that an unreviewed level cannot, signal <code>UnresolvedField</code>.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>Catalog$new()</code> returns a <code>Catalog</code>.</p>
 </section><section id="public-fields" class="level3"><h3 class="anchored" data-anchor-id="public-fields">Public fields</h3>
@@ -300,18 +294,6 @@ Public methods
 <ul>
 <li>
 <p><a href="#method-Catalog-initialize"><code>Catalog$new()</code></a></p>
-</li>
-<li>
-<p><a href="#method-Catalog-keys"><code>Catalog$keys()</code></a></p>
-</li>
-<li>
-<p><a href="#method-Catalog-layer"><code>Catalog$layer()</code></a></p>
-</li>
-<li>
-<p><a href="#method-Catalog-var"><code>Catalog$var()</code></a></p>
-</li>
-<li>
-<p><a href="#method-Catalog-obs"><code>Catalog$obs()</code></a></p>
 </li>
 <li>
 <p><a href="#method-Catalog-fields"><code>Catalog$fields()</code></a></p>
@@ -366,170 +348,6 @@ The catalogue set, such as <code>“abundance”</code> or <code>“confidence�
 </dd>
 </dl>
 </div>
-<hr>
-<p><a id="method-Catalog-keys"></a></p>
-<h4 class="anchored">
-<code>Catalog$keys()</code>
-</h4>
-<p>The keys the level offers at one location, given further qualifiers.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>Catalog\$keys(level, location, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>location</code>
-</dt>
-<dd>
-<code>“layers”</code>, <code>“var”</code> or <code>“obs”</code>.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, such as <code>unit = “minute”</code>.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A character vector.</p>
-<hr>
-<p><a id="method-Catalog-layer"></a></p>
-<h4 class="anchored">
-<code>Catalog$layer()</code>
-</h4>
-<p>Where the sample-by-feature layer with this meaning lives.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>Catalog\$layer(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key, such as <code>“intensity”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code>.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A Reference, or <code>NULL</code> when the level has no such layer.</p>
-<hr>
-<p><a id="method-Catalog-var"></a></p>
-<h4 class="anchored">
-<code>Catalog$var()</code>
-</h4>
-<p>Where the per-feature column with this meaning lives, in <code>var</code> or a <code>varm</code> table.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>Catalog\$var(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A Reference, or <code>NULL</code>.</p>
-<hr>
-<p><a id="method-Catalog-obs"></a></p>
-<h4 class="anchored">
-<code>Catalog$obs()</code>
-</h4>
-<p>Where the per-sample column with this meaning lives.</p>
-<h5 class="anchored">
-Usage
-</h5>
-<div class="r">
-<pre>Catalog\$obs(level, key, ...)</pre>
-</div>
-<h5 class="anchored">
-Arguments
-</h5>
-<div class="arguments">
-<dl>
-<dt>
-<code>level</code>
-</dt>
-<dd>
-The quantification level.
-</dd>
-<dt>
-<code>key</code>
-</dt>
-<dd>
-The key.
-</dd>
-<dt>
-<code>…</code>
-</dt>
-<dd>
-Further qualifiers by name, besides those the key fixes.
-</dd>
-</dl>
-</div>
-<h5 class="anchored">
-Returns
-</h5>
-<p>A Reference, or <code>NULL</code>.</p>
 <hr>
 <p><a id="method-Catalog-fields"></a></p>
 <h4 class="anchored">
@@ -605,11 +423,7 @@ Whether to make a deep clone.
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Precursor_Quantity"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span><span class="op">$</span><span class="fu">layer</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, <span class="st">"intensity"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="st">"peptidoform_ion"</span>, <span class="st">"layers"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "intensity"                "ms1_intensity"           
 [3] "normalized_intensity"     "normalized_ms1_intensity"</code></pre>

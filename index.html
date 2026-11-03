@@ -228,12 +228,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./man/Reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Reference</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
   </div>
@@ -397,16 +391,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="use">Use</h2>
 <p>Ask the catalogue which column a software version reports:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apbCatalogR)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span><span class="fu">keys</span>(<span class="st">"peptidoform_ion"</span>, <span class="st">"layers"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span>layers<span class="sc">$</span><span class="fu">keys</span>()</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "intensity"                "ms1_intensity"            "normalized_intensity"</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4] "normalized_ms1_intensity"</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span><span class="fu">layer</span>(<span class="st">"peptidoform_ion"</span>, <span class="st">"intensity"</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;Reference peptidoform_ion layers: Precursor_Quantity&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span>layers[[<span class="st">"intensity"</span>]]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "Precursor_Quantity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Get the data of a result:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">read_parsed_levels</span>(<span class="st">"result.parquet"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>confidence <span class="ot">&lt;-</span> DataCatalog<span class="sc">$</span><span class="fu">new</span>(result, <span class="st">"confidence"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>pep <span class="ot">&lt;-</span> confidence<span class="sc">$</span><span class="fu">layer</span>(<span class="st">"peptidoform_ion"</span>, <span class="st">"pep"</span>)   <span class="co"># runs x features matrix</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ion <span class="ot">&lt;-</span> DataCatalog<span class="sc">$</span><span class="fu">new</span>(result, <span class="st">"confidence"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ion<span class="sc">$</span>layers                     <span class="co"># key -&gt; matrix, runs x features</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ion<span class="sc">$</span>var                        <span class="co"># key -&gt; vector, one value per feature</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pep <span class="ot">&lt;-</span> ion<span class="sc">$</span>layers<span class="sc">$</span><span class="fu">get</span>(<span class="st">"pep"</span>)   <span class="co"># runs x features matrix, NULL when absent</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ion<span class="sc">$</span>var[<span class="fu">c</span>(<span class="st">"peptidoform_ion"</span>)]  <span class="co"># a data.frame</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="the-bundle" class="level2">
 <h2 class="anchored" data-anchor-id="the-bundle">The bundle</h2>
