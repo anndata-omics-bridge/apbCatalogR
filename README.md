@@ -1,5 +1,7 @@
 # apbCatalogR
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23928865.svg)](https://doi.org/10.5281/zenodo.23928865)
+
 apb-catalog's API in R: look up the fields of an [APB](https://github.com/anndata-omics-bridge/apb2) result by meaning, such as a PEP or an unnormalized intensity, without naming vendor columns.
 
 > **New API.** This package is new, and its API may still change between releases. Feedback is very welcome: open an [issue](https://github.com/anndata-omics-bridge/apbCatalogR/issues) with what you need, what surprised you, or what broke.

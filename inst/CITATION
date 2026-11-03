@@ -1,0 +1,14 @@
+bibentry(
+    bibtype = "Manual",
+    title = "{apbCatalogR}: Look Up {APB} Result Fields by Meaning",
+    author = person(
+        "Witold E.",
+        "Wolski",
+        email = "witold.wolski@fgcz.uzh.ch",
+        comment = c(ORCID = "0000-0002-6468-120X")
+    ),
+    year = "2026",
+    note = sprintf("R package version %s", meta$Version),
+    doi = "10.5281/zenodo.23928865",
+    url = "https://github.com/anndata-omics-bridge/apbCatalogR"
+)

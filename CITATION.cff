@@ -4,6 +4,7 @@ type: software
 title: "apbCatalogR: Look Up APB Result Fields by Meaning"
 abstract: "apbCatalogR looks up the fields of AnnData Proteomics Bridge (APB) results by meaning, such as a posterior error probability or an unnormalized intensity, without naming vendor columns. It is the R implementation of the apb-catalog API and reads APB results, h5ad, Parquet or DuckDB, into anndataR objects."
 version: 0.99.0
+doi: 10.5281/zenodo.23928865
 license: MIT
 repository-code: "https://github.com/anndata-omics-bridge/apbCatalogR"
 url: "https://anndata-omics-bridge.github.io/apbCatalogR/"
