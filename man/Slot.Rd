@@ -4,7 +4,7 @@
 \alias{Slot}
 \title{One slot of a level, read by key first}
 \value{
-The class generator; a \link{Level}'s \code{layers}, \code{var} and \code{obs} are its objects.
+The class generator; a \link{Level}'s \code{layers} is its object.
 }
 \description{
 As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb{$keys()} lists the catalog's keys only.
@@ -26,7 +26,7 @@ As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb
   Bind one slot of a level.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Slot$new(level, location, find, offered, known, read, named)}
+    \preformatted{Slot$new(level, location, lookup, read, named)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -34,9 +34,7 @@ As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb
     \describe{
       \item{\code{level}}{The level's name.}
       \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
-      \item{\code{find}}{The field a key names on a level and location, or \code{NULL}.}
-      \item{\code{offered}}{The keys a level offers at a location.}
-      \item{\code{known}}{Every key of the catalog's sets.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
       \item{\code{read}}{The value of a field the slot holds.}
       \item{\code{named}}{The level's own names in this slot.}
     }
@@ -62,7 +60,7 @@ As cf_xarray's accessor: \code{[[} reads a key, else the level's own name; \verb
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A matrix for layers, a vector for var and obs.
+    A matrix for layers, a vector for var and obs; a name without data.
   }
 }
 

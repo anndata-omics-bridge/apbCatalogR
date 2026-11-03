@@ -1,5 +1,5 @@
 {
-  "bundle_format": 2,
+  "bundle_format": 3,
   "version": "0.1.4",
   "apb_catalog_version": "0.1.4",
   "apb2_version": "0.1.1",
@@ -17,7 +17,7 @@
     "catalogues/keys.csv",
     "catalogues/producers.csv",
     "catalogues/requirements.csv",
-    "catalogues/rule_levels.csv",
+    "catalogues/versions.csv",
     "catalogues/vocabulary.csv"
   ]
 }

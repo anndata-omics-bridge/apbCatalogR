@@ -10,7 +10,8 @@ The class generator; a \link{DataCatalog}'s \code{levels} hold its objects.
 anndataR's slots of one level: \code{X}, \code{layers}, \code{var}, \code{obs}, \code{obs_names} and \code{var_names}. \code{X} is the level's
 primary layer and \code{layers} its other layers, observations by variables; a key may name the primary layer, and then
 answers \code{X}. \code{cat$levels$protein$layers[["maxlfq"]]} looks the name up as one of the catalog's keys first, then as
-the level's own name in that slot, and signals an error when it is neither.
+the level's own name in that slot, and signals an error when it is neither. \code{obs[c("group", "Run")]} reads every
+column the names name as a data frame.
 }
 \keyword{internal}
 \section{Public fields}{
@@ -20,9 +21,9 @@ the level's own name in that slot, and signals an error when it is neither.
 
     \item{\code{layers}}{The level's layers, read with \code{[[}; \verb{$keys()} lists the keys it offers.}
 
-    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table, read with \code{[[}.}
+    \item{\code{var}}{The level's per-feature columns, from \code{var} or a \code{varm} table, read with \code{[[} or \code{[}.}
 
-    \item{\code{obs}}{The level's per-sample columns, read with \code{[[}.}
+    \item{\code{obs}}{The level's per-sample columns, read with \code{[[} or \code{[}.}
   }
   \if{html}{\out{</div>}}
 }
@@ -51,7 +52,7 @@ the level's own name in that slot, and signals an error when it is neither.
   Bind one level to the catalog's lookups.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Level$new(name, level, find, offered, known)}
+    \preformatted{Level$new(name, level, lookup)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -59,9 +60,7 @@ the level's own name in that slot, and signals an error when it is neither.
     \describe{
       \item{\code{name}}{The level's name.}
       \item{\code{level}}{The level, an anndataR \code{AnnData}.}
-      \item{\code{find}}{The field a key names on a level and location, or \code{NULL}.}
-      \item{\code{offered}}{The keys a level offers at a location.}
-      \item{\code{known}}{Every key of the catalog's sets.}
+      \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all}, \code{offered} and \code{known}.}
     }
     \if{html}{\out{</div>}}
   }

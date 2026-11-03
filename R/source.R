@@ -109,15 +109,14 @@ keys_of <- function(keys, qualifiers) {
   vapply(described, function(found) found$key, character(1), USE.NAMES = FALSE)
 }
 
-# One entry from its entries.csv row, its other qualifiers, a named character vector, and the key they match.
-row_entry <- function(row, qualifiers, keys) {
-  if (!(row$reference_by %in% c("name", "prefix"))) {
-    stop(sprintf("%s: reference_by is name or prefix", row$entry_id), call. = FALSE)
-  }
-  reference <- list(level = row$level, location = row$location)
-  reference[[row$reference_by]] <- row$reference
-  if (row$table != "") {
-    reference$table <- row$table
+# One entry from its entries.csv row and parsed id, its other qualifiers, a named character vector, and the key they
+# match.
+row_entry <- function(row, named, qualifiers, keys) {
+  reference <- list(level = named$level, location = named$attribute, table = named$table)
+  if (endsWith(named$name, "*")) {
+    reference$prefix <- sub("\\*$", "", named$name)
+  } else {
+    reference$name <- named$name
   }
   described <- c(kind = row$kind, qualifiers)
   matching <- keys_of(keys, described)
@@ -129,16 +128,22 @@ row_entry <- function(row, qualifiers, keys) {
   }
   list(
     entry_id = row$entry_id,
-    software_version_pattern = cell_list(row$software_version_pattern),
+    software_version_pattern = version_patterns(named$source, named$version),
     reference = new_reference(reference),
     key = matching,
     qualifiers = described
   )
 }
 
-# The entry with its reference bound to one level's column.
+# Who an entry comes from: the software, an app, or annotation:<convention>, the first field of its id.
+entry_source <- function(entry) {
+  sub("/.*$", "", entry$entry_id)
+}
+
+# The entry bound to one level's column: its reference and the column of its id.
 bound_entry <- function(entry, name) {
   reference <- entry$reference
+  entry$entry_id <- paste0(sub("/[^/]*$", "", entry$entry_id), "/", name)
   entry$reference <- list(
     level = reference$level,
     location = reference$location,
@@ -149,8 +154,8 @@ bound_entry <- function(entry, name) {
   entry
 }
 
-# One catalogue per software of rule_levels.csv, each reviewing every rule level of that software, when the set has
-# vendor entries; none otherwise.
+# One catalogue per software of versions.csv, each reviewing every level the bundle's entries name for its versions,
+# when the set has vendor entries; none otherwise.
 vendor_catalogues <- function(name, entries) {
   if (length(entries) == 0L) {
     return(list())
@@ -217,9 +222,25 @@ entries_for <- function(vendor, variant) {
   )
 }
 
-# The entries a producer or annotation catalogue supplies on one level.
+# The entries a producer or annotation catalogue supplies on one level, those of every level included.
 entries_on <- function(source, level) {
-  Filter(function(entry) entry$reference$level == level, source$entries)
+  Filter(Negate(is.null), lapply(source$entries, entry_on, level = level))
+}
+
+# The entry on one level: itself, an entry of every level (`*`) taking that level in its reference and id, or NULL on
+# another level.
+entry_on <- function(entry, level) {
+  if (entry$reference$level == level) {
+    return(entry)
+  }
+  if (entry$reference$level != ANY_VERSION) {
+    return(NULL)
+  }
+  fields <- strsplit(entry$entry_id, "/", fixed = TRUE)[[1L]]
+  fields[[3L]] <- level
+  entry$entry_id <- paste(fields, collapse = "/")
+  entry$reference$level <- level
+  entry
 }
 
 # Whether a result's metadata records a producer's run.
@@ -251,7 +272,8 @@ annotation_applies <- function(annotation, metadata) {
 
 # Whether an entry on a requirement row's level answers the row.
 row_describes <- function(row, entry) {
-  entry$reference$level == row$level &&
+  entry$reference$level %in%
+    c(row$level, ANY_VERSION) &&
     entry$reference$location %in% READS[[row$location]] &&
     identical(entry$key, row$key)
 }
@@ -293,12 +315,14 @@ CatalogueSet <- R6::R6Class(
       keys <- set_keys(rows("keys"))
       qualifier_rows <- rows("entry_qualifiers")
       entry_rows <- rows("entries")
+      ids <- lapply(entry_rows$entry_id, entry_id_fields)
       entries <- lapply(seq_len(nrow(entry_rows)), function(index) {
         row <- as.list(entry_rows[index, , drop = FALSE])
-        own <- qualifier_rows[qualifier_rows$entry_id == row$entry_id, , drop = FALSE]
-        row_entry(row, stats::setNames(own$value, own$qualifier), keys)
+        own <- qualifier_rows[qualifier_rows$entry_id == row$entry_id & qualifier_rows$kind == row$kind, , drop = FALSE]
+        row_entry(row, ids[[index]], stats::setNames(own$value, own$qualifier), keys)
       })
-      by_source <- split(entries, factor(entry_rows$source, levels = unique(entry_rows$source)))
+      named_sources <- vapply(ids, function(found) found$source, character(1))
+      by_source <- split(entries, factor(named_sources, levels = unique(named_sources)))
       sources <- names(by_source)
       runs <- rows("producers")
       annotation <- startsWith(sources, "annotation:")

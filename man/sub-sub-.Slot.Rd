@@ -14,7 +14,7 @@
 \item{...}{Ignored.}
 }
 \value{
-A matrix for layers, a vector for var and obs.
+A matrix for layers, a vector for var and obs; a name without data.
 }
 \description{
 Read a slot by key

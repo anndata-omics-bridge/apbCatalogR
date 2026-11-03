@@ -8,14 +8,23 @@ The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 }
 \description{
 Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
-levels; the set's entries for that pattern give each level's fields. A lookup asks by one of the set's keys, such as
-\code{"normalized_intensity"}; further qualifiers, such as \code{unit}, narrow it. Lookups that several fields answer, or that
-an unreviewed level cannot, signal \code{UnresolvedField}.
+levels; the set's entries for that pattern give each level's fields. \code{levels} have the slots of a \link{DataCatalog}'s
+levels, holding names. The methods ask by one of the set's keys, such as \code{"normalized_intensity"}, and return a
+\link{Reference}; further qualifiers, such as \code{unit}, narrow them. Lookups that several fields answer, or that an
+unreviewed level cannot, signal \code{UnresolvedField}.
 }
 \examples{
 catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+catalog$levels$peptidoform_ion$layers[["intensity"]]
 catalog$layer("peptidoform_ion", "intensity")
 catalog$keys("peptidoform_ion", "layers")
+}
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{levels}}{One level per rule level, with a \link{DataCatalog}'s slots holding names.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}

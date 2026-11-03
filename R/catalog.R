@@ -94,7 +94,10 @@ bound_entries <- function(source, rule_level, obs_columns) {
 # Every field the set's entries name on one level: without data, the catalogue says what a level holds.
 catalogued_keys <- function(set, level) {
   entries <- unlist(lapply(set$sources(), function(source) source$entries), recursive = FALSE)
-  named <- Filter(function(entry) entry$reference$level == level && !is.na(entry$reference$name), entries)
+  named <- Filter(
+    function(entry) entry$reference$level %in% c(level, ANY_VERSION) && !is.na(entry$reference$name),
+    entries
+  )
   unique(vapply(named, function(entry) reference_key(entry$reference), character(1)))
 }
 
@@ -140,17 +143,6 @@ enforce_requirement <- function(resolution, row, enforce) {
   NULL
 }
 
-# Who each entry of the set comes from, by entry id.
-source_labels <- function(set) {
-  labels <- character(0)
-  for (source in set$sources()) {
-    for (entry in source$entries) {
-      labels[[entry$entry_id]] <- source$label
-    }
-  }
-  labels
-}
-
 # The requests, answers and rows both catalogues share for one set.
 Lookups <- R6::R6Class(
   "Lookups",
@@ -189,32 +181,68 @@ Lookups <- R6::R6Class(
       view$resolve(request)
     },
 
-    # The field asked for; a missing required field signals or warns as enforce says.
-    find = function(level, location, key, qualifiers) {
-      request <- self$request(level, location, key, qualifiers)
-      resolution <- self$answer(request)
+    # The answer; a missing required field signals or warns as enforce says.
+    lookup = function(level, location, key, qualifiers) {
+      resolution <- self$answer(self$request(level, location, key, qualifiers))
       row <- if (resolution$status == "missing" && !is.null(self$enforce)) {
         self$set$requirement_for(level, location, key)
       }
-      if (is.null(row) || row$requirement == "MAY") {
-        return(resolution$found())
+      if (!is.null(row) && row$requirement != "MAY") {
+        enforce_requirement(resolution, row, self$enforce)
       }
-      enforce_requirement(resolution, row, self$enforce)
+      resolution
+    },
+
+    # The one field asked for, NULL when the level has none.
+    find = function(level, location, key, qualifiers) {
+      self$lookup(level, location, key, qualifiers)$found()
+    },
+
+    # Every field one key names on a level.
+    find_all = function(level, location, key) {
+      answer_fields(self$lookup(level, location, key, list()), self$views[[level]])
     },
 
     keys = function(level, location, qualifiers) {
-      self$answer(self$request(level, location, NULL, qualifiers))$offered()
+      held_keys(self$answer(self$request(level, location, NULL, qualifiers)), self$views[[level]])
     },
 
     rows = function(view, entries) {
-      labels <- source_labels(self$set)
       lapply(entries, function(entry) {
         pattern <- view$software_version_pattern %||% NA_character_
-        entry_row(self$name, self$set, labels[[entry$entry_id]], pattern, entry)
+        entry_row(self$name, self$set, entry_source(entry), pattern, entry)
       })
     }
   )
 )
+
+# The keys a field the level holds answers; a later producer's keys wait until it runs, so every key listed reads.
+held_keys <- function(resolution, view) {
+  held <- vapply(view$entries %||% list(), function(entry) reference_key(entry$reference), character(1))
+  answering <- vapply(
+    Filter(function(candidate) reference_key(candidate$reference) %in% held, resolution$candidates),
+    function(candidate) candidate$key,
+    character(1)
+  )
+  offered <- resolution$offered()
+  offered[offered %in% answering]
+}
+
+# Every field an answer names: none when missing, one when resolved, each match when ambiguous. A field the key may
+# name that is undecided, or whose producer has not run, signals UnresolvedField.
+answer_fields <- function(resolution, view) {
+  if (resolution$status != "ambiguous") {
+    found <- resolution$found()
+    return(if (is.null(found)) list() else list(found))
+  }
+  answering <- vapply(view$entries, function(entry) reference_key(entry$reference), character(1))
+  for (candidate in resolution$candidates) {
+    if (length(candidate$undecided) > 0L || !(reference_key(candidate$reference) %in% answering)) {
+      stop(unresolved_field(resolution))
+    }
+  }
+  lapply(resolution$candidates, function(candidate) candidate$reference)
+}
 
 qualifier_arguments <- function(...) {
   qualifiers <- list(...)
@@ -231,20 +259,25 @@ fields_frame <- function(rows, set) {
 #' Which column one software version reports for each meaning
 #'
 #' Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the
-#' levels; the set's entries for that pattern give each level's fields. A lookup asks by one of the set's keys, such as
-#' `"normalized_intensity"`; further qualifiers, such as `unit`, narrow it. Lookups that several fields answer, or that
-#' an unreviewed level cannot, signal `UnresolvedField`.
+#' levels; the set's entries for that pattern give each level's fields. `levels` have the slots of a [DataCatalog]'s
+#' levels, holding names. The methods ask by one of the set's keys, such as `"normalized_intensity"`, and return a
+#' [Reference]; further qualifiers, such as `unit`, narrow them. Lookups that several fields answer, or that an
+#' unreviewed level cannot, signal `UnresolvedField`.
 #'
 #' @field description What this catalogue set holds and who uses it.
 #' @return The class generator; `Catalog$new()` returns a `Catalog`.
 #' @export
 #' @examples
 #' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+#' catalog$levels$peptidoform_ion$layers[["intensity"]]
 #' catalog$layer("peptidoform_ion", "intensity")
 #' catalog$keys("peptidoform_ion", "layers")
 Catalog <- R6::R6Class(
   "Catalog",
   public = list(
+    #' @field levels One level per rule level, with a [DataCatalog]'s slots holding names.
+    levels = NULL,
+
     #' @description Bind a catalogue set to the rule levels of one software version.
     #' @param software The software name, such as `"DIA-NN"`.
     #' @param version The software version, such as `"2.2.0"`.
@@ -285,6 +318,13 @@ Catalog <- R6::R6Class(
         )
       }
       private$lookups <- Lookups$new(catalog, set, views, enforce)
+      lookup <- list(
+        find = function(level, location, key) private$lookups$find(level, location, key, list()),
+        find_all = function(level, location, key) private$lookups$find_all(level, location, key),
+        offered = function(level, location) self$keys(level, location),
+        known = names(set$keys)
+      )
+      self$levels <- stats::setNames(lapply(names(views), LevelNames$new, lookup = lookup), names(views))
     },
 
     #' @description The keys the level offers at one location, given further qualifiers.
@@ -396,12 +436,14 @@ DataCatalog <- R6::R6Class(
       check_composed_enforce(private$sets, enforce)
       check_shared_keys(private$sets)
       private$known <- unique(unlist(lapply(private$sets, function(lookups) names(lookups$set$keys))))
-      find <- function(level, location, key) private$find(level, location, key, list())
-      offered <- function(level, location) self$keys(level, location)
+      lookup <- list(
+        find = function(level, location, key) private$find(level, location, key, list()),
+        find_all = function(level, location, key) composed_fields(private$sets, private$known, level, location, key),
+        offered = function(level, location) self$keys(level, location),
+        known = private$known
+      )
       self$levels <- stats::setNames(
-        lapply(names(result$levels), function(name) {
-          Level$new(name, result$levels[[name]], find, offered, private$known)
-        }),
+        lapply(names(result$levels), function(name) Level$new(name, result$levels[[name]], lookup)),
         names(result$levels)
       )
     },
@@ -561,6 +603,17 @@ composed_keys <- function(sets, level, location, qualifiers) {
   }
   offered <- unlist(lapply(eligible, function(lookups) lookups$keys(level, location, qualifiers)), use.names = FALSE)
   if (is.null(offered)) character(0) else sort_c(unique(offered))
+}
+
+# Every field one key names, from every set that defines the key.
+composed_fields <- function(sets, known, level, location, key) {
+  found <- list()
+  for (lookups in defining_sets(sets, known, key, list())) {
+    for (reference in lookups$find_all(level, location, key)) {
+      found[[reference_key(reference)]] <- found[[reference_key(reference)]] %||% reference
+    }
+  }
+  unname(found)
 }
 
 # The sets that define a key and declare every further qualifier asked; the first that defines it when none declares

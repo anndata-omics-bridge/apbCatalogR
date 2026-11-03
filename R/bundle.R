@@ -1,7 +1,7 @@
 # The bundle apb-catalog releases: catalogue tables and expected answers. The package ships one; update_catalog()
 # downloads newer ones into the user cache. The newest readable bundle is used.
 
-BUNDLE_FORMAT <- 2L
+BUNDLE_FORMAT <- 3L
 BUNDLE_NAME <- "apb-catalog-bundle"
 RELEASES <- "https://github.com/anndata-omics-bridge/apb-catalog/releases"
 
