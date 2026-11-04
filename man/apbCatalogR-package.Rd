@@ -23,8 +23,8 @@ Lookups signal conditions of the classes apb-catalog raises in Python:
 \item \code{UnresolvedField}: the catalogue cannot answer with one field; the request
 is ambiguous or unknown. Its \code{resolution} holds the candidates and reasons.
 \item \code{MissingRequiredField}: a field the set requires is missing, under
-\code{enforce}. Signalled as an error, or as a warning for a \code{SHOULD} field when
-\code{enforce = "MUST"}.
+\code{enforce}. Signalled as an error, or as a warning for a \code{recommended}
+field when \code{enforce = "required"}.
 }
 
 Catch them with \code{\link[=tryCatch]{tryCatch()}}, for example

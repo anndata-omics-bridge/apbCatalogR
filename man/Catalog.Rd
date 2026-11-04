@@ -62,7 +62,7 @@ version.
       \item{\code{version}}{The software version, such as \code{"2.2.0"}.}
       \item{\code{catalog}}{The catalogue set, such as \code{"abundance"} or
 \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal
+      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal
 \code{MissingRequiredField} when a field the set requires at that
 strength is missing.}
     }

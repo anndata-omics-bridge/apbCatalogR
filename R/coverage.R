@@ -19,7 +19,7 @@ COVERAGE_COLUMNS <- c(
     "verdict"
 )
 
-SEVERITY <- c(MUST = "fail", SHOULD = "warn", MAY = "warn")
+SEVERITY <- c(required = "fail", recommended = "warn", optional = "pass")
 
 #' The catalogue sets
 #'
@@ -58,8 +58,9 @@ catalogues <- function() {
 #' One row per catalogued or required field of each rule level the set reviews;
 #' a set without vendor catalogues is checked against every level the bundle's
 #' entries name for each version of `versions.csv`. A set with requirements
-#' judges each level: `fail` when a MUST field is unsupported, `warn` when a
-#' SHOULD or MAY field is, `pass` otherwise.
+#' judges each level: `fail` when a required field is unsupported, `warn` when
+#' a recommended one is, `pass` otherwise; an unsupported optional field is
+#' listed but passes.
 #'
 #' @param catalogue The set's name.
 #' @return A data frame with columns `software`, `version` (the label),
@@ -220,7 +221,7 @@ coverage_verdict <- function(requirements) {
     if ("fail" %in% severities) {
         return("fail")
     }
-    if (length(severities) > 0L) "warn" else "pass"
+    if ("warn" %in% severities) "warn" else "pass"
 }
 
 coverage_field <- function(entry, producer) {

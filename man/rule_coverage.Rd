@@ -21,8 +21,9 @@ conversion software's fields), \code{requirement}, \code{location}, \code{table}
 One row per catalogued or required field of each rule level the set reviews;
 a set without vendor catalogues is checked against every level the bundle's
 entries name for each version of \code{versions.csv}. A set with requirements
-judges each level: \code{fail} when a MUST field is unsupported, \code{warn} when a
-SHOULD or MAY field is, \code{pass} otherwise.
+judges each level: \code{fail} when a required field is unsupported, \code{warn} when
+a recommended one is, \code{pass} otherwise; an unsupported optional field is
+listed but passes.
 }
 \examples{
 head(rule_coverage("abundance"))

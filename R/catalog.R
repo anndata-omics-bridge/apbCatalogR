@@ -144,8 +144,11 @@ check_enforce <- function(name, set, enforce) {
     if (is.null(enforce)) {
         return(invisible(NULL))
     }
-    if (!(enforce %in% c("MUST", "SHOULD"))) {
-        stop("enforce is NULL, \"MUST\" or \"SHOULD\"", call. = FALSE)
+    if (!(enforce %in% c("required", "recommended"))) {
+        stop(
+            "enforce is NULL, \"required\" or \"recommended\"",
+            call. = FALSE
+        )
     }
     if (length(set$requirements) == 0L) {
         stop(
@@ -159,10 +162,10 @@ check_enforce <- function(name, set, enforce) {
 }
 
 # A missing field the set requires: signal MissingRequiredField, or warn for a
-# SHOULD field under enforce = "MUST".
+# recommended field under enforce = "required".
 enforce_requirement <- function(resolution, row, enforce) {
     resolution$requirement <- row$requirement
-    if (row$requirement == "MUST" || enforce == "SHOULD") {
+    if (row$requirement == "required" || enforce == "recommended") {
         stop(missing_required_field(resolution, row))
     }
     warning(missing_required_warning(resolution, row))
@@ -235,7 +238,7 @@ Lookups <- R6::R6Class(
             ) {
                 self$set$requirement_for(level, location, key)
             }
-            if (!is.null(row) && row$requirement != "MAY") {
+            if (!is.null(row) && row$requirement != "optional") {
                 enforce_requirement(resolution, row, self$enforce)
             }
             resolution
@@ -365,7 +368,7 @@ Catalog <- R6::R6Class(
         #' @param version The software version, such as `"2.2.0"`.
         #' @param catalog The catalogue set, such as `"abundance"` or
         #'   `"confidence"`; see [catalogues()].
-        #' @param enforce `NULL`, `"MUST"` or `"SHOULD"`: signal
+        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal
         #'   `MissingRequiredField` when a field the set requires at that
         #'   strength is missing.
         initialize = function(software, version, catalog, enforce = NULL) {
@@ -500,7 +503,7 @@ DataCatalog <- R6::R6Class(
         #' @param result A [ParsedLevels] object.
         #' @param ... The catalogue sets, such as `"abundance"` and
         #'   `"confidence"`; see [catalogues()].
-        #' @param enforce `NULL`, `"MUST"` or `"SHOULD"`: signal
+        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal
         #'   `MissingRequiredField` when a field a set requires at that strength
         #'   is missing.
         initialize = function(result, ..., enforce = NULL) {

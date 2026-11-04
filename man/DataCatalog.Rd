@@ -67,7 +67,7 @@ APB's own fields, is always in.
       \item{\code{result}}{A \link{ParsedLevels} object.}
       \item{\code{...}}{The catalogue sets, such as \code{"abundance"} and
 \code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"MUST"} or \code{"SHOULD"}: signal
+      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal
 \code{MissingRequiredField} when a field a set requires at that strength
 is missing.}
     }

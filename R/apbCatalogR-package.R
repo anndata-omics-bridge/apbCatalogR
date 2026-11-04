@@ -14,8 +14,8 @@
 #' * `UnresolvedField`: the catalogue cannot answer with one field; the request
 #'   is ambiguous or unknown. Its `resolution` holds the candidates and reasons.
 #' * `MissingRequiredField`: a field the set requires is missing, under
-#'   `enforce`. Signalled as an error, or as a warning for a `SHOULD` field when
-#'   `enforce = "MUST"`.
+#'   `enforce`. Signalled as an error, or as a warning for a `recommended`
+#'   field when `enforce = "required"`.
 #'
 #' Catch them with [tryCatch()], for example
 #' `tryCatch(..., UnresolvedField = function(condition) NULL)`.

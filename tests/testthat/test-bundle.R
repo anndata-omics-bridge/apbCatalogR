@@ -1,7 +1,7 @@
 # The newest readable bundle is used: shipped with the package or downloaded into the user cache.
 
 # A copy of the shipped bundle claiming another version and format, packed as a release asset.
-bundle_archive <- function(version, format = 3L) {
+bundle_archive <- function(version, format = BUNDLE_FORMAT) {
     root <- withr::local_tempdir(.local_envir = parent.frame())
     folder <- file.path(root, "apb-catalog-bundle")
     dir.create(folder)
