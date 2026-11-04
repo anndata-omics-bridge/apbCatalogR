@@ -88,21 +88,17 @@ cell_list <- function(text, separator = ";") {
     }
 }
 
-# The columns of keys.csv besides those of the qualifiers a key fixes.
-KEY_TABLE_COLUMNS <- c("set", "key", "kind", "psi_ms")
-
-# A set's keys from its keys.csv rows: each the name callers ask by, the kind
-# and the qualifier values it fixes (an empty cell leaves that qualifier open),
-# and its PSI-MS terms.
-set_keys <- function(rows) {
-    fixed_columns <- setdiff(names(rows), KEY_TABLE_COLUMNS)
+# A set's keys from its keys.csv rows and its key_qualifiers.csv rows: each the
+# name callers ask by, the kind, the qualifier values it fixes (a qualifier
+# without a row stays open), and its PSI-MS terms.
+set_keys <- function(rows, qualifiers) {
     keys <- lapply(seq_len(nrow(rows)), function(index) {
         row <- as.list(rows[index, , drop = FALSE])
-        values <- unlist(row[fixed_columns])
+        found <- qualifiers[qualifiers$key == row$key, , drop = FALSE]
         list(
             key = row$key,
             kind = row$kind,
-            fixed = values[values != ""],
+            fixed = stats::setNames(found$value, found$qualifier),
             psi_ms = cell_list(row$psi_ms)
         )
     })
@@ -398,7 +394,7 @@ CatalogueSet <- R6::R6Class(
             }
             vocabulary <- rows("vocabulary")
             head <- set_head(vocabulary, name)
-            keys <- set_keys(rows("keys"))
+            keys <- set_keys(rows("keys"), rows("key_qualifiers"))
             by_source <- source_entries(
                 rows("entries"),
                 rows("entry_qualifiers"),

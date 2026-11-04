@@ -14,6 +14,7 @@
     "catalogues/datapackage.json",
     "catalogues/entries.csv",
     "catalogues/entry_qualifiers.csv",
+    "catalogues/key_qualifiers.csv",
     "catalogues/keys.csv",
     "catalogues/producers.csv",
     "catalogues/requirements.csv",
