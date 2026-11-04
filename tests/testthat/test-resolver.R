@@ -31,7 +31,8 @@ test_that("a request a pending producer would answer is unknown, with what to ru
             prefix = NA_character_
         ),
         key = "contaminant",
-        qualifiers = c(kind = "contaminant")
+        kind = "contaminant",
+        qualifiers = stats::setNames(character(0), character(0))
     )
     pending <- list(list(
         entry = entry,
@@ -41,7 +42,8 @@ test_that("a request a pending producer would answer is unknown, with what to ru
         "protein",
         "var",
         "contaminant",
-        list(kind = "contaminant")
+        list(),
+        kind = "contaminant"
     )
     resolution <- apbCatalogR:::resolve_entries(
         list(),

@@ -226,7 +226,7 @@ coverage_verdict <- function(requirements) {
 
 coverage_field <- function(entry, producer) {
     reference <- entry$reference
-    others <- entry$qualifiers[names(entry$qualifiers) != "kind"]
+    others <- entry$qualifiers
     origin <- if ("origin" %in% names(others)) {
         others[["origin"]]
     } else {
@@ -235,7 +235,7 @@ coverage_field <- function(entry, producer) {
     others <- others[names(others) != "origin"]
     list(
         key = entry$key,
-        kind = entry$qualifiers[["kind"]],
+        kind = entry$kind,
         qualifiers = qualifier_pairs(others),
         origin = origin,
         producer = if (is.null(producer)) NULL else producer$producer,

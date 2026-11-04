@@ -20,9 +20,9 @@ field_name <- function(entry) {
     paste0("prefix:", reference$prefix)
 }
 
-# The set's qualifiers besides kind, in vocabulary order.
-other_qualifiers <- function(set) {
-    setdiff(names(set$vocabulary$qualifiers), "kind")
+# The set's qualifiers, in vocabulary order; the kind is a column of its own.
+qualifier_names <- function(set) {
+    names(set$vocabulary$qualifiers)
 }
 
 # One table row: where the entry's field lives, its key and qualifiers, and its
@@ -36,7 +36,7 @@ entry_row <- function(set_name, set, source, software_version_pattern, entry) {
             break
         }
     }
-    qualifiers <- other_qualifiers(set)
+    qualifiers <- qualifier_names(set)
     c(
         list(
             set = set_name,
@@ -47,7 +47,7 @@ entry_row <- function(set_name, set, source, software_version_pattern, entry) {
             table = reference$table,
             name = field_name(entry),
             key = entry$key,
-            kind = entry$qualifiers[["kind"]]
+            kind = entry$kind
         ),
         stats::setNames(
             as.list(unname(entry$qualifiers[qualifiers])),
@@ -93,7 +93,7 @@ set_columns <- function(set) {
         KEY_COLUMNS,
         "key",
         "kind",
-        sprintf("qualifier.%s", other_qualifiers(set)),
+        sprintf("qualifier.%s", qualifier_names(set)),
         "requirement",
         "entry_id"
     )

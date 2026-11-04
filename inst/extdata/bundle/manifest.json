@@ -16,9 +16,12 @@
     "catalogues/entry_qualifiers.csv",
     "catalogues/key_qualifiers.csv",
     "catalogues/keys.csv",
+    "catalogues/kinds.csv",
     "catalogues/producers.csv",
+    "catalogues/qualifier_values.csv",
+    "catalogues/qualifiers.csv",
     "catalogues/requirements.csv",
-    "catalogues/versions.csv",
-    "catalogues/vocabulary.csv"
+    "catalogues/sets.csv",
+    "catalogues/versions.csv"
   ]
 }

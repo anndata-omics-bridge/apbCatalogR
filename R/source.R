@@ -11,9 +11,13 @@ READS <- list(
     varm = "varm"
 )
 
-# A request accepts any subset of the qualifiers, each with admitted values;
-# every qualifier admits "unknown".
-check_predicate <- function(vocabulary, qualifiers) {
+# A request accepts one of the set's kinds, or none, and any subset of the
+# qualifiers, each with admitted values; the kinds and every qualifier admit
+# "unknown".
+check_predicate <- function(vocabulary, kind, qualifiers) {
+    if (!is.null(kind)) {
+        check_kind(vocabulary, kind)
+    }
     for (name in names(qualifiers)) {
         accepted <- qualifiers[[name]]
         if (length(accepted) == 0L) {
@@ -25,6 +29,19 @@ check_predicate <- function(vocabulary, qualifiers) {
         for (value in accepted) {
             check_value(vocabulary, name, value)
         }
+    }
+}
+
+check_kind <- function(vocabulary, kind) {
+    if (!(kind %in% names(vocabulary$kinds))) {
+        stop(
+            sprintf(
+                "the set does not admit the kind '%s'; kinds: %s",
+                kind,
+                paste(sort_c(names(vocabulary$kinds)), collapse = ", ")
+            ),
+            call. = FALSE
+        )
     }
 }
 
@@ -105,18 +122,18 @@ set_keys <- function(rows, qualifiers) {
     stats::setNames(keys, rows$key)
 }
 
-# The qualifier values a request for a key accepts: its kind and the values it
-# fixes.
-key_predicate <- function(found) {
-    c(list(kind = found$kind), as.list(found$fixed))
+# The qualifier values a request for a key accepts besides its kind: the values
+# it fixes.
+key_accepted <- function(found) {
+    as.list(found$fixed)
 }
 
-# The keys an entry with these qualifiers, a named character vector, has:
-# exactly one in a consistent set.
-keys_of <- function(keys, qualifiers) {
+# The keys an entry of this kind with these qualifiers, a named character
+# vector, has: exactly one in a consistent set.
+keys_of <- function(keys, kind, qualifiers) {
     described <- Filter(
         function(found) {
-            identical(unname(qualifiers["kind"]), found$kind) &&
+            identical(kind, found$kind) &&
                 all(vapply(
                     names(found$fixed),
                     function(name) {
@@ -151,8 +168,7 @@ row_entry <- function(row, named, qualifiers, keys) {
     } else {
         reference$name <- named$name
     }
-    described <- c(kind = row$kind, qualifiers)
-    matching <- keys_of(keys, described)
+    matching <- keys_of(keys, row$kind, qualifiers)
     if (length(matching) != 1L) {
         stop(
             sprintf(
@@ -171,7 +187,8 @@ row_entry <- function(row, named, qualifiers, keys) {
         ),
         reference = new_reference(reference),
         key = matching,
-        qualifiers = described
+        kind = row$kind,
+        qualifiers = qualifiers
     )
 }
 
@@ -265,18 +282,12 @@ annotation_catalogue <- function(convention, entries) {
     )
 }
 
-# A set's vocabulary from its vocabulary.csv rows, shaped as apb_catalog's
-# SetVocabulary.
-set_vocabulary <- function(rows, head) {
-    qualifier_rows <- rows[
-        rows$qualifier != "" & rows$value == "",
-        ,
-        drop = FALSE
-    ]
+# A set's vocabulary from its sets.csv row, its kinds, its qualifiers and their
+# values, shaped as apb_catalog's SetVocabulary.
+set_vocabulary <- function(head, kind_rows, qualifier_rows, value_rows) {
     qualifiers <- lapply(seq_len(nrow(qualifier_rows)), function(index) {
-        values <- rows[
-            rows$qualifier == qualifier_rows$qualifier[[index]] &
-                rows$value != "",
+        values <- value_rows[
+            value_rows$qualifier == qualifier_rows$qualifier[[index]],
             ,
             drop = FALSE
         ]
@@ -287,6 +298,8 @@ set_vocabulary <- function(rows, head) {
     })
     list(
         definition = head$definition,
+        kind_definition = head$kind_definition,
+        kinds = stats::setNames(as.list(kind_rows$definition), kind_rows$kind),
         qualifiers = stats::setNames(qualifiers, qualifier_rows$qualifier)
     )
 }
@@ -392,8 +405,7 @@ CatalogueSet <- R6::R6Class(
                 found <- catalogue_rows(bundle, table)
                 found[found$set == name, , drop = FALSE]
             }
-            vocabulary <- rows("vocabulary")
-            head <- set_head(vocabulary, name)
+            head <- set_head(rows("sets"), name)
             keys <- set_keys(rows("keys"), rows("key_qualifiers"))
             by_source <- source_entries(
                 rows("entries"),
@@ -405,7 +417,12 @@ CatalogueSet <- R6::R6Class(
             annotation <- startsWith(sources, "annotation:")
             app <- !annotation & sources %in% runs$producer
             self$name <- name
-            self$vocabulary <- set_vocabulary(vocabulary, head)
+            self$vocabulary <- set_vocabulary(
+                head,
+                rows("kinds"),
+                rows("qualifiers"),
+                rows("qualifier_values")
+            )
             self$vocabulary_version <- bundle$json(
                 "catalogues",
                 "datapackage.json"
@@ -475,10 +492,9 @@ CatalogueSet <- R6::R6Class(
     private = list(by_version = list())
 )
 
-# The vocabulary row describing the set itself; an unknown set signals an error
-# naming the packaged ones.
-set_head <- function(vocabulary, name) {
-    head <- vocabulary[vocabulary$qualifier == "", , drop = FALSE]
+# The sets.csv row describing the set; an unknown set signals an error naming
+# the packaged ones.
+set_head <- function(head, name) {
     if (nrow(head) != 1L) {
         stop(
             sprintf(
@@ -562,8 +578,7 @@ catalogue_set <- function(name) {
 }
 
 set_names <- function() {
-    found <- catalogue_rows(current_bundle(), "vocabulary")
-    found$set[found$qualifier == ""]
+    catalogue_rows(current_bundle(), "sets")$set
 }
 
 # One catalogue table of the bundle, as a data frame of strings with empty cells

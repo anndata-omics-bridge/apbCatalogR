@@ -193,11 +193,8 @@ Lookups <- R6::R6Class(
         # further qualifiers; a qualifier naming the kind or a value the key
         # already fixes is an error.
         request = function(level, location, key, qualifiers) {
-            fixed <- if (is.null(key)) {
-                list()
-            } else {
-                key_predicate(self$set$key(key))
-            }
+            found <- if (is.null(key)) NULL else self$set$key(key)
+            fixed <- if (is.null(found)) list() else key_accepted(found)
             named <- c("kind", names(fixed))
             clashing <- named[named %in% names(qualifiers)]
             if (length(clashing) > 0L) {
@@ -214,12 +211,17 @@ Lookups <- R6::R6Class(
                 level,
                 location,
                 key,
-                c(fixed, lapply(qualifiers, unname))
+                c(fixed, lapply(qualifiers, unname)),
+                kind = found$kind
             )
         },
 
         answer = function(request) {
-            check_predicate(self$set$vocabulary, request$qualifiers)
+            check_predicate(
+                self$set$vocabulary,
+                request$kind,
+                request$qualifiers
+            )
             view <- self$views[[request$level]] %||%
                 AbsentLevel$new(request$level)
             view$resolve(request)

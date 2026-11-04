@@ -1,18 +1,22 @@
 # The conditions apb-catalog raises as exceptions in Python.
 
-# The key asked for and the qualifiers the request accepts, for messages.
+# The key asked for, its kind and the qualifiers the request accepts, for
+# messages.
 wanted_text <- function(request) {
     accepted <- paste(
-        vapply(
-            names(request$qualifiers),
-            function(name) {
-                paste0(
-                    name,
-                    "=",
-                    paste(request$qualifiers[[name]], collapse = "|")
-                )
-            },
-            character(1)
+        c(
+            if (!is.null(request$kind)) paste0("kind=", request$kind),
+            vapply(
+                names(request$qualifiers),
+                function(name) {
+                    paste0(
+                        name,
+                        "=",
+                        paste(request$qualifiers[[name]], collapse = "|")
+                    )
+                },
+                character(1)
+            )
         ),
         collapse = ", "
     )

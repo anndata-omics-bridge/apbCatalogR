@@ -2,39 +2,57 @@
 # silently; apb_catalog.resolver.
 
 # A consumer's question: one level and location, the key asked for (NULL to ask
-# for every key) and the qualifier values accepted (a named list of character
-# vectors): the key's kind and fixed values, and any further qualifiers.
-# Qualifiers left out accept any value; accepting "unknown" admits entries that
-# leave it unknown.
-field_request <- function(level, location, key, qualifiers) {
-    list(level = level, location = location, key = key, qualifiers = qualifiers)
+# for every key), the kind it stands for (NULL with no key) and the qualifier
+# values accepted (a named list of character vectors): the values the key fixes
+# and any further qualifiers. Qualifiers left out accept any value; an entry
+# that leaves its kind or a qualifier unknown is undecided unless the request
+# accepts "unknown" there.
+field_request <- function(level, location, key, qualifiers, kind = NULL) {
+    list(
+        level = level,
+        location = location,
+        key = key,
+        kind = kind,
+        qualifiers = qualifiers
+    )
 }
 
 request_admits <- function(request, entry) {
     selects <- is.na(request$location) ||
         entry$reference$location %in% READS[[request$location]]
-    selects && length(request_mismatched(request, entry$qualifiers)) == 0L
+    selects && length(request_mismatched(request, entry)) == 0L
 }
 
-# The requested qualifiers an entry's known values contradict.
-request_mismatched <- function(request, qualifiers) {
-    Filter(
-        function(name) {
-            qualifiers[[name]] != UNKNOWN &&
-                !(qualifiers[[name]] %in% request$qualifiers[[name]])
-        },
-        names(request$qualifiers)
+# What the request asks that an entry's known kind or values contradict.
+request_mismatched <- function(request, entry) {
+    kind <- !is.null(request$kind) &&
+        !(entry$kind %in% c(UNKNOWN, request$kind))
+    c(
+        if (kind) "kind",
+        unlist(Filter(
+            function(name) {
+                entry$qualifiers[[name]] != UNKNOWN &&
+                    !(entry$qualifiers[[name]] %in% request$qualifiers[[name]])
+            },
+            names(request$qualifiers)
+        ))
     )
 }
 
-# The requested qualifiers an entry leaves unknown.
-request_undecided <- function(request, qualifiers) {
-    Filter(
-        function(name) {
-            qualifiers[[name]] == UNKNOWN &&
-                !(UNKNOWN %in% request$qualifiers[[name]])
-        },
-        names(request$qualifiers)
+# What the request asks that an entry leaves unknown: its kind or qualifiers.
+request_undecided <- function(request, entry) {
+    kind <- !is.null(request$kind) &&
+        request$kind != UNKNOWN &&
+        entry$kind == UNKNOWN
+    c(
+        if (kind) "kind",
+        unlist(Filter(
+            function(name) {
+                entry$qualifiers[[name]] == UNKNOWN &&
+                    !(UNKNOWN %in% request$qualifiers[[name]])
+            },
+            names(request$qualifiers)
+        ))
     )
 }
 
@@ -43,6 +61,7 @@ new_candidate <- function(entry, undecided = character(0)) {
         entry_id = entry$entry_id,
         reference = entry$reference,
         key = entry$key,
+        kind = entry$kind,
         qualifiers = entry$qualifiers,
         undecided = undecided
     )
@@ -105,7 +124,7 @@ resolve_entries <- function(entries, pending, request, missing) {
     compatible <- lapply(
         Filter(function(entry) request_admits(request, entry), entries),
         function(entry) {
-            new_candidate(entry, request_undecided(request, entry$qualifiers))
+            new_candidate(entry, request_undecided(request, entry))
         }
     )
     waiting <- Filter(
