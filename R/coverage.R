@@ -23,11 +23,11 @@ SEVERITY <- c(required = "fail", recommended = "warn", optional = "pass")
 
 #' The catalogue sets
 #'
-#' Every catalogue set of the bundle with its purpose, its users and its number
-#' of entries.
+#' Every catalogue set of the bundle with its prefix, its purpose, its users and
+#' its number of entries. The prefix asks the set alone, as `"c:q_value"`.
 #'
-#' @return A data frame with columns `catalogue`, `purpose`, `used_by` (a list
-#'   column), `has_requirements` and `entries`.
+#' @return A data frame with columns `catalogue`, `prefix`, `purpose`, `used_by`
+#'   (a list column), `has_requirements` and `entries`.
 #' @export
 #' @examples
 #' catalogues()

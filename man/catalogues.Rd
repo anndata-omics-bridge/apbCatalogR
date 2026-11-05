@@ -7,12 +7,12 @@
 catalogues()
 }
 \value{
-A data frame with columns \code{catalogue}, \code{purpose}, \code{used_by} (a list
-column), \code{has_requirements} and \code{entries}.
+A data frame with columns \code{catalogue}, \code{prefix}, \code{purpose}, \code{used_by}
+(a list column), \code{has_requirements} and \code{entries}.
 }
 \description{
-Every catalogue set of the bundle with its purpose, its users and its number
-of entries.
+Every catalogue set of the bundle with its prefix, its purpose, its users and
+its number of entries. The prefix asks the set alone, as \code{"c:q_value"}.
 }
 \examples{
 catalogues()
