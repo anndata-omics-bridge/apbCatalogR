@@ -36,6 +36,7 @@ catalogues <- function() {
         set <- catalogue_set(name)
         list(
             catalogue = name,
+            prefix = set$vocabulary$prefix,
             purpose = set$description$purpose,
             used_by = set$description$used_by,
             has_requirements = length(set$requirements) > 0L,
@@ -48,7 +49,14 @@ catalogues <- function() {
     })
     records_frame(
         rows,
-        c("catalogue", "purpose", "used_by", "has_requirements", "entries"),
+        c(
+            "catalogue",
+            "prefix",
+            "purpose",
+            "used_by",
+            "has_requirements",
+            "entries"
+        ),
         lists = "used_by"
     )
 }

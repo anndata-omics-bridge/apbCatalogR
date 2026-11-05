@@ -266,6 +266,23 @@ Lookups <- R6::R6Class(
             )
         },
 
+        # How this set alone answers keys, as a name with its prefix asks it.
+        alone = function() {
+            list(
+                find = function(level, location, key, qualifiers) {
+                    self$find(level, location, key, qualifiers)
+                },
+                find_all = function(level, location, key) {
+                    self$find_all(level, location, key)
+                },
+                offered = function(level, location) {
+                    self$keys(level, location, list())
+                },
+                known = names(self$set$keys),
+                sets = list()
+            )
+        },
+
         rows = function(view, entries) {
             lapply(entries, function(entry) {
                 pattern <- view$software_version_pattern %||% NA_character_
@@ -402,7 +419,11 @@ Catalog <- R6::R6Class(
                 offered = function(level, location) {
                     private$lookups$keys(level, location, list())
                 },
-                known = names(set$keys)
+                known = names(set$keys),
+                sets = stats::setNames(
+                    list(private$lookups$alone()),
+                    set$vocabulary$prefix
+                )
             )
             self$levels <- stats::setNames(
                 lapply(names(views), LevelNames$new, lookup = lookup),
@@ -545,7 +566,15 @@ DataCatalog <- R6::R6Class(
                 offered = function(level, location) {
                     composed_keys(private$sets, level, location)
                 },
-                known = private$known
+                known = private$known,
+                sets = stats::setNames(
+                    lapply(private$sets, function(lookups) lookups$alone()),
+                    vapply(
+                        private$sets,
+                        function(lookups) lookups$set$vocabulary$prefix,
+                        character(1)
+                    )
+                )
             )
             self$levels <- stats::setNames(
                 lapply(names(result$levels), function(name) {

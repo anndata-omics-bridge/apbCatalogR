@@ -49,7 +49,7 @@ keys it offers.}
     \describe{
       \item{\code{name}}{The level's name.}
       \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
-\code{offered} and \code{known}.}
+\code{offered}, \code{known} and \code{sets}, one lookup per set prefix.}
     }
     \if{html}{\out{</div>}}
   }

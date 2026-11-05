@@ -8,8 +8,9 @@
 #' observations by variables; a key may name the primary layer, and then answers
 #' `X`. `cat$levels$protein$layers[["maxlfq"]]` looks the name up as one of the
 #' catalog's keys first, then as the level's own name in that slot, and signals
-#' an error when it is neither. `obs[c("group", "Run")]` reads every column the
-#' names name as a data frame.
+#' an error when it is neither; a prefix makes the lookup exact, `"c:q_value"`
+#' the confidence set alone, `"v:q_value"` the level's own name alone.
+#' `obs[c("group", "Run")]` reads every column the names name as a data frame.
 #'
 #' @field name The level's name.
 #' @field layers The level's layers, read with `[[` or `$get()`; `$name()` names
@@ -31,7 +32,7 @@ Level <- R6::R6Class(
         #' @param name The level's name.
         #' @param level The level, an anndataR `AnnData`.
         #' @param lookup How the catalog answers keys: `find`, `find_all`,
-        #'   `offered` and `known`.
+        #'   `offered`, `known` and `sets`, one lookup per set prefix.
         initialize = function(name, level, lookup) {
             self$name <- name
             private$level <- level
@@ -104,7 +105,7 @@ LevelNames <- R6::R6Class(
         #' @description Bind one rule level to the catalog's lookups.
         #' @param name The level's name.
         #' @param lookup How the catalog answers keys: `find`, `find_all`,
-        #'   `offered` and `known`.
+        #'   `offered`, `known` and `sets`, one lookup per set prefix.
         initialize = function(name, lookup) {
             self$name <- name
             self$layers <- Slot$new(
@@ -139,7 +140,8 @@ LevelNames <- R6::R6Class(
 #' As cf_xarray's accessor: `[[` reads a key, else the level's own name;
 #' `$keys()` lists the catalog's keys only. `$get()` returns `NULL` where `[[`
 #' signals an error, `$name()` the field's name; both take the qualifiers a key
-#' leaves open.
+#' leaves open. A set's prefix, `"c:q_value"`, asks that set alone and never
+#' the level's own name; `"v:q_value"` asks the level's own name alone.
 #'
 #' @return The class generator; a [Level]'s `layers` is its object.
 #' @keywords internal
@@ -150,7 +152,7 @@ Slot <- R6::R6Class(
         #' @param level The level's name.
         #' @param location `"layers"`, `"var"` or `"obs"`.
         #' @param lookup How the catalog answers keys: `find`, `find_all`,
-        #'   `offered` and `known`.
+        #'   `offered`, `known` and `sets`, one lookup per set prefix.
         #' @param read The value of a field the slot holds.
         #' @param named The level's own names in this slot.
         initialize = function(level, location, lookup, read, named) {
@@ -200,19 +202,20 @@ Slot <- R6::R6Class(
             private$read(private$found(key, list()))
         },
 
-        reference = function(key, qualifiers) {
-            if (key %in% private$lookup$known || length(qualifiers) > 0L) {
-                found <- private$lookup$find(
+        reference = function(name, qualifiers) {
+            route <- slot_route(private$lookup, name, qualifiers)
+            if (route_asks(route, qualifiers)) {
+                found <- route$lookup$find(
                     private$level,
                     private$location,
-                    key,
+                    route$key,
                     qualifiers
                 )
-                if (!is.null(found)) {
+                if (!is.null(found) || !route$own) {
                     return(found)
                 }
             }
-            private$own(key)
+            private$own(route$key)
         },
 
         found = function(key, qualifiers) {
@@ -258,7 +261,7 @@ Columns <- R6::R6Class(
         #' @param level The level's name.
         #' @param location `"var"` or `"obs"`.
         #' @param lookup How the catalog answers keys: `find`, `find_all`,
-        #'   `offered` and `known`.
+        #'   `offered`, `known` and `sets`, one lookup per set prefix.
         #' @param read The value of a field the slot holds.
         #' @param named The level's own names in this slot.
         #' @param combine The fields read, a named list, as one value.
@@ -285,17 +288,18 @@ Columns <- R6::R6Class(
         combine = NULL,
 
         fields = function(name) {
-            if (name %in% private$lookup$known) {
-                found <- private$lookup$find_all(
+            route <- slot_route(private$lookup, name, list())
+            if (route_asks(route, list())) {
+                found <- route$lookup$find_all(
                     private$level,
                     private$location,
-                    name
+                    route$key
                 )
                 if (length(found) > 0L) {
                     return(found)
                 }
             }
-            own <- private$own(name)
+            own <- if (route$own) private$own(route$key)
             if (is.null(own)) {
                 private$missing(name)
             }
@@ -303,6 +307,58 @@ Columns <- R6::R6Class(
         }
     )
 )
+
+# The prefix that asks a level's own name, never a set: v:q_value.
+VENDOR <- "v"
+
+# The lookup a name asks, the key it asks for, and whether the level's own name
+# answers when the lookup does not: a plain name asks every set, then the own
+# name; a set's prefix that set alone; v: the own name alone, with no lookup and
+# no qualifiers.
+slot_route <- function(lookup, name, qualifiers) {
+    colon <- regexpr(":", name, fixed = TRUE)
+    if (colon < 0L) {
+        return(list(lookup = lookup, key = name, own = TRUE))
+    }
+    prefix <- substr(name, 1L, colon - 1L)
+    key <- substr(name, colon + 1L, nchar(name))
+    if (prefix == VENDOR) {
+        if (length(qualifiers) > 0L) {
+            stop(
+                sprintf(
+                    "'%s' names the level's own field, %s",
+                    name,
+                    "which takes no qualifiers"
+                ),
+                call. = FALSE
+            )
+        }
+        return(list(lookup = NULL, key = key, own = TRUE))
+    }
+    found <- lookup$sets[[prefix]]
+    if (is.null(found)) {
+        stop(
+            sprintf(
+                "unknown prefix '%s' in '%s'; prefixes: %s",
+                prefix,
+                name,
+                paste(sort_c(c(VENDOR, names(lookup$sets))), collapse = ", ")
+            ),
+            call. = FALSE
+        )
+    }
+    list(lookup = found, key = key, own = FALSE)
+}
+
+# Whether a routed name asks its lookup: a known key, qualifiers, or a set's
+# prefix, which the own name never answers.
+route_asks <- function(route, qualifiers) {
+    !is.null(route$lookup) &&
+        (route$key %in%
+            route$lookup$known ||
+            length(qualifiers) > 0L ||
+            !route$own)
+}
 
 # A field's name in its slot; table/column for a column of a varm table.
 slot_name <- function(reference) {

@@ -10,7 +10,8 @@ The class generator; a \link{Level}'s \code{layers} is its object.
 As cf_xarray's accessor: \code{[[} reads a key, else the level's own name;
 \verb{$keys()} lists the catalog's keys only. \verb{$get()} returns \code{NULL} where \code{[[}
 signals an error, \verb{$name()} the field's name; both take the qualifiers a key
-leaves open.
+leaves open. A set's prefix, \code{"c:q_value"}, asks that set alone and never
+the level's own name; \code{"v:q_value"} asks the level's own name alone.
 }
 \keyword{internal}
 \section{Methods}{
@@ -39,7 +40,7 @@ leaves open.
       \item{\code{level}}{The level's name.}
       \item{\code{location}}{\code{"layers"}, \code{"var"} or \code{"obs"}.}
       \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
-\code{offered} and \code{known}.}
+\code{offered}, \code{known} and \code{sets}, one lookup per set prefix.}
       \item{\code{read}}{The value of a field the slot holds.}
       \item{\code{named}}{The level's own names in this slot.}
     }

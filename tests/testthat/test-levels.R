@@ -158,3 +158,30 @@ test_that("a varm field's name is its table and column", {
         level$varm$fasta_validation$fasta_matches_contaminant
     )
 })
+
+test_that("a prefix tells a key from the vendor column of its name", {
+    result <- synthetic_result("sage-peptidoform_ion")
+    var <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion$var
+    expect_identical(var$name("q_value"), "q_value")
+    expect_identical(var$name("v:q_value"), "q_value")
+    expect_identical(var$name("c:quantification_q_value"), "q_value")
+    expect_null(var$get("c:q_value"))
+    expect_error(var[["c:q_value"]], "no key or field 'c:q_value'")
+    expect_error(var[c("c:q_value")], "no key or field 'c:q_value'")
+    expect_identical(names(var[c("v:q_value")]), "q_value")
+})
+
+test_that("a prefix of no composed set or a qualified vendor name fails", {
+    result <- synthetic_result("sage-peptidoform_ion")
+    var <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion$var
+    expect_error(var$get("a:intensity"), "unknown prefix 'a'.*apb, c, v")
+    expect_error(var$get("c:intensity"), "unknown key 'intensity'")
+    expect_error(var$get("v:q_value", stage = "run"), "takes no qualifiers")
+})
+
+test_that("a catalog answers its own prefix and no vendor name", {
+    ion <- Catalog$new("DIA-NN", "2.6.0", "abundance")$levels$peptidoform_ion
+    expect_identical(ion$layers[["a:intensity"]], "Precursor_Quantity")
+    expect_null(ion$layers$get("v:Precursor_Quantity"))
+    expect_error(ion$layers$get("c:pep"), "unknown prefix 'c'.*a, v")
+})

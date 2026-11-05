@@ -297,6 +297,7 @@ set_vocabulary <- function(head, kind_rows, qualifier_rows, value_rows) {
         )
     })
     list(
+        prefix = head$prefix,
         definition = head$definition,
         kind_definition = head$kind_definition,
         kinds = stats::setNames(as.list(kind_rows$definition), kind_rows$kind),

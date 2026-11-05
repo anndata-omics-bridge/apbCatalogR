@@ -165,10 +165,21 @@ ion$obs_names
 ion$var_names
 # MaxQuant's own layer, as adata$layers[["Score"]]
 ion$layers[["Score"]]
-# A data frame, as adata$obs[c("Raw_File", "Experiment")]
-ion$obs[c("Raw_File", "Experiment")]
+# A data frame, as adata$obs[c("Raw_file", "Experiment")]
+ion$obs[c("Raw_file", "Experiment")]
 # Keys, each column named as the result names it
 ion$var[c("peptidoform_ion", "decoy", "contaminant")]
+```
+
+A vendor may name a column as a key is named, as Sage names its quantification
+q-value `q_value`. A prefix makes the lookup exact: a set's prefix asks that set
+alone and never the level's own field, `v:` the level's own field alone and
+never the catalog. `catalogues()` lists each set's prefix:
+
+```{r prefixes}
+ion$layers$name("c:pep")    # the confidence set alone
+ion$layers$name("v:Score")  # MaxQuant's own layer alone
+catalogues()[, c("catalogue", "prefix")]
 ```
 
 MaxQuant reports no q-value on this level, so `$get()` gives `NULL`, where

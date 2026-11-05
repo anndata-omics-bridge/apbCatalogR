@@ -45,7 +45,7 @@ where \code{obs[["group"]]} signals \code{UnresolvedField} because there are sev
       \item{\code{level}}{The level's name.}
       \item{\code{location}}{\code{"var"} or \code{"obs"}.}
       \item{\code{lookup}}{How the catalog answers keys: \code{find}, \code{find_all},
-\code{offered} and \code{known}.}
+\code{offered}, \code{known} and \code{sets}, one lookup per set prefix.}
       \item{\code{read}}{The value of a field the slot holds.}
       \item{\code{named}}{The level's own names in this slot.}
       \item{\code{combine}}{The fields read, a named list, as one value.}
