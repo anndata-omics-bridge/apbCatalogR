@@ -121,9 +121,16 @@ check_id_names <- function(text, attribute, key, column) {
 rule_levels <- function() {
     bundle <- current_bundle()
     bundle$memo("rule_levels", function() {
+        rows <- catalogue_rows(bundle, "catalog")
+        entry_ids <- unique(paste(
+            rows$software,
+            rows$location,
+            rows$name,
+            sep = "/"
+        ))
         ids <- Filter(
             function(found) found$level != ANY_VERSION,
-            lapply(catalogue_rows(bundle, "entries")$entry_id, entry_id_fields)
+            lapply(entry_ids, entry_id_fields)
         )
         sources <- vapply(ids, function(found) found$source, character(1))
         labels <- vapply(ids, function(found) found$version, character(1))

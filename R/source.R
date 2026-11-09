@@ -12,7 +12,7 @@ READS <- list(
 )
 
 # A request accepts one of the set's kinds, or none, and any subset of the
-# qualifiers, each with admitted values; the kinds and every qualifier admit
+# qualifiers, each with admitted values; every qualifier with values admits
 # "unknown".
 check_predicate <- function(vocabulary, kind, qualifiers) {
     if (!is.null(kind)) {
@@ -105,21 +105,116 @@ cell_list <- function(text, separator = ";") {
     }
 }
 
-# A set's keys from its keys.csv rows and its key_qualifiers.csv rows: each the
-# name callers ask by, the kind, the qualifier values it fixes (a qualifier
-# without a row stays open), and its PSI-MS terms.
-set_keys <- function(rows, qualifiers) {
-    keys <- lapply(seq_len(nrow(rows)), function(index) {
-        row <- as.list(rows[index, , drop = FALSE])
-        found <- qualifiers[qualifiers$key == row$key, , drop = FALSE]
+# A catalog.csv row's entry id: its software, location and name joined by
+# `/`.
+row_entry_ids <- function(rows) {
+    paste(rows$software, rows$location, rows$name, sep = "/")
+}
+
+# The qualifier and value of an entry's catalog.csv rows, one pair per row, as a
+# named character vector; a row with neither adds none. Half a pair, a pair
+# qualifying the kind, or a fixed other than true or false, or true without a
+# qualifier, is refused.
+row_pairs <- function(label, rows) {
+    for (index in seq_len(nrow(rows))) {
+        check_pair(
+            label,
+            rows$qualifier[[index]],
+            rows$value[[index]],
+            rows$fixed[[index]]
+        )
+    }
+    paired <- rows$qualifier != ""
+    stats::setNames(rows$value[paired], rows$qualifier[paired])
+}
+
+check_pair <- function(label, qualifier, value, fixed) {
+    if ((qualifier == "") != (value == "")) {
+        stop(
+            sprintf(
+                "catalog.csv: %s has a qualifier and a value only together",
+                label
+            ),
+            call. = FALSE
+        )
+    }
+    if (qualifier == "kind") {
+        stop(
+            sprintf(
+                "catalog.csv: %s qualifies the kind, %s",
+                label,
+                "which its kind column holds"
+            ),
+            call. = FALSE
+        )
+    }
+    if (
+        !(fixed %in% c("true", "false")) || (fixed == "true" && qualifier == "")
+    ) {
+        stop(
+            sprintf(
+                "catalog.csv: %s has fixed '%s'; %s",
+                label,
+                fixed,
+                "true on a row with a qualifier, else false"
+            ),
+            call. = FALSE
+        )
+    }
+}
+
+# A set's keys from its terms.csv rows, the catalogue's root: each the name
+# callers ask by, its kind and PSI-MS terms, the same on every row of the key,
+# and the qualifier values it fixes, one row per value; a row with neither fixes
+# none. apb-catalog checks the bundle's terms when it writes them.
+term_keys <- function(name, rows) {
+    names <- unique(rows$key)
+    keys <- lapply(names, function(key) {
+        found <- rows[rows$key == key, , drop = FALSE]
+        kinds <- sort_c(unique(found$kind))
+        terms <- sort_c(unique(found$psi_ms))
+        if (length(kinds) != 1L || length(terms) != 1L) {
+            stop(
+                sprintf(
+                    "%s: key '%s' has the kinds %s and the PSI-MS terms %s; %s",
+                    name,
+                    key,
+                    paste(kinds, collapse = ", "),
+                    paste(terms, collapse = ", "),
+                    "every row of a key has one of each"
+                ),
+                call. = FALSE
+            )
+        }
+        pairs <- found[found$qualifier != "", , drop = FALSE]
+        pairs <- pairs[!duplicated(pairs$qualifier), , drop = FALSE]
         list(
-            key = row$key,
-            kind = row$kind,
-            fixed = stats::setNames(found$value, found$qualifier),
-            psi_ms = cell_list(row$psi_ms)
+            key = key,
+            kind = kinds,
+            fixed = stats::setNames(pairs$value, pairs$qualifier),
+            psi_ms = cell_list(terms)
         )
     })
-    stats::setNames(keys, rows$key)
+    stats::setNames(keys, names)
+}
+
+# The requirement rows of a set's terms.csv: one per term, a key at one
+# location, that states one.
+term_requirements <- function(rows) {
+    stated <- rows[rows$requirement != "", , drop = FALSE]
+    terms <- paste(stated$key, stated$location, sep = "\x1f")
+    lapply(which(!duplicated(terms)), function(index) {
+        parts <- c(
+            strsplit(stated$location[[index]], "/", fixed = TRUE)[[1L]],
+            ""
+        )
+        list(
+            level = parts[[1L]],
+            location = parts[[2L]],
+            key = stated$key[[index]],
+            requirement = stated$requirement[[index]]
+        )
+    })
 }
 
 # The qualifier values a request for a key accepts besides its kind: the values
@@ -128,36 +223,13 @@ key_accepted <- function(found) {
     as.list(found$fixed)
 }
 
-# The keys an entry of this kind with these qualifiers, a named character
-# vector, has: exactly one in a consistent set.
-keys_of <- function(keys, kind, qualifiers) {
-    described <- Filter(
-        function(found) {
-            identical(kind, found$kind) &&
-                all(vapply(
-                    names(found$fixed),
-                    function(name) {
-                        identical(
-                            unname(qualifiers[name]),
-                            unname(found$fixed[name])
-                        )
-                    },
-                    logical(1)
-                ))
-        },
-        keys
-    )
-    vapply(
-        described,
-        function(found) found$key,
-        character(1),
-        USE.NAMES = FALSE
-    )
-}
-
-# One entry from its entries.csv row and parsed id, its other qualifiers, a
-# named character vector, and the key they match.
-row_entry <- function(row, named, qualifiers, keys) {
+# One entry from its catalog.csv rows, one per qualifier, its parsed id and its
+# key.
+row_entry <- function(rows, named, key) {
+    if (is.null(key)) {
+        stop(sprintf("%s: a field has no key", named$source), call. = FALSE)
+    }
+    entry_id <- row_entry_ids(rows[1L, , drop = FALSE])
     reference <- list(
         level = named$level,
         location = named$attribute,
@@ -168,27 +240,16 @@ row_entry <- function(row, named, qualifiers, keys) {
     } else {
         reference$name <- named$name
     }
-    matching <- keys_of(keys, row$kind, qualifiers)
-    if (length(matching) != 1L) {
-        stop(
-            sprintf(
-                "%s: matches the keys %s, not exactly one",
-                row$entry_id,
-                paste(matching, collapse = ", ")
-            ),
-            call. = FALSE
-        )
-    }
     list(
-        entry_id = row$entry_id,
+        entry_id = entry_id,
         software_version_pattern = version_patterns(
             named$source,
             named$version
         ),
         reference = new_reference(reference),
-        key = matching,
-        kind = row$kind,
-        qualifiers = qualifiers
+        key = key$key,
+        kind = key$kind,
+        qualifiers = row_pairs(entry_id, rows)
     )
 }
 
@@ -378,11 +439,6 @@ row_describes <- function(row, entry) {
         identical(entry$key, row$key)
 }
 
-# Whether a request on one level and location asks for a requirement row's key.
-row_asked <- function(row, level, location, key) {
-    level == row$level && location == row$location && identical(key, row$key)
-}
-
 # One packaged catalogue set: its vocabulary, keys, vendor, producer and
 # annotation catalogues and requirements, indexed by software and version.
 # Producers hold the fields apps write after conversion and annotations the
@@ -407,12 +463,8 @@ CatalogueSet <- R6::R6Class(
                 found[found$set == name, , drop = FALSE]
             }
             head <- set_head(rows("sets"), name)
-            keys <- set_keys(rows("keys"), rows("key_qualifiers"))
-            by_source <- source_entries(
-                rows("entries"),
-                rows("entry_qualifiers"),
-                keys
-            )
+            keys <- term_keys(name, rows("terms"))
+            by_source <- source_entries(rows("catalog"), keys)
             sources <- names(by_source)
             runs <- rows("producers")
             annotation <- startsWith(sources, "annotation:")
@@ -447,7 +499,7 @@ CatalogueSet <- R6::R6Class(
                     by_source[[index]]
                 )
             })
-            self$requirements <- set_requirements(rows("requirements"), keys)
+            self$requirements <- term_requirements(rows("terms"))
             private$by_version <- reviewed_versions(self$catalogues)
         },
 
@@ -473,16 +525,6 @@ CatalogueSet <- R6::R6Class(
                 )
             }
             found
-        },
-
-        # The requirement row a request asks for, or NULL.
-        requirement_for = function(level, location, key) {
-            for (row in self$requirements) {
-                if (row_asked(row, level, location, key)) {
-                    return(row)
-                }
-            }
-            NULL
         }
     ),
     active = list(
@@ -509,50 +551,25 @@ set_head <- function(head, name) {
     head
 }
 
-# A set's entries, grouped by the source their ids name, in the order the
-# sources first appear.
-source_entries <- function(entry_rows, qualifier_rows, keys) {
-    ids <- lapply(entry_rows$entry_id, entry_id_fields)
-    entries <- lapply(seq_len(nrow(entry_rows)), function(index) {
-        row <- as.list(entry_rows[index, , drop = FALSE])
-        own <- qualifier_rows[
-            qualifier_rows$entry_id == row$entry_id &
-                qualifier_rows$kind == row$kind,
-            ,
-            drop = FALSE
-        ]
+# A set's entries from its catalog.csv rows, one entry per field and key,
+# grouped by the source their ids name, in the order the sources first appear.
+source_entries <- function(rows, keys) {
+    ids <- row_entry_ids(rows)
+    fields <- paste(ids, rows$key, sep = "\x1f")
+    groups <- split(
+        seq_len(nrow(rows)),
+        factor(fields, levels = unique(fields))
+    )
+    entries <- lapply(unname(groups), function(index) {
+        field <- rows[index, , drop = FALSE]
         row_entry(
-            row,
-            ids[[index]],
-            stats::setNames(own$value, own$qualifier),
-            keys
+            field,
+            entry_id_fields(ids[[index[[1L]]]]),
+            keys[[field$key[[1L]]]]
         )
     })
-    named_sources <- vapply(ids, function(found) found$source, character(1))
+    named_sources <- vapply(entries, entry_source, character(1))
     split(entries, factor(named_sources, levels = unique(named_sources)))
-}
-
-# A set's requirement rows; a row naming a key the set lacks signals an error.
-set_requirements <- function(requirement_rows, keys) {
-    lapply(seq_len(nrow(requirement_rows)), function(index) {
-        row <- requirement_rows[index, , drop = FALSE]
-        if (!(row$key %in% names(keys))) {
-            stop(
-                sprintf(
-                    "requirement on %s: unknown key '%s'",
-                    row$level,
-                    row$key
-                ),
-                call. = FALSE
-            )
-        }
-        list(
-            level = row$level,
-            location = row$location,
-            key = row$key,
-            requirement = row$requirement
-        )
-    })
 }
 
 # Each vendor catalogue's reviewed rule levels, by software, version pattern and

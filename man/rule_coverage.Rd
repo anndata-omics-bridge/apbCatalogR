@@ -26,5 +26,5 @@ a recommended one is, \code{pass} otherwise; an unsupported optional field is
 listed but passes.
 }
 \examples{
-head(rule_coverage("abundance"))
+head(rule_coverage("abundance_alpha"))
 }

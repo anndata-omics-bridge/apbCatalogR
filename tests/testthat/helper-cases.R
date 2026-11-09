@@ -98,12 +98,29 @@ frame_records <- function(frame) {
     })
 }
 
-# What one lookup gives: the answer, or the class of the condition it signals.
+# What one lookup gives: the answer, or the UnresolvedField it signals.
 outcome_of <- function(lookup) {
+    tryCatch(
+        list(value = lookup()),
+        UnresolvedField = function(condition) {
+            list(
+                error = "UnresolvedField",
+                status = condition$resolution$status
+            )
+        }
+    )
+}
+
+# What opening a catalog gives: the catalog, or the condition it signals as the
+# recording names it, with every missing field as [level, location, key,
+# requirement] or the message; and whether it warned. A plain error is Python's
+# ValueError.
+opened_of <- function(open) {
+    opened <- stats::setNames(list(), character(0))
     warned <- FALSE
-    answer <- tryCatch(
+    catalog <- tryCatch(
         withCallingHandlers(
-            list(value = lookup()),
+            open(),
             MissingRequiredField = function(condition) {
                 if (inherits(condition, "warning")) {
                     warned <<- TRUE
@@ -111,20 +128,31 @@ outcome_of <- function(lookup) {
                 }
             }
         ),
-        UnresolvedField = function(condition) {
-            list(
-                error = "UnresolvedField",
-                status = condition$resolution$status
-            )
-        },
-        MissingRequiredField = function(condition) {
-            list(error = "MissingRequiredField")
+        error = function(condition) {
+            if (inherits(condition, "MissingRequiredField")) {
+                opened$error <<- "MissingRequiredField"
+                opened$missing <<- lapply(condition$missing, function(found) {
+                    row <- found$row
+                    list(row$level, row$location, row$key, row$requirement)
+                })
+            } else if (inherits(condition, "simpleError")) {
+                opened$error <<- "ValueError"
+                opened$message <<- conditionMessage(condition)
+            } else {
+                stop(condition)
+            }
+            NULL
         }
     )
-    if (!is.null(answer$error)) {
-        return(answer)
+    if (warned) {
+        opened$warning <- "MissingRequiredField"
     }
-    c(answer, if (warned) list(warning = "MissingRequiredField"))
+    list(catalog = catalog, opened = opened)
+}
+
+# What a case records that opening its catalog signalled or warned.
+recorded_opening <- function(case) {
+    case[intersect(c("error", "missing", "message", "warning"), names(case))]
 }
 
 # The slot one request reads: a level's layers, var or obs.

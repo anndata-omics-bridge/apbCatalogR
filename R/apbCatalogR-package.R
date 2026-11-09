@@ -13,9 +13,11 @@
 #' Lookups signal conditions of the classes apb-catalog raises in Python:
 #' * `UnresolvedField`: the catalogue cannot answer with one field; the request
 #'   is ambiguous or unknown. Its `resolution` holds the candidates and reasons.
-#' * `MissingRequiredField`: a field the set requires is missing, under
-#'   `enforce`. Signalled as an error, or as a warning for a `recommended`
-#'   field when `enforce = "required"`.
+#' * `MissingRequiredField`: fields the named sets require are missing, under
+#'   `enforce`, checked once when a catalog opens. Its `missing` lists every
+#'   missing field, each as its `resolution` and requirement `row`, and its
+#'   message has one line per field. Signalled as an error, or as a warning
+#'   for the `recommended` fields when `enforce = "required"`.
 #'
 #' Catch them with [tryCatch()], for example
 #' `tryCatch(..., UnresolvedField = function(condition) NULL)`.

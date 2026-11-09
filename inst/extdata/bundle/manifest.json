@@ -4,24 +4,23 @@
   "apb_catalog_version": "0.1.4",
   "apb2_version": "0.1.1",
   "catalogues": [
-    "abundance",
-    "confidence",
-    "proteobench_entrapment",
-    "apb",
-    "chromatography"
+    "abundance_alpha",
+    "confidence_alpha",
+    "proteobench_entrapment_alpha",
+    "apb_alpha",
+    "obs_annotation_alpha",
+    "apb_fasta_alpha",
+    "chromatography_alpha"
   ],
   "files": [
+    "catalogues/catalog.csv",
     "catalogues/datapackage.json",
-    "catalogues/entries.csv",
-    "catalogues/entry_qualifiers.csv",
-    "catalogues/key_qualifiers.csv",
-    "catalogues/keys.csv",
     "catalogues/kinds.csv",
     "catalogues/producers.csv",
     "catalogues/qualifier_values.csv",
     "catalogues/qualifiers.csv",
-    "catalogues/requirements.csv",
     "catalogues/sets.csv",
+    "catalogues/terms.csv",
     "catalogues/versions.csv"
   ]
 }

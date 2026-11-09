@@ -60,7 +60,10 @@ catalog_version()
 
 # Catalogue sets
 
-Each catalogue set serves one kind of consumer:
+Each catalogue set serves one kind of consumer, and each holds the fields one
+producer writes: `apb_alpha` what `apb2 convert` writes, `apb_fasta_alpha`
+what `apb-fasta verify-peptides` adds, and `obs_annotation_alpha` the sample
+annotation `apb2 annotate` attaches:
 
 ```{r sets}
 catalogues()[, c("catalogue", "has_requirements", "entries")]
@@ -70,7 +73,7 @@ catalogues()[, c("catalogue", "has_requirements", "entries")]
 version pattern:
 
 ```{r table}
-entries <- catalogue_table("confidence")
+entries <- catalogue_table("confidence_alpha")
 columns <- c("software_version_pattern", "level", "name", "key")
 entries[entries$source == "Spectronaut", columns]
 ```
@@ -82,18 +85,18 @@ levels apb2 converts for that software version, each with the slots `layers`,
 `var` and `obs`, holding field names:
 
 ```{r catalog}
-catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance_alpha")
 catalog
 catalog$levels$peptidoform_ion$layers$keys()
 catalog$levels$peptidoform_ion$layers[["intensity"]]
-catalog$levels$protein$layers[["maxlfq"]]
+catalog$levels$protein$layers[["intensity_norm_settings"]]
 ```
 
 `[` on `var` or `obs` names every column the keys read. Spectronaut 21 reports
 two protein q-values:
 
 ```{r catalog-var}
-spectronaut <- Catalog$new("Spectronaut", "21.0", "confidence")
+spectronaut <- Catalog$new("Spectronaut", "21.0", "confidence_alpha")
 spectronaut$levels$protein$var$keys()
 spectronaut$levels$protein$var[c("q_value", "library_q_value")]
 ```
@@ -126,24 +129,23 @@ result
 result$levels$peptidoform_ion
 ```
 
-`DataCatalog` answers on the result and hands back the data:
+`DataCatalog` answers on the result and hands back the data. It composes the
+named sets alone: `apb_alpha`, APB's own fields, answers only when named.
 
 ```{r data-catalog}
-confidence <- DataCatalog$new(result, "confidence")
+confidence <- DataCatalog$new(result, "confidence_alpha", "apb_alpha")
 pep <- confidence$levels$peptidoform_ion$layers[["pep"]]
 dim(pep)
 ```
 
-`$fields()` lists the catalogued fields the result holds, from the `confidence`
-set and from `apb`, which is always in:
+`$fields()` lists the catalogued fields the result holds, from both sets:
 
 ```{r data-fields}
 confidence$fields()[, c("set", "location", "name", "key", "present")]
 ```
 
 Each level of the catalog has anndataR's slots. A name is read as a key first,
-then as the level's own layer or column, as cf_xarray reads `ds.cf[...]`;
-`apb`, APB's own fields, is always in:
+then as the level's own layer or column, as cf_xarray reads `ds.cf[...]`:
 
 ```{r levels}
 ion <- confidence$levels$peptidoform_ion
@@ -191,14 +193,16 @@ ion$layers$name("pep")
 ```
 
 A lookup the catalogue cannot answer with one field signals `UnresolvedField`
-rather than choosing silently. FragPipe does not document whether its
-intensity is normalized, so the key `intensity`, never normalized, is unknown
-there:
+rather than choosing silently. Spectronaut does not document how its protein
+quantity combines the precursors, so asking for a summed one is unknown there:
 
 ```{r unresolved}
-fragpipe <- Catalog$new("FragPipe", "22.0", "abundance")
+spectronaut <- Catalog$new("Spectronaut", "21.0", "abundance_alpha")
 tryCatch(
-    fragpipe$levels$peptidoform_ion$layers[["intensity"]],
+    spectronaut$levels$protein$layers$get(
+        "intensity_norm_settings",
+        aggregation = "sum"
+    ),
     UnresolvedField = function(condition) conditionMessage(condition)
 )
 ```
@@ -216,21 +220,21 @@ files <- c(
 )
 pep_field <- function(file) {
     vendor <- read_parsed_levels(file.path(results, file))
-    catalog <- DataCatalog$new(vendor, "confidence")
+    catalog <- DataCatalog$new(vendor, "confidence_alpha")
     catalog$levels$peptidoform_ion$layers$name("pep")
 }
 vapply(files, pep_field, character(1))
 ```
 
-A protein level reads the same way; DIA-NN's MaxLFQ intensity is the key
-`maxlfq`:
+A protein level reads the same way; DIA-NN's MaxLFQ intensity, normalized as
+the run's settings chose, is the key `intensity_norm_settings`:
 
 ```{r protein}
 diann <- read_parsed_levels(file.path(results, "diann_v2-protein.parquet"))
-protein <- DataCatalog$new(diann, "abundance")$levels$protein
+protein <- DataCatalog$new(diann, "abundance_alpha")$levels$protein
 protein$layers$keys()
-protein$layers$name("maxlfq")
-protein$layers[["maxlfq"]]
+protein$layers$name("intensity_norm_settings")
+protein$layers[["intensity_norm_settings"]]
 ```
 
 # Several sets and qualifiers
@@ -240,12 +244,43 @@ qualifier open, such as the unit of a retention time; `$get()` and `$name()`
 narrow it, and a lookup no field answers gives `NULL`:
 
 ```{r compose}
-both <- DataCatalog$new(result, "confidence", "chromatography")
+both <- DataCatalog$new(result, "confidence_alpha", "chromatography_alpha")
 both
 rt <- both$levels$peptidoform_ion
 rt$layers$keys()
 rt$layers$name("retention_time", unit = "minute")
 rt$layers$get("retention_time", unit = "second")
+```
+
+# Sets an app or an annotation answers
+
+A set of an app's fields answers once the app has run, and the sample
+annotation once `apb2 annotate` has attached it. Opening such a set on a result
+that lacks them is an error that says what to run:
+
+```{r producers}
+tryCatch(
+    DataCatalog$new(result, "apb_fasta_alpha"),
+    error = function(condition) conditionMessage(condition)
+)
+```
+
+# Requirements
+
+A set may require or recommend fields. `enforce` checks them once, when the
+catalog opens: `"required"` signals one `MissingRequiredField` listing every
+missing required field and warns about missing recommended ones;
+`"recommended"` signals for both. MaxQuant's peptidoform level lacks a
+recommended field of `apb_alpha`:
+
+```{r enforce}
+peptidoform <- read_parsed_levels(
+    file.path(results, "maxquant_wide-peptidoform.parquet")
+)
+tryCatch(
+    DataCatalog$new(peptidoform, "apb_alpha", enforce = "recommended"),
+    MissingRequiredField = function(condition) conditionMessage(condition)
+)
 ```
 
 # Rule coverage
@@ -254,7 +289,7 @@ rt$layers$get("retention_time", unit = "second")
 judges each level:
 
 ```{r coverage}
-coverage <- rule_coverage("abundance")
+coverage <- rule_coverage("abundance_alpha")
 unique(coverage[, c("software", "version", "level", "verdict")])[1:5, ]
 ```
 

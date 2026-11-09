@@ -137,7 +137,7 @@ records_frame <- function(rows, columns, lists = character(0)) {
 #'   `entry_id`.
 #' @export
 #' @examples
-#' head(catalogue_table("confidence"))
+#' head(catalogue_table("confidence_alpha"))
 catalogue_table <- function(catalogue = NULL) {
     names <- if (is.null(catalogue)) set_names() else catalogue
     rows <- list()

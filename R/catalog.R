@@ -140,36 +140,55 @@ annotation_entries <- function(annotations, rule_level, obs_columns) {
     )
 }
 
-check_enforce <- function(name, set, enforce) {
-    if (is.null(enforce)) {
-        return(invisible(NULL))
-    }
-    if (!(enforce %in% c("required", "recommended"))) {
+check_enforce <- function(enforce) {
+    if (!is.null(enforce) && !(enforce %in% c("required", "recommended"))) {
         stop(
             "enforce is NULL, \"required\" or \"recommended\"",
             call. = FALSE
         )
     }
-    if (length(set$requirements) == 0L) {
+}
+
+# Check the named sets' requirements once, when the catalog opens. Under
+# enforce = "required" the missing recommended fields give one
+# MissingRequiredField warning; under "recommended" they signal with the
+# required ones. An error when no named set has requirement rows.
+enforce_sets <- function(sets, enforce) {
+    if (is.null(enforce)) {
+        return(invisible(NULL))
+    }
+    binding <- Filter(
+        function(lookups) length(lookups$set$requirements) > 0L,
+        sets
+    )
+    if (length(binding) == 0L) {
+        names <- vapply(sets, function(lookups) lookups$name, character(1))
         stop(
             sprintf(
-                "catalogue '%s' sets no requirements, so nothing to enforce",
-                name
+                "catalogues %s set no requirements, so nothing to enforce",
+                paste(names, collapse = ", ")
             ),
             call. = FALSE
         )
     }
-}
-
-# A missing field the set requires: signal MissingRequiredField, or warn for a
-# recommended field under enforce = "required".
-enforce_requirement <- function(resolution, row, enforce) {
-    resolution$requirement <- row$requirement
-    if (row$requirement == "required" || enforce == "recommended") {
-        stop(missing_required_field(resolution, row))
+    missing <- do.call(
+        c,
+        unname(lapply(binding, function(lookups) lookups$missing()))
+    )
+    required <- vapply(
+        missing,
+        function(found) found$row$requirement == "required",
+        logical(1)
+    )
+    warned <- missing[enforce == "required" & !required]
+    raising <- missing[enforce == "recommended" | required]
+    if (length(warned) > 0L) {
+        warning(missing_required_warning(warned))
     }
-    warning(missing_required_warning(resolution, row))
-    NULL
+    if (length(raising) > 0L) {
+        stop(missing_required_field(raising))
+    }
+    invisible(NULL)
 }
 
 # The requests, answers and rows both catalogues share for one set.
@@ -179,14 +198,11 @@ Lookups <- R6::R6Class(
         name = NULL,
         set = NULL,
         views = NULL,
-        enforce = NULL,
 
-        initialize = function(name, set, views, enforce) {
-            check_enforce(name, set, enforce)
+        initialize = function(name, set, views) {
             self$name <- name
             self$set <- set
             self$views <- views
-            self$enforce <- enforce
         },
 
         # The request for a key, or for every key when key is NULL, narrowed by
@@ -227,23 +243,40 @@ Lookups <- R6::R6Class(
             view$resolve(request)
         },
 
-        # The answer; a missing required field signals or warns as enforce says.
+        # The answer to one key; requirements were checked when the catalog
+        # opened.
         lookup = function(level, location, key, qualifiers) {
-            resolution <- self$answer(self$request(
-                level,
-                location,
-                key,
-                qualifiers
-            ))
-            row <- if (
-                resolution$status == "missing" && !is.null(self$enforce)
-            ) {
-                self$set$requirement_for(level, location, key)
+            self$answer(self$request(level, location, key, qualifiers))
+        },
+
+        # Every required or recommended field a bound level lacks, each as its
+        # resolution, with its requirement set, and its requirement row; a field
+        # the catalogue cannot decide is not missing.
+        missing = function() {
+            found <- list()
+            for (row in self$set$requirements) {
+                if (
+                    row$requirement == "optional" ||
+                        is.null(self$views[[row$level]])
+                ) {
+                    next
+                }
+                resolution <- self$answer(self$request(
+                    row$level,
+                    row$location,
+                    row$key,
+                    list()
+                ))
+                if (resolution$status != "missing") {
+                    next
+                }
+                resolution$requirement <- row$requirement
+                found[[length(found) + 1L]] <- list(
+                    resolution = resolution,
+                    row = row
+                )
             }
-            if (!is.null(row) && row$requirement != "optional") {
-                enforce_requirement(resolution, row, self$enforce)
-            }
-            resolution
+            found
         },
 
         # The one field asked for, NULL when the level has none.
@@ -363,15 +396,17 @@ fields_frame <- function(rows, set) {
 #' pattern admits the version give the levels; the set's entries for that
 #' pattern give each level's fields. `levels` have the slots of a
 #' [DataCatalog]'s levels, holding names: a slot answers one of the set's keys,
-#' such as `"normalized_intensity"`, with the field's name, and its `$get()`
+#' such as `"intensity_norm_settings"`, with the field's name, and its `$get()`
 #' takes further qualifiers, such as `unit`. Lookups that several fields answer,
-#' or that an unreviewed level cannot, signal `UnresolvedField`.
+#' or that an unreviewed level cannot, signal `UnresolvedField`. `enforce`
+#' checks the set's requirements against the rule's levels once, when the
+#' catalog opens.
 #'
 #' @field description What this catalogue set holds and who uses it.
 #' @return The class generator; `Catalog$new()` returns a `Catalog`.
 #' @export
 #' @examples
-#' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+#' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance_alpha")
 #' catalog$levels$peptidoform_ion$layers[["intensity"]]
 #' catalog$levels$peptidoform_ion$layers$keys()
 Catalog <- R6::R6Class(
@@ -385,12 +420,15 @@ Catalog <- R6::R6Class(
         #'   version.
         #' @param software The software name, such as `"DIA-NN"`.
         #' @param version The software version, such as `"2.2.0"`.
-        #' @param catalog The catalogue set, such as `"abundance"` or
-        #'   `"confidence"`; see [catalogues()].
-        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal
-        #'   `MissingRequiredField` when a field the set requires at that
-        #'   strength is missing.
+        #' @param catalog The catalogue set, such as `"abundance_alpha"` or
+        #'   `"confidence_alpha"`; see [catalogues()].
+        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal one
+        #'   `MissingRequiredField` listing every field the set requires at
+        #'   that strength and the rule lacks; under `"required"`, missing
+        #'   recommended fields give one warning. An error when the set has no
+        #'   requirements.
         initialize = function(software, version, catalog, enforce = NULL) {
+            check_enforce(enforce)
             set <- catalogue_set(catalog)
             matched <- rules_matching(software, version)
             check_rules_matched(matched, software, version)
@@ -408,7 +446,8 @@ Catalog <- R6::R6Class(
                     annotations = list()
                 )
             }
-            private$lookups <- Lookups$new(catalog, set, views, enforce)
+            private$lookups <- Lookups$new(catalog, set, views)
+            enforce_sets(list(private$lookups), enforce)
             lookup <- list(
                 find = function(level, location, key, qualifiers) {
                     private$lookups$find(level, location, key, qualifiers)
@@ -498,7 +537,16 @@ check_rules_matched <- function(matched, software, version) {
 #' keys, such as `"q_value"` or Sage's `"quantification_q_value"`. Ambiguous or
 #' unreviewed answers signal `UnresolvedField`.
 #'
-#' @field description What this catalogue set holds and who uses it.
+#' Composes the named sets alone: `apb_alpha`, the fields apb2 convert writes,
+#' answers only when named. A key routes to the sets that define it; two sets
+#' naming different fields for one key on one level is an error. With no set
+#' named, every name is the level's own. A named set that can answer nothing on
+#' the result, because its app has not run or the result records no sample
+#' annotation, is an error saying what to run. `enforce` checks the
+#' requirements once, here.
+#'
+#' @field description What the first catalogue set named holds and who uses
+#'   it; an error when no set was named.
 #' @return The class generator; `DataCatalog$new()` returns a `DataCatalog`.
 #' @export
 #' @examples
@@ -511,7 +559,7 @@ check_rules_matched <- function(matched, software, version) {
 #' result <- read_parsed_levels(
 #'     file.path(results, "maxquant_wide-peptidoform_ion.parquet")
 #' )
-#' catalog <- DataCatalog$new(result, "confidence")
+#' catalog <- DataCatalog$new(result, "confidence_alpha")
 #' dim(catalog$levels$peptidoform_ion$layers[["pep"]])
 #' catalog$levels$peptidoform_ion$layers$name("pep")
 DataCatalog <- R6::R6Class(
@@ -521,14 +569,16 @@ DataCatalog <- R6::R6Class(
         #'   slots looked up by key.
         levels = NULL,
 
-        #' @description Bind catalogue sets to the levels of one result; `apb`,
-        #'   APB's own fields, is always in.
+        #' @description Bind the named catalogue sets, and no others, to the
+        #'   levels of one result.
         #' @param result A [ParsedLevels] object.
-        #' @param ... The catalogue sets, such as `"abundance"` and
-        #'   `"confidence"`; see [catalogues()].
-        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal
-        #'   `MissingRequiredField` when a field a set requires at that strength
-        #'   is missing.
+        #' @param ... The catalogue sets, such as `"abundance_alpha"` and
+        #'   `"confidence_alpha"`; see [catalogues()].
+        #' @param enforce `NULL`, `"required"` or `"recommended"`: signal one
+        #'   `MissingRequiredField` listing every field the named sets require
+        #'   at that strength and the result lacks; under `"required"`, missing
+        #'   recommended fields give one warning. An error when no named set
+        #'   has requirements.
         initialize = function(result, ..., enforce = NULL) {
             if (!inherits(result, "ParsedLevels")) {
                 stop(
@@ -536,20 +586,20 @@ DataCatalog <- R6::R6Class(
                     call. = FALSE
                 )
             }
+            check_enforce(enforce)
             private$parsed <- result
-            names <- unique(c(as.character(c(...)), BASE))
+            names <- unique(as.character(c(...)))
             private$sets <- stats::setNames(
-                lapply(names, function(name) {
-                    data_lookups(result, name, enforce)
-                }),
+                lapply(names, function(name) data_lookups(result, name)),
                 names
             )
-            check_composed_enforce(private$sets, enforce)
             check_shared_keys(private$sets)
-            private$known <- unique(unlist(lapply(
-                private$sets,
-                function(lookups) names(lookups$set$keys)
-            )))
+            private$known <- unique(unlist(
+                lapply(private$sets, function(lookups) names(lookups$set$keys)),
+                use.names = FALSE
+            )) %||%
+                character(0)
+            enforce_sets(private$sets, enforce)
             lookup <- list(
                 find = function(level, location, key, qualifiers) {
                     private$find(level, location, key, qualifiers)
@@ -608,14 +658,14 @@ DataCatalog <- R6::R6Class(
             # As polars builds a frame from records: the columns in the order
             # the rows first name them.
             columns <- unique(unlist(lapply(rows, names), use.names = FALSE))
-            if (is.null(columns)) {
+            if (is.null(columns) && length(private$sets) > 0L) {
                 columns <- c(
                     set_columns(private$sets[[1L]]$set),
                     "present",
                     "constant"
                 )
             }
-            records_frame(rows, columns)
+            records_frame(rows, columns %||% character(0))
         },
 
         #' @description Print the set and the levels.
@@ -630,12 +680,20 @@ DataCatalog <- R6::R6Class(
         }
     ),
     active = list(
-        description = function() private$sets[[1L]]$set$description
+        description = function() private$first()$set$description
     ),
     private = list(
         sets = NULL,
         known = NULL,
         parsed = NULL,
+
+        # The first set named; an error when no set was named.
+        first = function() {
+            if (length(private$sets) == 0L) {
+                stop("no catalogue set named", call. = FALSE)
+            }
+            private$sets[[1L]]
+        },
 
         # The field one key names, asked of every set that defines the key; the
         # first found.
@@ -657,18 +715,14 @@ DataCatalog <- R6::R6Class(
     )
 )
 
-# The set every data catalog composes: APB's own fields, so obs and var always
-# answer.
-BASE <- "apb"
-
-# One set bound to every level of a result; enforce applies where the set has
-# requirements.
-data_lookups <- function(result, name, enforce) {
+# One set bound to every level of a result.
+data_lookups <- function(result, name) {
     set <- catalogue_set(name)
     annotations <- Filter(
         function(annotation) annotation_applies(annotation, result$metadata),
         set$annotations
     )
+    check_answers(name, set, result$metadata, annotations)
     views <- list()
     for (level_name in names(result$levels)) {
         level <- result$levels[[level_name]]
@@ -685,35 +739,45 @@ data_lookups <- function(result, name, enforce) {
             annotations = annotations
         )
     }
-    Lookups$new(
-        name,
-        set,
-        views,
-        if (length(set$requirements) > 0L) enforce else NULL
+    Lookups$new(name, set, views)
+}
+
+# A set without vendor catalogues needs a source the result answers from: an
+# app that has run or an annotation convention the result records. An error,
+# saying what to run, when it can answer nothing.
+check_answers <- function(name, set, metadata, annotations) {
+    ran <- vapply(set$producers, producer_ran, logical(1), metadata = metadata)
+    if (set$needs_review || length(annotations) > 0L || any(ran)) {
+        return(invisible(NULL))
+    }
+    reasons <- vapply(set$producers, pending_reason, character(1))
+    if (length(set$annotations) > 0L) {
+        conventions <- vapply(
+            set$annotations,
+            function(found) found$convention,
+            character(1)
+        )
+        reasons <- c(
+            reasons,
+            sprintf(
+                "the result records no sample annotation (%s); %s",
+                paste(sort_c(conventions), collapse = ", "),
+                "run apb2 annotate"
+            )
+        )
+    }
+    if (length(reasons) == 0L) {
+        reasons <- "no source of the set applies to the result"
+    }
+    stop(
+        sprintf("%s: %s", name, paste(reasons, collapse = "; ")),
+        call. = FALSE
     )
 }
 
 # Whether a set declares every qualifier a request names.
 declares <- function(lookups, qualifiers) {
     all(names(qualifiers) %in% names(lookups$set$vocabulary$qualifiers))
-}
-
-# enforce needs a composed set with requirements.
-check_composed_enforce <- function(sets, enforce) {
-    has_requirements <- vapply(
-        sets,
-        function(lookups) length(lookups$set$requirements) > 0L,
-        logical(1)
-    )
-    if (!is.null(enforce) && !any(has_requirements)) {
-        stop(
-            sprintf(
-                "catalogues %s set no requirements, so nothing to enforce",
-                paste(names(sets), collapse = ", ")
-            ),
-            call. = FALSE
-        )
-    }
 }
 
 # The keys a level offers at one location, from every set.

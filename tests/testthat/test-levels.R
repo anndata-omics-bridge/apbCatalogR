@@ -4,8 +4,9 @@ levels_of <- function() {
         result = result$levels$peptidoform_ion,
         level = DataCatalog$new(
             result,
-            "abundance",
-            "confidence"
+            "abundance_alpha",
+            "confidence_alpha",
+            "apb_alpha"
         )$levels$peptidoform_ion
     )
 }
@@ -17,7 +18,7 @@ test_that("a level answers a key with the matrix the AnnData holds", {
         found$result$layers[["Q_Value"]]
     )
     expect_identical(
-        found$level$layers[["normalized_ms1_intensity"]],
+        found$level$layers[["intensity_ms1_norm_settings"]],
         found$level$X
     )
     expect_identical(found$level$X, found$result$X)
@@ -40,7 +41,7 @@ test_that("keys lists the catalog's keys only", {
     found <- levels_of()
     keys <- found$level$layers$keys()
     expect_true(all(
-        c("intensity", "normalized_intensity", "q_value") %in% keys
+        c("intensity", "intensity_norm_settings", "q_value") %in% keys
     ))
     expect_false("Q_Value" %in% keys)
     expect_true("peptidoform_ion" %in% found$level$var$keys())
@@ -55,7 +56,10 @@ test_that("several names read every column a key names, as a data frame", {
     obs$subject <- rep_len(c("s1", "s2"), nrow(obs))
     level$obs <- obs
     result$metadata$prolfquapp <- list(schema_version = "4")
-    ion <- DataCatalog$new(result, "apb")$levels$peptidoform_ion
+    ion <- DataCatalog$new(
+        result,
+        "obs_annotation_alpha"
+    )$levels$peptidoform_ion
     expect_error(ion$obs[["group"]], "ambiguous")
     design <- ion$obs[c("group", "subject", "Run")]
     expect_identical(colnames(design), c("group_x", "bait", "subject", "Run"))
@@ -64,9 +68,13 @@ test_that("several names read every column a key names, as a data frame", {
 })
 
 test_that("a Catalog's levels hold names", {
-    ion <- Catalog$new("DIA-NN", "2.2.0", "abundance")$levels$peptidoform_ion
+    ion <- Catalog$new(
+        "DIA-NN",
+        "2.2.0",
+        "abundance_alpha"
+    )$levels$peptidoform_ion
     expect_identical(ion$layers[["intensity"]], "Precursor_Quantity")
-    expect_true("normalized_intensity" %in% ion$layers$keys())
+    expect_true("intensity_norm_settings" %in% ion$layers$keys())
     expect_error(
         ion$layers[["Precursor_Quantity"]],
         "no key or field 'Precursor_Quantity'"
@@ -74,24 +82,27 @@ test_that("a Catalog's levels hold names", {
     expect_identical(ion$layers$get("intensity"), "Precursor_Quantity")
     expect_identical(ion$layers$name("intensity"), "Precursor_Quantity")
     expect_null(ion$layers$get("Precursor_Quantity"))
-    apb <- Catalog$new("DIA-NN", "2.2.0", "apb")$levels$peptidoform_ion
+    apb <- Catalog$new("DIA-NN", "2.2.0", "apb_alpha")$levels$peptidoform_ion
     expect_identical(
         apb$var[c("peptidoform_ion", "protein_assignment")],
         c("ProForma_ion", "Protein_Group")
     )
 })
 
-test_that("apb is always in, and the names are the AnnData's", {
+test_that("only the named sets answer, and the names are the AnnData's", {
     found <- levels_of()
     expect_identical(found$level$obs_names, found$result$obs_names)
     expect_identical(found$level$var_names, found$result$var_names)
-    confidence <- DataCatalog$new(
-        synthetic_result("diann_v2-peptidoform_ion"),
-        "confidence"
+    result <- synthetic_result("diann_v2-peptidoform_ion")
+    confidence <- DataCatalog$new(result, "confidence_alpha")
+    expect_null(confidence$levels$peptidoform_ion$var$get("peptidoform_ion"))
+    none <- DataCatalog$new(result)
+    expect_identical(none$levels$peptidoform_ion$layers$keys(), character(0))
+    expect_identical(
+        none$levels$peptidoform_ion$layers[["Q_Value"]],
+        found$result$layers[["Q_Value"]]
     )
-    expect_false(is.null(confidence$levels$peptidoform_ion$var$get(
-        "peptidoform_ion"
-    )))
+    expect_error(none$description, "no catalogue set named")
 })
 
 test_that("get returns NULL where [[ signals an error, and name says which field a key reads", {
@@ -114,7 +125,7 @@ test_that("get returns NULL where [[ signals an error, and name says which field
 test_that("get and name take the qualifiers a key leaves open", {
     layers <- DataCatalog$new(
         synthetic_result("diann_v2-peptidoform_ion"),
-        "chromatography"
+        "chromatography_alpha"
     )$levels$peptidoform_ion$layers
     expect_identical(layers$name("retention_time", unit = "minute"), "RT")
     expect_null(layers$get("retention_time", unit = "second"))
@@ -126,13 +137,13 @@ test_that("get and name take the qualifiers a key leaves open", {
     names <- Catalog$new(
         "DIA-NN",
         "2.2.0",
-        "chromatography"
+        "chromatography_alpha"
     )$levels$peptidoform_ion$layers
     expect_identical(names$get("retention_time", unit = "minute"), "RT")
     expect_null(names$get("retention_time", unit = "second"))
 })
 
-test_that("a varm field's name is its table and column", {
+test_that("an app's set opens once it has run; varm fields are table/column", {
     result <- read_parsed_levels(result_path("diann_v2-peptidoform_ion"))
     level <- result$levels$peptidoform_ion
     level$varm <- list(
@@ -140,15 +151,17 @@ test_that("a varm field's name is its table and column", {
             fasta_matches_contaminant = rep_len(c(TRUE, FALSE), nrow(level$var))
         )
     )
-    var <- DataCatalog$new(result, "apb")$levels$peptidoform_ion$var
     expect_error(
-        var$get("fasta_matches_contaminant"),
-        "apb-fasta verify-peptides"
+        DataCatalog$new(result, "apb_fasta_alpha"),
+        "^apb_fasta_alpha: apb-fasta has not run.*apb-fasta verify-peptides"
     )
     result$metadata$fasta <- list(
         provenance = list(peptide_verification = list())
     )
-    var <- DataCatalog$new(result, "apb")$levels$peptidoform_ion$var
+    var <- DataCatalog$new(
+        result,
+        "apb_fasta_alpha"
+    )$levels$peptidoform_ion$var
     expect_identical(
         var$name("fasta_matches_contaminant"),
         "fasta_validation/fasta_matches_contaminant"
@@ -161,7 +174,10 @@ test_that("a varm field's name is its table and column", {
 
 test_that("a prefix tells a key from the vendor column of its name", {
     result <- synthetic_result("sage-peptidoform_ion")
-    var <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion$var
+    var <- DataCatalog$new(
+        result,
+        "confidence_alpha"
+    )$levels$peptidoform_ion$var
     expect_identical(var$name("q_value"), "q_value")
     expect_identical(var$name("v:q_value"), "q_value")
     expect_identical(var$name("c:quantification_q_value"), "q_value")
@@ -173,14 +189,21 @@ test_that("a prefix tells a key from the vendor column of its name", {
 
 test_that("a prefix of no composed set or a qualified vendor name fails", {
     result <- synthetic_result("sage-peptidoform_ion")
-    var <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion$var
-    expect_error(var$get("a:intensity"), "unknown prefix 'a'.*apb, c, v")
+    var <- DataCatalog$new(
+        result,
+        "confidence_alpha"
+    )$levels$peptidoform_ion$var
+    expect_error(var$get("a:intensity"), "unknown prefix 'a'.*prefixes: c, v")
     expect_error(var$get("c:intensity"), "unknown key 'intensity'")
     expect_error(var$get("v:q_value", stage = "run"), "takes no qualifiers")
 })
 
 test_that("a catalog answers its own prefix and no vendor name", {
-    ion <- Catalog$new("DIA-NN", "2.6.0", "abundance")$levels$peptidoform_ion
+    ion <- Catalog$new(
+        "DIA-NN",
+        "2.6.0",
+        "abundance_alpha"
+    )$levels$peptidoform_ion
     expect_identical(ion$layers[["a:intensity"]], "Precursor_Quantity")
     expect_null(ion$layers$get("v:Precursor_Quantity"))
     expect_error(ion$layers$get("c:pep"), "unknown prefix 'c'.*a, v")

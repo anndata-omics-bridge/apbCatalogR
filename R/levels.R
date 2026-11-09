@@ -6,10 +6,11 @@
 #' anndataR's slots of one level: `X`, `layers`, `var`, `obs`, `obs_names` and
 #' `var_names`. `X` is the level's primary layer and `layers` its other layers,
 #' observations by variables; a key may name the primary layer, and then answers
-#' `X`. `cat$levels$protein$layers[["maxlfq"]]` looks the name up as one of the
-#' catalog's keys first, then as the level's own name in that slot, and signals
-#' an error when it is neither; a prefix makes the lookup exact, `"c:q_value"`
-#' the confidence set alone, `"v:q_value"` the level's own name alone.
+#' `X`. `cat$levels$protein$layers[["intensity"]]` looks the name up as one of
+#' the catalog's keys first, then as the level's own name in that slot, and
+#' signals an error when it is neither; a prefix makes the lookup exact,
+#' `"c:q_value"` the confidence set alone, `"v:q_value"` the level's own name
+#' alone.
 #' `obs[c("group", "Run")]` reads every column the names name as a data frame.
 #'
 #' @field name The level's name.

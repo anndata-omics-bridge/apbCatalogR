@@ -11,12 +11,14 @@ Answers from the catalogue alone, without data. The rule levels whose version
 pattern admits the version give the levels; the set's entries for that
 pattern give each level's fields. \code{levels} have the slots of a
 \link{DataCatalog}'s levels, holding names: a slot answers one of the set's keys,
-such as \code{"normalized_intensity"}, with the field's name, and its \verb{$get()}
+such as \code{"intensity_norm_settings"}, with the field's name, and its \verb{$get()}
 takes further qualifiers, such as \code{unit}. Lookups that several fields answer,
-or that an unreviewed level cannot, signal \code{UnresolvedField}.
+or that an unreviewed level cannot, signal \code{UnresolvedField}. \code{enforce}
+checks the set's requirements against the rule's levels once, when the
+catalog opens.
 }
 \examples{
-catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance")
+catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance_alpha")
 catalog$levels$peptidoform_ion$layers[["intensity"]]
 catalog$levels$peptidoform_ion$layers$keys()
 }
@@ -60,11 +62,13 @@ version.
     \describe{
       \item{\code{software}}{The software name, such as \code{"DIA-NN"}.}
       \item{\code{version}}{The software version, such as \code{"2.2.0"}.}
-      \item{\code{catalog}}{The catalogue set, such as \code{"abundance"} or
-\code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal
-\code{MissingRequiredField} when a field the set requires at that
-strength is missing.}
+      \item{\code{catalog}}{The catalogue set, such as \code{"abundance_alpha"} or
+\code{"confidence_alpha"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal one
+\code{MissingRequiredField} listing every field the set requires at
+that strength and the rule lacks; under \code{"required"}, missing
+recommended fields give one warning. An error when the set has no
+requirements.}
     }
     \if{html}{\out{</div>}}
   }

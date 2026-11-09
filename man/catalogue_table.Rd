@@ -22,5 +22,5 @@ One row per entry and software version it applies to, as \verb{apb-catalog table
 prints it.
 }
 \examples{
-head(catalogue_table("confidence"))
+head(catalogue_table("confidence_alpha"))
 }

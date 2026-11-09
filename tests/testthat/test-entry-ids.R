@@ -50,9 +50,10 @@ test_that("an entry of every level takes the level it answers on", {
         "*"
     )
     entries <- unlist(
-        lapply(apbCatalogR:::catalogue_set("apb")$annotations, function(found) {
-            found$entries
-        }),
+        lapply(
+            apbCatalogR:::catalogue_set("obs_annotation_alpha")$annotations,
+            function(found) found$entries
+        ),
         FALSE
     )
     group <- Find(

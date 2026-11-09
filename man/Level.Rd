@@ -10,10 +10,11 @@ The class generator; a \link{DataCatalog}'s \code{levels} hold its objects.
 anndataR's slots of one level: \code{X}, \code{layers}, \code{var}, \code{obs}, \code{obs_names} and
 \code{var_names}. \code{X} is the level's primary layer and \code{layers} its other layers,
 observations by variables; a key may name the primary layer, and then answers
-\code{X}. \code{cat$levels$protein$layers[["maxlfq"]]} looks the name up as one of the
-catalog's keys first, then as the level's own name in that slot, and signals
-an error when it is neither; a prefix makes the lookup exact, \code{"c:q_value"}
-the confidence set alone, \code{"v:q_value"} the level's own name alone.
+\code{X}. \code{cat$levels$protein$layers[["intensity"]]} looks the name up as one of
+the catalog's keys first, then as the level's own name in that slot, and
+signals an error when it is neither; a prefix makes the lookup exact,
+\code{"c:q_value"} the confidence set alone, \code{"v:q_value"} the level's own name
+alone.
 \code{obs[c("group", "Run")]} reads every column the names name as a data frame.
 }
 \keyword{internal}

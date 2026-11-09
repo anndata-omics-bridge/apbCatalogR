@@ -79,7 +79,7 @@ catalogues <- function() {
 #'   `verdict` (`NA` for a set without requirements).
 #' @export
 #' @examples
-#' head(rule_coverage("abundance"))
+#' head(rule_coverage("abundance_alpha"))
 rule_coverage <- function(catalogue) {
     set <- catalogue_set(catalogue)
     rows <- list()

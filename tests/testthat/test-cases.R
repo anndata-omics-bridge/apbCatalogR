@@ -17,10 +17,7 @@ test_that("Catalog answers every bundle case as apb-catalog does", {
                 do.call(slot$get, slot_arguments(request))
             })
             if (is.null(outcome$error)) {
-                outcome <- c(
-                    list(name = outcome$value),
-                    outcome[setdiff(names(outcome), "value")]
-                )
+                outcome <- list(name = outcome$value)
             }
             expect_json_equal(
                 outcome,
@@ -71,18 +68,18 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
     for (case in read_cases("data_catalog.json")) {
         label <- paste(case$result, case$catalogue, case$enforce %||% "")
         result <- synthetic_result(case$result)
-        if (!is.null(case$error)) {
-            expect_error(
-                DataCatalog$new(result, case$catalogue, enforce = case$enforce),
-                label = label
-            )
+        found <- opened_of(function() {
+            DataCatalog$new(result, case$catalogue, enforce = case$enforce)
+        })
+        expect_json_equal(
+            found$opened,
+            recorded_opening(case),
+            paste(label, "opening")
+        )
+        catalog <- found$catalog
+        if (is.null(catalog)) {
             next
         }
-        catalog <- DataCatalog$new(
-            result,
-            case$catalogue,
-            enforce = case$enforce
-        )
         for (request in case$requests) {
             slot <- slot_of(catalog, request)
             outcome <- outcome_of(function() {
@@ -101,11 +98,6 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
             expect_identical(
                 outcome$value,
                 named_data(result, request, expected$name),
-                label = request_label
-            )
-            expect_identical(
-                outcome$warning,
-                expected$warning,
                 label = request_label
             )
             if (!is.null(expected$name)) {

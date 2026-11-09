@@ -11,6 +11,14 @@ Answers on a result read with \code{\link[=read_parsed_levels]{read_parsed_level
 directly: \code{levels} give each level's slots, looked up by one of the set's
 keys, such as \code{"q_value"} or Sage's \code{"quantification_q_value"}. Ambiguous or
 unreviewed answers signal \code{UnresolvedField}.
+
+Composes the named sets alone: \code{apb_alpha}, the fields apb2 convert writes,
+answers only when named. A key routes to the sets that define it; two sets
+naming different fields for one key on one level is an error. With no set
+named, every name is the level's own. A named set that can answer nothing on
+the result, because its app has not run or the result records no sample
+annotation, is an error saying what to run. \code{enforce} checks the
+requirements once, here.
 }
 \examples{
 results <- tempfile()
@@ -22,7 +30,7 @@ utils::untar(archive, exdir = results)
 result <- read_parsed_levels(
     file.path(results, "maxquant_wide-peptidoform_ion.parquet")
 )
-catalog <- DataCatalog$new(result, "confidence")
+catalog <- DataCatalog$new(result, "confidence_alpha")
 dim(catalog$levels$peptidoform_ion$layers[["pep"]])
 catalog$levels$peptidoform_ion$layers$name("pep")
 }
@@ -37,7 +45,8 @@ slots looked up by key.}
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{description}}{What this catalogue set holds and who uses it.}
+    \item{\code{description}}{What the first catalogue set named holds and who uses
+it; an error when no set was named.}
   }
   \if{html}{\out{</div>}}
 }
@@ -54,8 +63,8 @@ slots looked up by key.}
 \if{html}{\out{<a id="method-DataCatalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-initialize}{}}}
 \subsection{\code{DataCatalog$new()}}{
-  Bind catalogue sets to the levels of one result; \code{apb},
-APB's own fields, is always in.
+  Bind the named catalogue sets, and no others, to the
+levels of one result.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$new(result, ..., enforce = NULL)}
@@ -65,11 +74,13 @@ APB's own fields, is always in.
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{result}}{A \link{ParsedLevels} object.}
-      \item{\code{...}}{The catalogue sets, such as \code{"abundance"} and
-\code{"confidence"}; see \code{\link[=catalogues]{catalogues()}}.}
-      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal
-\code{MissingRequiredField} when a field a set requires at that strength
-is missing.}
+      \item{\code{...}}{The catalogue sets, such as \code{"abundance_alpha"} and
+\code{"confidence_alpha"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal one
+\code{MissingRequiredField} listing every field the named sets require
+at that strength and the result lacks; under \code{"required"}, missing
+recommended fields give one warning. An error when no named set
+has requirements.}
     }
     \if{html}{\out{</div>}}
   }

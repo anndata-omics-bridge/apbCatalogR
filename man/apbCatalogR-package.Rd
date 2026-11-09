@@ -22,9 +22,11 @@ Lookups signal conditions of the classes apb-catalog raises in Python:
 \itemize{
 \item \code{UnresolvedField}: the catalogue cannot answer with one field; the request
 is ambiguous or unknown. Its \code{resolution} holds the candidates and reasons.
-\item \code{MissingRequiredField}: a field the set requires is missing, under
-\code{enforce}. Signalled as an error, or as a warning for a \code{recommended}
-field when \code{enforce = "required"}.
+\item \code{MissingRequiredField}: fields the named sets require are missing, under
+\code{enforce}, checked once when a catalog opens. Its \code{missing} lists every
+missing field, each as its \code{resolution} and requirement \code{row}, and its
+message has one line per field. Signalled as an error, or as a warning
+for the \code{recommended} fields when \code{enforce = "required"}.
 }
 
 Catch them with \code{\link[=tryCatch]{tryCatch()}}, for example

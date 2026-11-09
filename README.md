@@ -31,11 +31,13 @@ Columns keep the vendor's names: the posterior error probability is `PEP` in Max
 
 | Set | Fields |
 | --- | --- |
-| `abundance` | Intensities, and whether the software normalizes them across runs |
-| `confidence` | PEP and q-values per run and per feature |
-| `proteobench_entrapment` | Precursor q-values for ProteoBench's entrapment scoring |
-| `apb` | Fields APB writes for every vendor: ProForma identifiers, decoy and contaminant flags, sample annotations |
-| `chromatography` | Retention times, peak bounds and widths, with their unit |
+| `abundance_alpha` | Intensities, and whether the software normalizes them across runs |
+| `confidence_alpha` | PEP and q-values per run and per feature |
+| `proteobench_entrapment_alpha` | Precursor q-values for ProteoBench's entrapment scoring |
+| `apb_alpha` | Fields `apb2 convert` writes for every vendor: ProForma identifiers, decoy and contaminant flags |
+| `obs_annotation_alpha` | Each run's group and subject, from an SDRF or a prolfquapp table |
+| `apb_fasta_alpha` | apb-fasta's peptide verification, once it has run |
+| `chromatography_alpha` | Retention times, peak bounds and widths, with their unit |
 
 A lookup answers one of three ways:
 
@@ -50,7 +52,7 @@ apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names 
 | Call | Answers |
 | --- | --- |
 | `Catalog$new(software, version, set)` | From the catalogue alone, without data |
-| `DataCatalog$new(result, set)` | On one result, and returns the data |
+| `DataCatalog$new(result, set)` | On one result, the named sets alone, and returns the data |
 | `catalogues()`, `rule_coverage()`, `catalogue_table()` | The sets, how each rule covers a set, every entry as a table |
 | `read_parsed_levels(path)` | An APB result, `.h5ad`, `.parquet` or `.duckdb`, as `ParsedLevels`, one anndataR `AnnData` per level |
 
@@ -79,10 +81,10 @@ Ask the catalogue which column a software version reports:
 
 ```r
 library(apbCatalogR)
-diann <- Catalog$new("DIA-NN", "2.2.0", "abundance")$levels$peptidoform_ion
+diann <- Catalog$new("DIA-NN", "2.2.0", "abundance_alpha")$levels$peptidoform_ion
 diann$layers$keys()
-#> [1] "intensity"                "ms1_intensity"            "normalized_intensity"
-#> [4] "normalized_ms1_intensity"
+#> [1] "intensity"                   "intensity_ms1"
+#> [3] "intensity_ms1_norm_settings" "intensity_norm_settings"
 diann$layers[["intensity"]]
 #> [1] "Precursor_Quantity"
 ```
@@ -91,7 +93,7 @@ Get the data of a result:
 
 ```r
 result <- read_parsed_levels("result.parquet")
-ion <- DataCatalog$new(result, "confidence")$levels$peptidoform_ion
+ion <- DataCatalog$new(result, "confidence_alpha", "apb_alpha")$levels$peptidoform_ion
 ion$layers                     # key -> matrix, runs x features
 ion$var                        # key -> vector, one value per feature
 pep <- ion$layers$get("pep")   # runs x features matrix, NULL when absent

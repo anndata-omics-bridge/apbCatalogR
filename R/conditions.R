@@ -54,6 +54,8 @@ unresolved_field <- function(resolution) {
     )
 }
 
+# One missing field: its requirement, what was asked, on which level, and why
+# it is absent.
 missing_required_text <- function(resolution, row) {
     sprintf(
         "%s field %s on %s is missing: %s",
@@ -64,21 +66,32 @@ missing_required_text <- function(resolution, row) {
     )
 }
 
-missing_required_field <- function(resolution, row) {
+# Fields the named sets require are missing, every one listed, one line each:
+# `missing` holds each field's resolution and requirement row.
+missing_required_lines <- function(missing) {
+    paste(
+        vapply(
+            missing,
+            function(found) missing_required_text(found$resolution, found$row),
+            character(1)
+        ),
+        collapse = "\n"
+    )
+}
+
+missing_required_field <- function(missing) {
     errorCondition(
-        missing_required_text(resolution, row),
-        resolution = resolution,
-        row = row,
+        missing_required_lines(missing),
+        missing = missing,
         class = "MissingRequiredField",
         call = NULL
     )
 }
 
-missing_required_warning <- function(resolution, row) {
+missing_required_warning <- function(missing) {
     warningCondition(
-        missing_required_text(resolution, row),
-        resolution = resolution,
-        row = row,
+        missing_required_lines(missing),
+        missing = missing,
         class = "MissingRequiredField",
         call = NULL
     )

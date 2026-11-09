@@ -4,9 +4,10 @@
 # A consumer's question: one level and location, the key asked for (NULL to ask
 # for every key), the kind it stands for (NULL with no key) and the qualifier
 # values accepted (a named list of character vectors): the values the key fixes
-# and any further qualifiers. Qualifiers left out accept any value; an entry
-# that leaves its kind or a qualifier unknown is undecided unless the request
-# accepts "unknown" there.
+# and any further qualifiers. A request for a key answers with that key's
+# entries; an entry of another key only keeps it undecided. Qualifiers left out
+# accept any value; an entry that leaves a qualifier unknown is undecided unless
+# the request accepts "unknown" there.
 field_request <- function(level, location, key, qualifiers, kind = NULL) {
     list(
         level = level,
@@ -17,16 +18,21 @@ field_request <- function(level, location, key, qualifiers, kind = NULL) {
     )
 }
 
+# Whether an entry answers the request apart from qualifiers it leaves unknown:
+# an entry of the key asked for, or of another key when it leaves unknown what
+# the request asks.
 request_admits <- function(request, entry) {
     selects <- is.na(request$location) ||
         entry$reference$location %in% READS[[request$location]]
-    selects && length(request_mismatched(request, entry)) == 0L
+    keyed <- is.null(request$key) ||
+        identical(entry$key, request$key) ||
+        length(request_undecided(request, entry)) > 0L
+    selects && length(request_mismatched(request, entry)) == 0L && keyed
 }
 
-# What the request asks that an entry's known kind or values contradict.
+# What the request asks that an entry's kind or known values contradict.
 request_mismatched <- function(request, entry) {
-    kind <- !is.null(request$kind) &&
-        !(entry$kind %in% c(UNKNOWN, request$kind))
+    kind <- !is.null(request$kind) && entry$kind != request$kind
     c(
         if (kind) "kind",
         unlist(Filter(
@@ -39,21 +45,17 @@ request_mismatched <- function(request, entry) {
     )
 }
 
-# What the request asks that an entry leaves unknown: its kind or qualifiers.
+# What the request asks that an entry leaves unknown: its qualifiers with the
+# value unknown. A kind is always known; a field whose meaning the reviewer
+# could not establish is not catalogued.
 request_undecided <- function(request, entry) {
-    kind <- !is.null(request$kind) &&
-        request$kind != UNKNOWN &&
-        entry$kind == UNKNOWN
-    c(
-        if (kind) "kind",
-        unlist(Filter(
-            function(name) {
-                entry$qualifiers[[name]] == UNKNOWN &&
-                    !(UNKNOWN %in% request$qualifiers[[name]])
-            },
-            names(request$qualifiers)
-        ))
-    )
+    unlist(Filter(
+        function(name) {
+            entry$qualifiers[[name]] == UNKNOWN &&
+                !(UNKNOWN %in% request$qualifiers[[name]])
+        },
+        names(request$qualifiers)
+    ))
 }
 
 new_candidate <- function(entry, undecided = character(0)) {
@@ -68,8 +70,8 @@ new_candidate <- function(entry, undecided = character(0)) {
 }
 
 # The answer to one request; only a resolved one carries a reference.
-# `requirement` records the requirement a missing field had when the lookup
-# enforced it.
+# `requirement` records the requirement a missing field had when the catalog
+# enforced it at init.
 Resolution <- R6::R6Class(
     "Resolution",
     public = list(
