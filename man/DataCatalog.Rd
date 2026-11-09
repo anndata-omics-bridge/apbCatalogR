@@ -19,6 +19,11 @@ named, every name is the level's own. A named set that can answer nothing on
 the result, because its app has not run or the result records no sample
 annotation, is an error saying what to run. \code{enforce} checks the
 requirements once, here.
+
+\code{DataCatalog$answering_sets(result)} returns the sets
+\code{DataCatalog$new(result, name)} opens, as a character vector: every set but
+one whose app has not run on the result or whose annotation it does not
+record. It signals no error for such a set, so a consumer can leave it out.
 }
 \examples{
 results <- tempfile()

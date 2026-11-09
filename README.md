@@ -36,7 +36,8 @@ Columns keep the vendor's names: the posterior error probability is `PEP` in Max
 | `proteobench_entrapment_alpha` | Precursor q-values for ProteoBench's entrapment scoring |
 | `apb_alpha` | Fields `apb2 convert` writes for every vendor: ProForma identifiers, decoy and contaminant flags |
 | `obs_annotation_alpha` | Each run's group and subject, from an SDRF or a prolfquapp table |
-| `apb_fasta_alpha` | apb-fasta's peptide verification, once it has run |
+| `fasta_peptides_alpha` | apb-fasta's peptide verification, once `apb-fasta verify-peptides` has run |
+| `fasta_proteins_alpha` | apb-fasta's protein annotation, once `apb-fasta merge-annotations` has run |
 | `chromatography_alpha` | Retention times, peak bounds and widths, with their unit |
 
 A lookup answers one of three ways:

@@ -152,15 +152,15 @@ test_that("an app's set opens once it has run; varm fields are table/column", {
         )
     )
     expect_error(
-        DataCatalog$new(result, "apb_fasta_alpha"),
-        "^apb_fasta_alpha: apb-fasta has not run.*apb-fasta verify-peptides"
+        DataCatalog$new(result, "fasta_peptides_alpha"),
+        "^fasta_peptides_alpha: apb-fasta has not run.*verify-peptides"
     )
     result$metadata$fasta <- list(
         provenance = list(peptide_verification = list())
     )
     var <- DataCatalog$new(
         result,
-        "apb_fasta_alpha"
+        "fasta_peptides_alpha"
     )$levels$peptidoform_ion$var
     expect_identical(
         var$name("fasta_matches_contaminant"),
@@ -170,6 +170,35 @@ test_that("an app's set opens once it has run; varm fields are table/column", {
         var$get("fasta_matches_contaminant"),
         level$varm$fasta_validation$fasta_matches_contaminant
     )
+})
+
+test_that("answering_sets lists the sets a result opens, signalling nothing", {
+    result <- read_parsed_levels(result_path("diann_v2-peptidoform_ion"))
+    listed <- DataCatalog$answering_sets(result)
+    expect_true("abundance_alpha" %in% listed)
+    expect_false(any(
+        c(
+            "fasta_peptides_alpha",
+            "fasta_proteins_alpha",
+            "obs_annotation_alpha"
+        ) %in%
+            listed
+    ))
+    result$metadata$fasta <- list(
+        provenance = list(peptide_verification = list())
+    )
+    listed <- DataCatalog$answering_sets(result)
+    expect_true("fasta_peptides_alpha" %in% listed)
+    expect_false("fasta_proteins_alpha" %in% listed)
+    annotated <- read_parsed_levels(result_path("edge-fasta-proteins"))
+    expect_true(
+        "fasta_proteins_alpha" %in% DataCatalog$answering_sets(annotated)
+    )
+    var <- DataCatalog$new(
+        annotated,
+        "fasta_proteins_alpha"
+    )$levels$protein$var
+    expect_identical(var$name("fasta_gene_names"), "fasta/fasta_gene_names")
 })
 
 test_that("a prefix tells a key from the vendor column of its name", {

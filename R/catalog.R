@@ -545,6 +545,11 @@ check_rules_matched <- function(matched, software, version) {
 #' annotation, is an error saying what to run. `enforce` checks the
 #' requirements once, here.
 #'
+#' `DataCatalog$answering_sets(result)` returns the sets
+#' `DataCatalog$new(result, name)` opens, as a character vector: every set but
+#' one whose app has not run on the result or whose annotation it does not
+#' record. It signals no error for such a set, so a consumer can leave it out.
+#'
 #' @field description What the first catalogue set named holds and who uses
 #'   it; an error when no set was named.
 #' @return The class generator; `DataCatalog$new()` returns a `DataCatalog`.
@@ -715,14 +720,28 @@ DataCatalog <- R6::R6Class(
     )
 )
 
+# The sets DataCatalog$new(result, name) opens: see answers().
+DataCatalog$answering_sets <- function(result) {
+    if (!inherits(result, "ParsedLevels")) {
+        stop(
+            "result is a ParsedLevels, as read_parsed_levels() returns",
+            call. = FALSE
+        )
+    }
+    Filter(
+        function(name) answers(catalogue_set(name), result$metadata),
+        set_names()
+    )
+}
+
 # One set bound to every level of a result.
 data_lookups <- function(result, name) {
     set <- catalogue_set(name)
+    check_answers(name, set, result$metadata)
     annotations <- Filter(
         function(annotation) annotation_applies(annotation, result$metadata),
         set$annotations
     )
-    check_answers(name, set, result$metadata, annotations)
     views <- list()
     for (level_name in names(result$levels)) {
         level <- result$levels[[level_name]]
@@ -742,12 +761,23 @@ data_lookups <- function(result, name) {
     Lookups$new(name, set, views)
 }
 
-# A set without vendor catalogues needs a source the result answers from: an
-# app that has run or an annotation convention the result records. An error,
-# saying what to run, when it can answer nothing.
-check_answers <- function(name, set, metadata, annotations) {
+# Whether a set can answer on a result: it has vendor catalogues, one of its
+# apps has run, or the result records one of its annotation conventions.
+answers <- function(set, metadata) {
+    applies <- vapply(
+        set$annotations,
+        annotation_applies,
+        logical(1),
+        metadata = metadata
+    )
     ran <- vapply(set$producers, producer_ran, logical(1), metadata = metadata)
-    if (set$needs_review || length(annotations) > 0L || any(ran)) {
+    set$needs_review || any(applies) || any(ran)
+}
+
+# A set needs a source the result answers from, as answers() decides. An
+# error, saying what to run, when it can answer nothing.
+check_answers <- function(name, set, metadata) {
+    if (answers(set, metadata)) {
         return(invisible(NULL))
     }
     reasons <- vapply(set$producers, pending_reason, character(1))

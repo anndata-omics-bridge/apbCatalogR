@@ -61,9 +61,10 @@ catalog_version()
 # Catalogue sets
 
 Each catalogue set serves one kind of consumer, and each holds the fields one
-producer writes: `apb_alpha` what `apb2 convert` writes, `apb_fasta_alpha`
-what `apb-fasta verify-peptides` adds, and `obs_annotation_alpha` the sample
-annotation `apb2 annotate` attaches:
+producer writes: `apb_alpha` what `apb2 convert` writes,
+`fasta_peptides_alpha` what `apb-fasta verify-peptides` adds,
+`fasta_proteins_alpha` what `apb-fasta merge-annotations` adds, and
+`obs_annotation_alpha` the sample annotation `apb2 annotate` attaches:
 
 ```{r sets}
 catalogues()[, c("catalogue", "has_requirements", "entries")]
@@ -260,9 +261,16 @@ that lacks them is an error that says what to run:
 
 ```{r producers}
 tryCatch(
-    DataCatalog$new(result, "apb_fasta_alpha"),
+    DataCatalog$new(result, "fasta_peptides_alpha"),
     error = function(condition) conditionMessage(condition)
 )
+```
+
+`DataCatalog$answering_sets()` lists the sets a result opens, without an error,
+so a consumer can leave out the fields of an app that has not run:
+
+```{r answering}
+DataCatalog$answering_sets(result)
 ```
 
 # Requirements
