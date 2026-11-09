@@ -327,19 +327,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; [1] "0.1.1"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="catalogue-sets" class="level1"><h1>Catalogue sets</h1>
-<p>Each catalogue set serves one kind of consumer:</p>
+<p>Each catalogue set serves one kind of consumer, and each holds the fields one producer writes: <code>apb_alpha</code> what <code>apb2 convert</code> writes, <code>fasta_peptides_alpha</code> what <code>apb-fasta verify-peptides</code> adds, <code>fasta_proteins_alpha</code> what <code>apb-fasta merge-annotations</code> adds, and <code>obs_annotation_alpha</code> the sample annotation <code>apb2 annotate</code> attaches:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"catalogue"</span>, <span class="st">"has_requirements"</span>, <span class="st">"entries"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;                catalogue has_requirements entries</span></span>
-<span><span class="co">#&gt; 1              abundance             TRUE      45</span></span>
-<span><span class="co">#&gt; 2             confidence            FALSE      26</span></span>
-<span><span class="co">#&gt; 3 proteobench_entrapment            FALSE       7</span></span>
-<span><span class="co">#&gt; 4                    apb             TRUE     268</span></span>
-<span><span class="co">#&gt; 5         chromatography            FALSE      58</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt;                      catalogue has_requirements entries</span></span>
+<span><span class="co">#&gt; 1              abundance_alpha             TRUE      45</span></span>
+<span><span class="co">#&gt; 2             confidence_alpha            FALSE      26</span></span>
+<span><span class="co">#&gt; 3 proteobench_entrapment_alpha            FALSE       7</span></span>
+<span><span class="co">#&gt; 4                    apb_alpha             TRUE     181</span></span>
+<span><span class="co">#&gt; 5         obs_annotation_alpha            FALSE       7</span></span>
+<span><span class="co">#&gt; 6         fasta_peptides_alpha            FALSE      28</span></span>
+<span><span class="co">#&gt; 7         fasta_proteins_alpha            FALSE       4</span></span>
+<span><span class="co">#&gt; 8         chromatography_alpha            FALSE      58</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> lists the entries of a set, one row per field and software version pattern:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">entries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table</a></span><span class="op">(</span><span class="st">"confidence"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">entries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table</a></span><span class="op">(</span><span class="st">"confidence_alpha"</span><span class="op">)</span></span>
 <span><span class="va">columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"software_version_pattern"</span>, <span class="st">"level"</span>, <span class="st">"name"</span>, <span class="st">"key"</span><span class="op">)</span></span>
 <span><span class="va">entries</span><span class="op">[</span><span class="va">entries</span><span class="op">$</span><span class="va">source</span> <span class="op">==</span> <span class="st">"Spectronaut"</span>, <span class="va">columns</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    software_version_pattern           level               name             key</span></span>
@@ -359,20 +362,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="which-column-a-software-version-reports" class="level1"><h1>Which column a software version reports</h1>
 <p><code>Catalog</code> answers from the catalogue alone, without data. Its <code>levels</code> are the levels apb2 converts for that software version, each with the slots <code>layers</code>, <code>var</code> and <code>obs</code>, holding field names:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance_alpha"</span><span class="op">)</span></span>
 <span><span class="va">catalog</span></span>
-<span><span class="co">#&gt; &lt;Catalog abundance: peptidoform_ion, protein&gt;</span></span>
+<span><span class="co">#&gt; &lt;Catalog abundance_alpha: peptidoform_ion, protein&gt;</span></span>
 <span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "intensity"                "ms1_intensity"           </span></span>
-<span><span class="co">#&gt; [3] "normalized_intensity"     "normalized_ms1_intensity"</span></span>
+<span><span class="co">#&gt; [1] "intensity"                   "intensity_ms1"              </span></span>
+<span><span class="co">#&gt; [3] "intensity_ms1_norm_settings" "intensity_norm_settings"</span></span>
 <span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"intensity"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "Precursor_Quantity"</span></span>
-<span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"maxlfq"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"intensity_norm_settings"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "PG_MaxLFQ"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>[</code> on <code>var</code> or <code>obs</code> names every column the keys read. Spectronaut 21 reports two protein q-values:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spectronaut</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"Spectronaut"</span>, <span class="st">"21.0"</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spectronaut</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"Spectronaut"</span>, <span class="st">"21.0"</span>, <span class="st">"confidence_alpha"</span><span class="op">)</span></span>
 <span><span class="va">spectronaut</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span><span class="op">$</span><span class="va">var</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "library_q_value" "q_value"</span></span>
 <span><span class="va">spectronaut</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span><span class="op">$</span><span class="va">var</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"q_value"</span>, <span class="st">"library_q_value"</span><span class="op">)</span><span class="op">]</span></span>
@@ -411,27 +414,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;     uns: 'apb'</span></span>
 <span><span class="co">#&gt;     layers: 'MS_MS_count', 'Retention_time', 'Retention_length', 'Calibrated_retention_time', 'Calibrated_retention_time_start', 'Calibrated_retention_time_finish', 'Score', 'PEP'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>DataCatalog</code> answers on the result and hands back the data:</p>
+<p><code>DataCatalog</code> answers on the result and hands back the data. It composes the named sets alone: <code>apb_alpha</code>, APB’s own fields, answers only when named.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">confidence</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">confidence</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence_alpha"</span>, <span class="st">"apb_alpha"</span><span class="op">)</span></span>
 <span><span class="va">pep</span> <span class="op">&lt;-</span> <span class="va">confidence</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"pep"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">pep</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2 3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>$fields()</code> lists the catalogued fields the result holds, from the <code>confidence</code> set and from <code>apb</code>, which is always in:</p>
+<p><code>$fields()</code> lists the catalogued fields the result holds, from both sets:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">confidence</span><span class="op">$</span><span class="fu">fields</span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"set"</span>, <span class="st">"location"</span>, <span class="st">"name"</span>, <span class="st">"key"</span>, <span class="st">"present"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;          set location                 name                key present</span></span>
-<span><span class="co">#&gt; 1 confidence   layers                  PEP                pep    TRUE</span></span>
-<span><span class="co">#&gt; 2        apb      var     ProForma_peptide            peptide    TRUE</span></span>
-<span><span class="co">#&gt; 3        apb      var ProForma_peptidoform        peptidoform    TRUE</span></span>
-<span><span class="co">#&gt; 4        apb      var         ProForma_ion    peptidoform_ion    TRUE</span></span>
-<span><span class="co">#&gt; 5        apb      var            apb_Decoy              decoy    TRUE</span></span>
-<span><span class="co">#&gt; 6        apb      var      apb_Contaminant        contaminant    TRUE</span></span>
-<span><span class="co">#&gt; 7        apb      var          Protein_IDs protein_assignment    TRUE</span></span>
-<span><span class="co">#&gt; 8        apb      var             Proteins   fasta_accessions    TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt;                set location                 name                key present</span></span>
+<span><span class="co">#&gt; 1 confidence_alpha   layers                  PEP                pep    TRUE</span></span>
+<span><span class="co">#&gt; 2        apb_alpha      var     ProForma_peptide            peptide    TRUE</span></span>
+<span><span class="co">#&gt; 3        apb_alpha      var ProForma_peptidoform        peptidoform    TRUE</span></span>
+<span><span class="co">#&gt; 4        apb_alpha      var         ProForma_ion    peptidoform_ion    TRUE</span></span>
+<span><span class="co">#&gt; 5        apb_alpha      var            apb_Decoy              decoy    TRUE</span></span>
+<span><span class="co">#&gt; 6        apb_alpha      var      apb_Contaminant        contaminant    TRUE</span></span>
+<span><span class="co">#&gt; 7        apb_alpha      var          Protein_IDs protein_assignment    TRUE</span></span>
+<span><span class="co">#&gt; 8        apb_alpha      var             Proteins   fasta_accessions    TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Each level of the catalog has anndataR’s slots. A name is read as a key first, then as the level’s own layer or column, as cf_xarray reads <code>ds.cf[...]</code>; <code>apb</code>, APB’s own fields, is always in:</p>
+<p>Each level of the catalog has anndataR’s slots. A name is read as a key first, then as the level’s own layer or column, as cf_xarray reads <code>ds.cf[...]</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ion</span> <span class="op">&lt;-</span> <span class="va">confidence</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"pep"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>            <span class="co"># a matrix, runs x features</span></span>
@@ -477,12 +480,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"v:Score"</span><span class="op">)</span>  <span class="co"># MaxQuant's own layer alone</span></span>
 <span><span class="co">#&gt; [1] "Score"</span></span>
 <span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"catalogue"</span>, <span class="st">"prefix"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;                catalogue prefix</span></span>
-<span><span class="co">#&gt; 1              abundance      a</span></span>
-<span><span class="co">#&gt; 2             confidence      c</span></span>
-<span><span class="co">#&gt; 3 proteobench_entrapment    pbe</span></span>
-<span><span class="co">#&gt; 4                    apb    apb</span></span>
-<span><span class="co">#&gt; 5         chromatography     rt</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt;                      catalogue prefix</span></span>
+<span><span class="co">#&gt; 1              abundance_alpha      a</span></span>
+<span><span class="co">#&gt; 2             confidence_alpha      c</span></span>
+<span><span class="co">#&gt; 3 proteobench_entrapment_alpha    pbe</span></span>
+<span><span class="co">#&gt; 4                    apb_alpha    apb</span></span>
+<span><span class="co">#&gt; 5         obs_annotation_alpha  annot</span></span>
+<span><span class="co">#&gt; 6         fasta_peptides_alpha   fpep</span></span>
+<span><span class="co">#&gt; 7         fasta_proteins_alpha  fprot</span></span>
+<span><span class="co">#&gt; 8         chromatography_alpha     rt</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>MaxQuant reports no q-value on this level, so <code>$get()</code> gives <code>NULL</code>, where <code>[[</code> signals an error; <code>$name()</code> names the field a key reads:</p>
 <div class="cell">
@@ -491,14 +497,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"pep"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "PEP"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>A lookup the catalogue cannot answer with one field signals <code>UnresolvedField</code> rather than choosing silently. FragPipe does not document whether its intensity is normalized, so the key <code>intensity</code>, never normalized, is unknown there:</p>
+<p>A lookup the catalogue cannot answer with one field signals <code>UnresolvedField</code> rather than choosing silently. Spectronaut does not document how its protein quantity combines the precursors, so asking for a summed one is unknown there:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fragpipe</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"FragPipe"</span>, <span class="st">"22.0"</span>, <span class="st">"abundance"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spectronaut</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Catalog.html">Catalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"Spectronaut"</span>, <span class="st">"21.0"</span>, <span class="st">"abundance_alpha"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span></span>
-<span>    <span class="va">fragpipe</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"intensity"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>    <span class="va">spectronaut</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
+<span>        <span class="st">"intensity_norm_settings"</span>,</span>
+<span>        aggregation <span class="op">=</span> <span class="st">"sum"</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>    UnresolvedField <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">condition</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">condition</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "intensity (kind=intensity, normalization=none) on peptidoform_ion is unknown: Intensity leaves normalization unknown; candidates: Intensity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt; [1] "intensity_norm_settings (kind=intensity, normalization=run_setting, aggregation=sum) on protein is unknown: PG_Quantity leaves aggregation unknown; candidates: PG_Quantity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="the-same-code-for-every-software" class="level1"><h1>The same code for every software</h1>
 <p>The same lookup reads each software’s field; the test bundle holds results of many:</p>
@@ -510,22 +519,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="op">)</span></span>
 <span><span class="va">pep_field</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">vendor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="va">file</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">vendor</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
+<span>    <span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">vendor</span>, <span class="st">"confidence_alpha"</span><span class="op">)</span></span>
 <span>    <span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"pep"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">vapply</a></span><span class="op">(</span><span class="va">files</span>, <span class="va">pep_field</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    MaxQuant Spectronaut      DIA-NN </span></span>
 <span><span class="co">#&gt;       "PEP"    "EG_PEP"       "PEP"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>A protein level reads the same way; DIA-NN’s MaxLFQ intensity is the key <code>maxlfq</code>:</p>
+<p>A protein level reads the same way; DIA-NN’s MaxLFQ intensity, normalized as the run’s settings chose, is the key <code>intensity_norm_settings</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">diann</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"diann_v2-protein.parquet"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">protein</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">diann</span>, <span class="st">"abundance"</span><span class="op">)</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span></span>
+<span><span class="va">protein</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">diann</span>, <span class="st">"abundance_alpha"</span><span class="op">)</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">protein</span></span>
 <span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "maxlfq"</span></span>
-<span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"maxlfq"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "intensity_norm_settings"</span></span>
+<span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">name</span><span class="op">(</span><span class="st">"intensity_norm_settings"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "PG_MaxLFQ"</span></span>
-<span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"maxlfq"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">protein</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"intensity_norm_settings"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     F0  F1  F2</span></span>
 <span><span class="co">#&gt; S0 0.0 0.1 0.2</span></span>
 <span><span class="co">#&gt; S1 0.1 0.2 0.3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -533,9 +542,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="several-sets-and-qualifiers" class="level1"><h1>Several sets and qualifiers</h1>
 <p><code>DataCatalog$new()</code> composes several sets on one result. A key may leave a qualifier open, such as the unit of a retention time; <code>$get()</code> and <code>$name()</code> narrow it, and a lookup no field answers gives <code>NULL</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">both</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span>, <span class="st">"chromatography"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">both</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence_alpha"</span>, <span class="st">"chromatography_alpha"</span><span class="op">)</span></span>
 <span><span class="va">both</span></span>
-<span><span class="co">#&gt; &lt;DataCatalog confidence, chromatography, apb: peptidoform_ion&gt;</span></span>
+<span><span class="co">#&gt; &lt;DataCatalog confidence_alpha, chromatography_alpha: peptidoform_ion&gt;</span></span>
 <span><span class="va">rt</span> <span class="op">&lt;-</span> <span class="va">both</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span></span>
 <span><span class="va">rt</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">keys</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "aligned_peak_end"       "aligned_peak_start"     "aligned_retention_time"</span></span>
@@ -545,10 +554,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">rt</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="st">"retention_time"</span>, unit <span class="op">=</span> <span class="st">"second"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section><section id="sets-an-app-or-an-annotation-answers" class="level1"><h1>Sets an app or an annotation answers</h1>
+<p>A set of an app’s fields answers once the app has run, and the sample annotation once <code>apb2 annotate</code> has attached it. Opening such a set on a result that lacks them is an error that says what to run:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span></span>
+<span>    <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"fasta_peptides_alpha"</span><span class="op">)</span>,</span>
+<span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">condition</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">condition</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "fasta_peptides_alpha: apb-fasta has not run on this result; run `apb-fasta verify-peptides`"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>DataCatalog$answering_sets()</code> lists the sets a result opens, without an error, so a consumer can leave out the fields of an app that has not run:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">DataCatalog</span><span class="op">$</span><span class="fu">answering_sets</span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "abundance_alpha"              "confidence_alpha"            </span></span>
+<span><span class="co">#&gt; [3] "proteobench_entrapment_alpha" "apb_alpha"                   </span></span>
+<span><span class="co">#&gt; [5] "chromatography_alpha"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="requirements" class="level1"><h1>Requirements</h1>
+<p>A set may require or recommend fields. <code>enforce</code> checks them once, when the catalog opens: <code>"required"</code> signals one <code>MissingRequiredField</code> listing every missing required field and warns about missing recommended ones; <code>"recommended"</code> signals for both. MaxQuant’s peptidoform level lacks a recommended field of <code>apb_alpha</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peptidoform</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform.parquet"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span></span>
+<span>    <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">peptidoform</span>, <span class="st">"apb_alpha"</span>, enforce <span class="op">=</span> <span class="st">"recommended"</span><span class="op">)</span>,</span>
+<span>    MissingRequiredField <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">condition</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">condition</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "recommended field peptidoform (kind=peptidoform) on peptidoform is missing: no reviewed MaxQuant ^(1\\.5|1\\.6|2\\.) entry on peptidoform matches"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section><section id="rule-coverage" class="level1"><h1>Rule coverage</h1>
 <p><code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/rule_coverage.html">rule_coverage()</a></code> checks every rule against one set; a set with requirements judges each level:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/rule_coverage.html">rule_coverage</a></span><span class="op">(</span><span class="st">"abundance"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">coverage</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/rule_coverage.html">rule_coverage</a></span><span class="op">(</span><span class="st">"abundance_alpha"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">coverage</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"software"</span>, <span class="st">"version"</span>, <span class="st">"level"</span>, <span class="st">"verdict"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;    software version           level verdict</span></span>
 <span><span class="co">#&gt; 1  AlphaDIA    1.10 peptidoform_ion    warn</span></span>
@@ -560,11 +597,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="a-newer-catalog" class="level1"><h1>A newer catalog</h1>
 <p><code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/update_catalog.html">update_catalog()</a></code> downloads the bundle of the latest apb-catalog release into the user cache; later sessions use the newest bundle, shipped or downloaded. It works from the next apb-catalog release, the first to ship the bundle.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/update_catalog.html">update_catalog</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/update_catalog.html">update_catalog</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="session-information" class="level1"><h1>Session information</h1>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.2 (2026-10-29)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">#&gt; Running under: Ubuntu 26.04.1 LTS</span></span>
@@ -590,14 +627,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] vctrs_0.7.3       cli_3.6.6         knitr_1.52        rlang_1.3.0      </span></span>
-<span><span class="co">#&gt;  [5] xfun_0.62         otel_0.2.0        png_0.1-9         purrr_1.2.2      </span></span>
+<span><span class="co">#&gt;  [5] xfun_0.62         otel_0.3.0        png_0.1-9         purrr_1.2.2      </span></span>
 <span><span class="co">#&gt;  [9] assertthat_0.2.1  jsonlite_2.0.0    glue_1.8.1        bit_4.6.0        </span></span>
 <span><span class="co">#&gt; [13] htmltools_0.5.9   rmarkdown_2.32    grid_4.6.2        evaluate_1.0.5   </span></span>
 <span><span class="co">#&gt; [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5   compiler_4.6.2   </span></span>
 <span><span class="co">#&gt; [21] Rcpp_1.1.2        htmlwidgets_1.6.4 anndataR_1.2.3    lattice_0.23-1   </span></span>
 <span><span class="co">#&gt; [25] digest_0.6.39     R6_2.6.1          reticulate_1.47.0 tidyselect_1.2.1 </span></span>
 <span><span class="co">#&gt; [29] magrittr_2.0.5    Matrix_1.7-6      tools_4.6.2       bit64_4.8.6      </span></span>
-<span><span class="co">#&gt; [33] arrow_26.0.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt; [33] arrow_26.0.1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

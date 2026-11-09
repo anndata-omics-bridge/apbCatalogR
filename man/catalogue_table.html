@@ -279,22 +279,22 @@ One set’s name; <code>NULL</code> lists every set of the bundle.
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table</a></span><span class="op">(</span><span class="st">"confidence"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table</a></span><span class="op">(</span><span class="st">"confidence_alpha"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>         set    source software_version_pattern           level location table
-1 confidence  AlphaDIA       ^1\\.12(?:\\.|-|$) peptidoform_ion   layers  &lt;NA&gt;
-2 confidence  AlphaDIA                    ^2\\. peptidoform_ion   layers  &lt;NA&gt;
-3 confidence AlphaPept                ^0\\.5\\. peptidoform_ion   layers  &lt;NA&gt;
-4 confidence    DIA-NN        ^1\\.[0-7](\\.|$) peptidoform_ion   layers  &lt;NA&gt;
-5 confidence    DIA-NN         ^1\\.[89](\\.|$) peptidoform_ion   layers  &lt;NA&gt;
-6 confidence    DIA-NN                  ^2\\..* peptidoform_ion   layers  &lt;NA&gt;
-            name     key    kind qualifier.stage requirement
-1           qval q_value q_value  identification        &lt;NA&gt;
-2 precursor_qval q_value q_value  identification        &lt;NA&gt;
-3        q_value q_value q_value  identification        &lt;NA&gt;
-4        Q_Value q_value q_value  identification        &lt;NA&gt;
-5        Q_Value q_value q_value  identification        &lt;NA&gt;
-6        Q_Value q_value q_value  identification        &lt;NA&gt;
+<pre><code>               set    source software_version_pattern           level location
+1 confidence_alpha  AlphaDIA       ^1\\.12(?:\\.|-|$) peptidoform_ion   layers
+2 confidence_alpha  AlphaDIA                    ^2\\. peptidoform_ion   layers
+3 confidence_alpha AlphaPept                ^0\\.5\\. peptidoform_ion   layers
+4 confidence_alpha    DIA-NN        ^1\\.[0-7](\\.|$) peptidoform_ion   layers
+5 confidence_alpha    DIA-NN         ^1\\.[89](\\.|$) peptidoform_ion   layers
+6 confidence_alpha    DIA-NN                  ^2\\..* peptidoform_ion   layers
+  table           name     key    kind qualifier.stage requirement
+1  &lt;NA&gt;           qval q_value q_value  identification        &lt;NA&gt;
+2  &lt;NA&gt; precursor_qval q_value q_value  identification        &lt;NA&gt;
+3  &lt;NA&gt;        q_value q_value q_value  identification        &lt;NA&gt;
+4  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
+5  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
+6  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
                                               entry_id
 1          AlphaDIA/1.12/peptidoform_ion/layers/qval/-
 2 AlphaDIA/2.x/peptidoform_ion/layers/precursor_qval/-

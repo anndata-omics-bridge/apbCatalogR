@@ -262,6 +262,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav></header><section id="what-one-results-fields-mean-to-one-consumer" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-one-results-fields-mean-to-one-consumer">What one result’s fields mean to one consumer</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
 <p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly: <code>levels</code> give each level’s slots, looked up by one of the set’s keys, such as <code>“q_value”</code> or Sage’s <code>“quantification_q_value”</code>. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
+<p>Composes the named sets alone: <code>apb_alpha</code>, the fields apb2 convert writes, answers only when named. A key routes to the sets that define it; two sets naming different fields for one key on one level is an error. With no set named, every name is the level’s own. A named set that can answer nothing on the result, because its app has not run or the result records no sample annotation, is an error saying what to run. <code>enforce</code> checks the requirements once, here.</p>
+<p><code>DataCatalog$answering_sets(result)</code> returns the sets <code>DataCatalog$new(result, name)</code> opens, as a character vector: every set but one whose app has not run on the result or whose annotation it does not record. It signals no error for such a set, so a consumer can leave it out.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>DataCatalog$new()</code> returns a <code>DataCatalog</code>.</p>
 </section><section id="public-fields" class="level3"><h3 class="anchored" data-anchor-id="public-fields">Public fields</h3>
@@ -282,7 +284,7 @@ One Level per level of the result, with anndataR’s slots looked up by key.
 <code>description</code>
 </dt>
 <dd>
-What this catalogue set holds and who uses it.
+What the first catalogue set named holds and who uses it; an error when no set was named.
 </dd>
 </dl>
 </div>
@@ -309,7 +311,7 @@ Public methods
 <h4 class="anchored">
 <code>DataCatalog$new()</code>
 </h4>
-<p>Bind catalogue sets to the levels of one result; <code>apb</code>, APB’s own fields, is always in.</p>
+<p>Bind the named catalogue sets, and no others, to the levels of one result.</p>
 <h5 class="anchored">
 Usage
 </h5>
@@ -331,13 +333,13 @@ A ParsedLevels object.
 <code>…</code>
 </dt>
 <dd>
-The catalogue sets, such as <code>“abundance”</code> and <code>“confidence”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
+The catalogue sets, such as <code>“abundance_alpha”</code> and <code>“confidence_alpha”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
 </dt>
 <dd>
-<code>NULL</code>, <code>“required”</code> or <code>“recommended”</code>: signal <code>MissingRequiredField</code> when a field a set requires at that strength is missing.
+<code>NULL</code>, <code>“required”</code> or <code>“recommended”</code>: signal one <code>MissingRequiredField</code> listing every field the named sets require at that strength and the result lacks; under <code>“required”</code>, missing recommended fields give one warning. An error when no named set has requirements.
 </dd>
 </dl>
 </div>
@@ -420,7 +422,7 @@ Whether to make a deep clone.
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">results</span>, <span class="st">"maxquant_wide-peptidoform_ion.parquet"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence"</span><span class="op">)</span></span>
+<span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="va"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/DataCatalog.html">DataCatalog</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">result</span>, <span class="st">"confidence_alpha"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">catalog</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"pep"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2 3</code></pre>

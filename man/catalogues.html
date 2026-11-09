@@ -273,24 +273,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>               catalogue prefix
-1              abundance      a
-2             confidence      c
-3 proteobench_entrapment    pbe
-4                    apb    apb
-5         chromatography     rt
-                                                                                                                                                                                                            purpose
-1                                                                                                        What each layer an APB2 rule marks abundance measures, and whether the software normalizes it across runs.
-2                                                                                            How likely each identification, or the signal quantified for it, is correct: PEP and q-values per run and per feature.
-3                                                                                                        The precursor q-values ProteoBench's entrapment scoring ranks by, each key in each location its own score.
-4 The fields APB and its apps write for every vendor, asked for by kind: ProForma identifiers, decoy and contaminant flags, role columns, sample annotations, and apb-fasta's peptide verification once it has run.
-5                                                                                                                 Retention times, elution-peak bounds and peak widths, with the unit the software reports them in.
+<pre><code>                     catalogue prefix
+1              abundance_alpha      a
+2             confidence_alpha      c
+3 proteobench_entrapment_alpha    pbe
+4                    apb_alpha    apb
+5         obs_annotation_alpha  annot
+6         fasta_peptides_alpha   fpep
+7         fasta_proteins_alpha  fprot
+8         chromatography_alpha     rt
+                                                                                                                                  purpose
+1                              What each layer an APB2 rule marks abundance measures, and whether the software normalizes it across runs.
+2                  How likely each identification, or the signal quantified for it, is correct: PEP and q-values per run and per feature.
+3                              The precursor q-values ProteoBench's entrapment scoring ranks by, each key in each location its own score.
+4 The fields apb2 convert writes for every vendor, asked for by kind: ProForma identifiers, decoy and contaminant flags and role columns.
+5                                                                     Each run's group and subject, whichever sample table supplied them.
+6                              apb-fasta's peptide verification, asked for by kind, once apb-fasta verify-peptides has run on the result.
+7                              apb-fasta's protein annotation, asked for by kind, once apb-fasta merge-annotations has run on the result.
+8                                       Retention times, elution-peak bounds and peak widths, with the unit the software reports them in.
        used_by has_requirements entries
 1 apb-prot....             TRUE      45
 2 apb-aggr....            FALSE      26
 3 apb-prot....            FALSE       7
-4 apb-expo....             TRUE     268
-5 apb-expo....            FALSE      58</code></pre>
+4 apb-expo....             TRUE     181
+5 apb-expo....            FALSE       7
+6 apb-expo....            FALSE      28
+7 apb-expo....            FALSE       4
+8 apb-expo....            FALSE      58</code></pre>
 </div>
 </div>
 

@@ -330,23 +330,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>abundance</code></td>
+<td><code>abundance_alpha</code></td>
 <td>Intensities, and whether the software normalizes them across runs</td>
 </tr>
 <tr class="even">
-<td><code>confidence</code></td>
+<td><code>confidence_alpha</code></td>
 <td>PEP and q-values per run and per feature</td>
 </tr>
 <tr class="odd">
-<td><code>proteobench_entrapment</code></td>
+<td><code>proteobench_entrapment_alpha</code></td>
 <td>Precursor q-values for ProteoBench’s entrapment scoring</td>
 </tr>
 <tr class="even">
-<td><code>apb</code></td>
-<td>Fields APB writes for every vendor: ProForma identifiers, decoy and contaminant flags, sample annotations</td>
+<td><code>apb_alpha</code></td>
+<td>Fields <code>apb2 convert</code> writes for every vendor: ProForma identifiers, decoy and contaminant flags</td>
 </tr>
 <tr class="odd">
-<td><code>chromatography</code></td>
+<td><code>obs_annotation_alpha</code></td>
+<td>Each run’s group and subject, from an SDRF or a prolfquapp table</td>
+</tr>
+<tr class="even">
+<td><code>fasta_peptides_alpha</code></td>
+<td>apb-fasta’s peptide verification, once <code>apb-fasta verify-peptides</code> has run</td>
+</tr>
+<tr class="odd">
+<td><code>fasta_proteins_alpha</code></td>
+<td>apb-fasta’s protein annotation, once <code>apb-fasta merge-annotations</code> has run</td>
+</tr>
+<tr class="even">
+<td><code>chromatography_alpha</code></td>
 <td>Retention times, peak bounds and widths, with their unit</td>
 </tr>
 </tbody>
@@ -379,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>DataCatalog$new(result, set)</code></td>
-<td>On one result, and returns the data</td>
+<td>On one result, the named sets alone, and returns the data</td>
 </tr>
 <tr class="odd">
 <td><code>catalogues()</code>, <code>rule_coverage()</code>, <code>catalogue_table()</code></td>
@@ -405,15 +417,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="use">Use</h2>
 <p>Ask the catalogue which column a software version reports:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apbCatalogR)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance_alpha"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span>layers<span class="sc">$</span><span class="fu">keys</span>()</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "intensity"                "ms1_intensity"            "normalized_intensity"</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4] "normalized_ms1_intensity"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "intensity"                   "intensity_ms1"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3] "intensity_ms1_norm_settings" "intensity_norm_settings"</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span>layers[[<span class="st">"intensity"</span>]]</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "Precursor_Quantity"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Get the data of a result:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">read_parsed_levels</span>(<span class="st">"result.parquet"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ion <span class="ot">&lt;-</span> DataCatalog<span class="sc">$</span><span class="fu">new</span>(result, <span class="st">"confidence"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ion <span class="ot">&lt;-</span> DataCatalog<span class="sc">$</span><span class="fu">new</span>(result, <span class="st">"confidence_alpha"</span>, <span class="st">"apb_alpha"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ion<span class="sc">$</span>layers                     <span class="co"># key -&gt; matrix, runs x features</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ion<span class="sc">$</span>var                        <span class="co"># key -&gt; vector, one value per feature</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>pep <span class="ot">&lt;-</span> ion<span class="sc">$</span>layers<span class="sc">$</span><span class="fu">get</span>(<span class="st">"pep"</span>)   <span class="co"># runs x features matrix, NULL when absent</span></span>
