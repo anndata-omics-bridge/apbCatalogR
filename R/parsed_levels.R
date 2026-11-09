@@ -36,7 +36,7 @@ PARQUET_FORMAT_VERSION <- "9"
 #' result <- read_parsed_levels(file.path(results, "edge-two-levels.parquet"))
 #' names(result$levels)
 #' result$levels$protein
-ParsedLevels <- R6::R6Class(
+ParsedLevels <- R6Class(
     "ParsedLevels",
     public = list(
         levels = NULL,
@@ -150,7 +150,7 @@ read_parsed_levels <- function(path) {
 # returns the table an entry names.
 manifest_levels <- function(manifest, path, read) {
     order <- as.character(unlist(manifest$level_order))
-    levels <- stats::setNames(
+    levels <- setNames(
         lapply(order, function(name) {
             read_level(path, manifest$levels[[name]], name, read)
         }),
@@ -210,7 +210,7 @@ declared_types <- function(frame, table) {
 
 read_named_tables <- function(directory, order, entries, read) {
     names <- as.character(unlist(order))
-    stats::setNames(
+    setNames(
         lapply(names, function(name) {
             entry <- entries[[name]]
             table <- read(directory, entry)
@@ -246,7 +246,7 @@ read_level <- function(path, entry, name, read) {
     rownames(obs) <- obs_names
     rownames(var) <- var_names
     layer_order <- as.character(unlist(entry$layer_order))
-    layers <- stats::setNames(
+    layers <- setNames(
         lapply(layer_order, function(layer) {
             values <- as.matrix(read(
                 file.path(directory, "layers"),
@@ -267,7 +267,7 @@ read_level <- function(path, entry, name, read) {
         obs_key_columns = obs_keys,
         var_key_columns = var_keys
     )
-    anndataR::AnnData(
+    AnnData(
         X = layers[[primary]],
         obs = obs,
         var = var,
@@ -304,7 +304,7 @@ read_pairwise <- function(directory, entry, slot, names, read) {
         read
     )
     lapply(tables, function(table) {
-        Matrix::sparseMatrix(
+        sparseMatrix(
             i = table$row + 1L,
             j = table$column + 1L,
             x = as.numeric(table$value),
@@ -335,7 +335,7 @@ level_layer <- function(level, name) {
 level_stored_rule <- function(level) {
     text <- level_apb(level)$parse$provenance$rule_json
     if (is.character(text)) {
-        jsonlite::fromJSON(text, simplifyVector = FALSE)
+        fromJSON(text, simplifyVector = FALSE)
     } else {
         NULL
     }

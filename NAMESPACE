@@ -11,4 +11,19 @@ export(catalogues)
 export(read_parsed_levels)
 export(rule_coverage)
 export(update_catalog)
+importFrom(Matrix,sparseMatrix)
 importFrom(R6,R6Class)
+importFrom(anndataR,
+  AnnData,
+  read_h5ad
+)
+importFrom(jsonlite,
+  fromJSON,
+  toJSON
+)
+importFrom(stats,setNames)
+importFrom(tools,R_user_dir)
+importFrom(utils,
+  read.csv,
+  untar
+)

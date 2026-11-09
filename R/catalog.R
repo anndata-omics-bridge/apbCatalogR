@@ -192,7 +192,7 @@ enforce_sets <- function(sets, enforce) {
 }
 
 # The requests, answers and rows both catalogues share for one set.
-Lookups <- R6::R6Class(
+Lookups <- R6Class(
     "Lookups",
     public = list(
         name = NULL,
@@ -409,7 +409,7 @@ fields_frame <- function(rows, set) {
 #' catalog <- Catalog$new("DIA-NN", "2.2.0", "abundance_alpha")
 #' catalog$levels$peptidoform_ion$layers[["intensity"]]
 #' catalog$levels$peptidoform_ion$layers$keys()
-Catalog <- R6::R6Class(
+Catalog <- R6Class(
     "Catalog",
     public = list(
         #' @field levels One level per rule level, with a [DataCatalog]'s slots
@@ -459,12 +459,12 @@ Catalog <- R6::R6Class(
                     private$lookups$keys(level, location, list())
                 },
                 known = names(set$keys),
-                sets = stats::setNames(
+                sets = setNames(
                     list(private$lookups$alone()),
                     set$vocabulary$prefix
                 )
             )
-            self$levels <- stats::setNames(
+            self$levels <- setNames(
                 lapply(names(views), LevelNames$new, lookup = lookup),
                 names(views)
             )
@@ -567,7 +567,7 @@ check_rules_matched <- function(matched, software, version) {
 #' catalog <- DataCatalog$new(result, "confidence_alpha")
 #' dim(catalog$levels$peptidoform_ion$layers[["pep"]])
 #' catalog$levels$peptidoform_ion$layers$name("pep")
-DataCatalog <- R6::R6Class(
+DataCatalog <- R6Class(
     "DataCatalog",
     public = list(
         #' @field levels One [Level] per level of the result, with anndataR's
@@ -594,7 +594,7 @@ DataCatalog <- R6::R6Class(
             check_enforce(enforce)
             private$parsed <- result
             names <- unique(as.character(c(...)))
-            private$sets <- stats::setNames(
+            private$sets <- setNames(
                 lapply(names, function(name) data_lookups(result, name)),
                 names
             )
@@ -622,7 +622,7 @@ DataCatalog <- R6::R6Class(
                     composed_keys(private$sets, level, location)
                 },
                 known = private$known,
-                sets = stats::setNames(
+                sets = setNames(
                     lapply(private$sets, function(lookups) lookups$alone()),
                     vapply(
                         private$sets,
@@ -631,7 +631,7 @@ DataCatalog <- R6::R6Class(
                     )
                 )
             )
-            self$levels <- stats::setNames(
+            self$levels <- setNames(
                 lapply(names(result$levels), function(name) {
                     Level$new(name, result$levels[[name]], lookup)
                 }),

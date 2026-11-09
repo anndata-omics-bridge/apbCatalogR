@@ -50,5 +50,10 @@ Authors:
   \item Witold E. Wolski \email{witold.wolski@fgcz.uzh.ch} (\href{https://orcid.org/0000-0002-6468-120X}{ORCID})
 }
 
+Other contributors:
+\itemize{
+  \item Functional Genomics Center Zurich [funder]
+}
+
 }
 \keyword{internal}

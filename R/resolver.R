@@ -72,7 +72,7 @@ new_candidate <- function(entry, undecided = character(0)) {
 # The answer to one request; only a resolved one carries a reference.
 # `requirement` records the requirement a missing field had when the catalog
 # enforced it at init.
-Resolution <- R6::R6Class(
+Resolution <- R6Class(
     "Resolution",
     public = list(
         request = NULL,
@@ -211,7 +211,7 @@ undecided_reasons <- function(undecided) {
 # A level with a reviewed rule; `entries` are those whose fields the level
 # holds. `pending` entries belong to producers that have not run; a request they
 # would answer is unknown until the producer runs.
-ReviewedLevel <- R6::R6Class(
+ReviewedLevel <- R6Class(
     "ReviewedLevel",
     public = list(
         level = NULL,
@@ -246,7 +246,7 @@ ReviewedLevel <- R6::R6Class(
 
 # A level of a set without vendor catalogues, answered by APB's own fields
 # alone.
-ProducedLevel <- R6::R6Class(
+ProducedLevel <- R6Class(
     "ProducedLevel",
     public = list(
         level = NULL,
@@ -281,7 +281,7 @@ ProducedLevel <- R6::R6Class(
 )
 
 # A level whose meanings cannot be established, so every answer is unknown.
-UnreviewedLevel <- R6::R6Class(
+UnreviewedLevel <- R6Class(
     "UnreviewedLevel",
     public = list(
         level = NULL,
@@ -304,7 +304,7 @@ UnreviewedLevel <- R6::R6Class(
 )
 
 # A requested level the result does not contain.
-AbsentLevel <- R6::R6Class(
+AbsentLevel <- R6Class(
     "AbsentLevel",
     public = list(
         level = NULL,

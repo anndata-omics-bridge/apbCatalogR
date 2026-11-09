@@ -31,7 +31,7 @@ read_duckdb_levels <- function(path) {
         connection,
         sprintf("SELECT manifest_json FROM %s", DUCKDB_METADATA_TABLE)
     )$manifest_json
-    manifest <- jsonlite::fromJSON(text, simplifyVector = FALSE)
+    manifest <- fromJSON(text, simplifyVector = FALSE)
     check_duckdb_manifest(manifest, path)
     manifest_levels(manifest, path, function(directory, entry) {
         if (!grepl("^data_[0-9]{6}$", entry$file)) {

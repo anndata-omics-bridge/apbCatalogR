@@ -21,7 +21,7 @@
 #' @field obs The level's per-sample columns, read with `[[` or `[`.
 #' @return The class generator; a [DataCatalog]'s `levels` hold its objects.
 #' @keywords internal
-Level <- R6::R6Class(
+Level <- R6Class(
     "Level",
     public = list(
         name = NULL,
@@ -95,7 +95,7 @@ Level <- R6::R6Class(
 #' @field obs The level's per-sample column names, read with `[[` or `[`.
 #' @return The class generator; a [Catalog]'s `levels` hold its objects.
 #' @keywords internal
-LevelNames <- R6::R6Class(
+LevelNames <- R6Class(
     "LevelNames",
     public = list(
         name = NULL,
@@ -146,7 +146,7 @@ LevelNames <- R6::R6Class(
 #'
 #' @return The class generator; a [Level]'s `layers` is its object.
 #' @keywords internal
-Slot <- R6::R6Class(
+Slot <- R6Class(
     "Slot",
     public = list(
         #' @description Bind one slot of a level.
@@ -254,7 +254,7 @@ Slot <- R6::R6Class(
 #'
 #' @return The class generator; a [Level]'s `var` and `obs` are its objects.
 #' @keywords internal
-Columns <- R6::R6Class(
+Columns <- R6Class(
     "Columns",
     inherit = Slot,
     public = list(

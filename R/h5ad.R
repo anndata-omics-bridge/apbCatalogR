@@ -8,7 +8,7 @@ H5_FORMAT_VERSION <- "8"
 # uns[[level]]$apb in the file, becomes the level's uns$apb; the root's part, at
 # uns$apb in the file, becomes the result's uns, metadata and hierarchy.
 read_h5ad_levels <- function(path) {
-    stored <- anndataR::read_h5ad(path, as = "InMemoryAnnData")
+    stored <- read_h5ad(path, as = "InMemoryAnnData")
     root <- h5_namespace(stored$uns$apb, path, "uns$apb")
     entries <- root$storage$levels
     if (length(entries) != 1L) {
@@ -30,7 +30,7 @@ read_h5ad_levels <- function(path) {
     )
     apb <- root$apb
     ParsedLevels$new(
-        levels = stats::setNames(list(h5_level(stored, level, name)), name),
+        levels = setNames(list(h5_level(stored, level, name)), name),
         uns = apb$parse %||% list(),
         metadata = apb[setdiff(names(apb), c("parse", "hierarchy"))],
         hierarchy = apb$hierarchy,
@@ -48,7 +48,7 @@ h5_namespace <- function(namespace, path, where) {
             call. = FALSE
         )
     }
-    storage <- jsonlite::fromJSON(namespace$storage, simplifyVector = FALSE)
+    storage <- fromJSON(namespace$storage, simplifyVector = FALSE)
     if (
         !identical(storage$format, H5_FORMAT) ||
             !identical(storage$format_version, H5_FORMAT_VERSION)
@@ -68,7 +68,7 @@ h5_namespace <- function(namespace, path, where) {
     apb <- json_shape(namespace[setdiff(names(namespace), "storage")])
     for (where in storage$json_values) {
         keys <- as.character(unlist(where))
-        apb[[keys]] <- jsonlite::fromJSON(apb[[keys]], simplifyVector = FALSE)
+        apb[[keys]] <- fromJSON(apb[[keys]], simplifyVector = FALSE)
     }
     list(storage = storage, apb = apb)
 }
@@ -113,7 +113,7 @@ h5_level <- function(stored, level, name) {
         var_key_columns = var_keys
     )
     export_keys <- as.character(unlist(storage$export_uns))
-    anndataR::AnnData(
+    AnnData(
         X = layers[[primary]],
         obs = obs,
         var = var,
@@ -128,7 +128,7 @@ h5_level <- function(stored, level, name) {
 
 # Each stored layer, X included, as a runs x features matrix under its name.
 h5_layers <- function(stored, entries, obs_names, var_names) {
-    stats::setNames(
+    setNames(
         lapply(entries, function(entry) {
             matrix <- if (identical(entry$location, "X")) {
                 stored$X
@@ -151,7 +151,7 @@ h5_aligned <- function(stored, entries, names) {
         rownames(table) <- names
         table
     })
-    stats::setNames(
+    setNames(
         tables,
         vapply(entries, function(entry) entry$name, character(1))
     )
@@ -164,7 +164,7 @@ h5_pairwise <- function(stored, entries, names) {
         dimnames(matrix) <- list(names, names)
         matrix
     })
-    stats::setNames(
+    setNames(
         matrices,
         vapply(entries, function(entry) entry$name, character(1))
     )

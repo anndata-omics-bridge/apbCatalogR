@@ -49,7 +49,7 @@ entry_row <- function(set_name, set, source, software_version_pattern, entry) {
             key = entry$key,
             kind = entry$kind
         ),
-        stats::setNames(
+        setNames(
             as.list(unname(entry$qualifiers[qualifiers])),
             sprintf("qualifier.%s", qualifiers)
         ),
@@ -114,7 +114,7 @@ records_frame <- function(rows, columns, lists = character(0)) {
         }
     }
     if (length(rows) == 0L) {
-        frame <- as.data.frame(stats::setNames(
+        frame <- as.data.frame(setNames(
             rep(list(character(0)), length(columns)),
             columns
         ))

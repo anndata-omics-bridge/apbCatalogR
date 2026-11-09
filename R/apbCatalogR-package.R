@@ -23,5 +23,11 @@
 #' `tryCatch(..., UnresolvedField = function(condition) NULL)`.
 #'
 #' @keywords internal
+#' @importFrom anndataR AnnData read_h5ad
+#' @importFrom jsonlite fromJSON toJSON
+#' @importFrom Matrix sparseMatrix
 #' @importFrom R6 R6Class
+#' @importFrom stats setNames
+#' @importFrom tools R_user_dir
+#' @importFrom utils read.csv untar
 "_PACKAGE"

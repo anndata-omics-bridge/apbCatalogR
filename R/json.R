@@ -2,7 +2,7 @@
 # lists, arrays unnamed lists.
 
 read_json_file <- function(path) {
-    jsonlite::fromJSON(path, simplifyVector = FALSE)
+    fromJSON(path, simplifyVector = FALSE)
 }
 
 `%||%` <- function(value, default) {
@@ -54,7 +54,7 @@ json_text <- function(value) {
     ) {
         return(format(value, nsmall = 1L, scientific = FALSE))
     }
-    as.character(jsonlite::toJSON(
+    as.character(toJSON(
         value,
         auto_unbox = TRUE,
         digits = NA,

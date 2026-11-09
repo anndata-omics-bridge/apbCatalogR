@@ -7,7 +7,7 @@ BUNDLE_NAME <- "apb-catalog-bundle"
 
 state <- new.env(parent = emptyenv())
 
-Bundle <- R6::R6Class(
+Bundle <- R6Class(
     "Bundle",
     public = list(
         dir = NULL,
@@ -45,7 +45,7 @@ Bundle <- R6::R6Class(
 )
 
 cache_root <- function() {
-    tools::R_user_dir("apbCatalogR", which = "cache")
+    R_user_dir("apbCatalogR", which = "cache")
 }
 
 shipped_dir <- function() {
@@ -153,7 +153,7 @@ update_catalog <- function(path) {
 install_bundle <- function(archive) {
     unpacked <- tempfile()
     on.exit(unlink(unpacked, recursive = TRUE), add = TRUE)
-    utils::untar(archive, exdir = unpacked)
+    untar(archive, exdir = unpacked)
     source <- file.path(unpacked, BUNDLE_NAME)
     manifest <- read_json_file(file.path(source, "manifest.json"))
     if (manifest$bundle_format > BUNDLE_FORMAT) {

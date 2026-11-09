@@ -125,7 +125,7 @@ row_pairs <- function(label, rows) {
         )
     }
     paired <- rows$qualifier != ""
-    stats::setNames(rows$value[paired], rows$qualifier[paired])
+    setNames(rows$value[paired], rows$qualifier[paired])
 }
 
 check_pair <- function(label, qualifier, value, fixed) {
@@ -191,11 +191,11 @@ term_keys <- function(name, rows) {
         list(
             key = key,
             kind = kinds,
-            fixed = stats::setNames(pairs$value, pairs$qualifier),
+            fixed = setNames(pairs$value, pairs$qualifier),
             psi_ms = cell_list(terms)
         )
     })
-    stats::setNames(keys, names)
+    setNames(keys, names)
 }
 
 # The requirement rows of a set's terms.csv: one per term, a key at one
@@ -354,15 +354,15 @@ set_vocabulary <- function(head, kind_rows, qualifier_rows, value_rows) {
         ]
         list(
             definition = qualifier_rows$definition[[index]],
-            values = stats::setNames(as.list(values$definition), values$value)
+            values = setNames(as.list(values$definition), values$value)
         )
     })
     list(
         prefix = head$prefix,
         definition = head$definition,
         kind_definition = head$kind_definition,
-        kinds = stats::setNames(as.list(kind_rows$definition), kind_rows$kind),
-        qualifiers = stats::setNames(qualifiers, qualifier_rows$qualifier)
+        kinds = setNames(as.list(kind_rows$definition), kind_rows$kind),
+        qualifiers = setNames(qualifiers, qualifier_rows$qualifier)
     )
 }
 
@@ -444,7 +444,7 @@ row_describes <- function(row, entry) {
 # Producers hold the fields apps write after conversion and annotations the
 # sample-annotation fields; both apply to every software version. A set made
 # only of them has no vendor catalogue and needs no review.
-CatalogueSet <- R6::R6Class(
+CatalogueSet <- R6Class(
     "CatalogueSet",
     public = list(
         name = NULL,
@@ -603,7 +603,7 @@ set_names <- function() {
 # as "", read once; its columns must be those datapackage.json declares.
 catalogue_rows <- function(bundle, table) {
     bundle$memo(paste0("table:", table), function() {
-        found <- utils::read.csv(
+        found <- read.csv(
             file.path(bundle$dir, "catalogues", paste0(table, ".csv")),
             colClasses = "character",
             na.strings = character(0),
