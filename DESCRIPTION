@@ -4,7 +4,8 @@ Version: 0.99.0
 Authors@R: c(
     person("Witold E.", "Wolski", , "witold.wolski@fgcz.uzh.ch", role = "aut",
            comment = c(ORCID = "0000-0002-6468-120X")),
-    person("Witek", "Wolski", , "wewolski@gmail.com", role = "cre"))
+    person("Witek", "Wolski", , "wewolski@gmail.com", role = "cre"),
+    person("Functional Genomics Center Zurich", role = "fnd"))
 Description: Looks up the fields of AnnData Proteomics Bridge (APB) results
     by meaning, such as a PEP or an unnormalized intensity, without naming
     vendor columns. Reimplements the apb-catalog API on the bundle apb-catalog
