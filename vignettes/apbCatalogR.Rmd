@@ -44,7 +44,7 @@ The main calls:
 - `DataCatalog$new(result, ...)`: the data of a result, looked up by key
 - `catalogues()`, `catalogue_table()`: the sets and their entries
 - `rule_coverage()`: how each software version covers a set
-- `catalog_version()`, `update_catalog()`: the bundle in use, and a newer one
+- `catalog_version()`, `update_catalog()`: the bundle in use, and installing one
 
 # Installation
 
@@ -303,12 +303,12 @@ unique(coverage[, c("software", "version", "level", "verdict")])[1:5, ]
 
 # A newer catalog
 
-`update_catalog()` downloads the bundle of the latest apb-catalog release into
-the user cache; later sessions use the newest bundle, shipped or downloaded. It
-works from the next apb-catalog release, the first to ship the bundle.
+`update_catalog()` installs a bundle archive into the user cache; later
+sessions use the newest bundle, shipped or installed. apb-catalog's
+`make bundle` writes the archive. Nothing is downloaded.
 
 ```{r update, eval = FALSE}
-update_catalog()
+update_catalog("apb-catalog/build/apb-catalog-bundle.tar.gz")
 ```
 
 # Session information

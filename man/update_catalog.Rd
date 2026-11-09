@@ -2,25 +2,24 @@
 % Please edit documentation in R/bundle.R
 \name{update_catalog}
 \alias{update_catalog}
-\title{Download a newer catalog}
+\title{Install a catalog bundle}
 \usage{
-update_catalog(version = NULL)
+update_catalog(path)
 }
 \arguments{
-\item{version}{The apb-catalog release, such as \code{"0.2.0"}; \code{NULL} downloads
-the latest release.}
+\item{path}{Path to the bundle archive, a \code{.tar.gz} file.}
 }
 \value{
 The \code{\link[=catalog_version]{catalog_version()}} now in use, invisibly.
 }
 \description{
-Downloads the bundle of an apb-catalog release from GitHub into the user
-cache, so lookups use it without a package update. Later sessions keep using
-the newest bundle, shipped or downloaded. It works from the next apb-catalog
-release, the first to ship the bundle.
+Installs a bundle archive into the user cache, so lookups use it without a
+package update. apb-catalog's \verb{make bundle} writes the archive, as
+\code{build/apb-catalog-bundle.tar.gz}. Later sessions keep using the newest
+bundle, shipped or installed. Nothing is downloaded.
 }
 \examples{
 if (interactive()) {
-  update_catalog()
+    update_catalog("apb-catalog/build/apb-catalog-bundle.tar.gz")
 }
 }

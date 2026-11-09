@@ -12,7 +12,7 @@ and \code{apb2_version}.
 }
 \description{
 Reports the bundle lookups answer from: its version, whether it was shipped
-with the package or downloaded by \code{\link[=update_catalog]{update_catalog()}}, and the apb2 version
+with the package or installed by \code{\link[=update_catalog]{update_catalog()}}, and the apb2 version
 its rule levels come from.
 }
 \examples{

@@ -6,8 +6,8 @@
 #' for a meaning, without data; [DataCatalog] answers on a result read with
 #' [read_parsed_levels()].
 #'
-#' The package ships a bundle; [update_catalog()] downloads a newer one and
-#' [catalog_version()] reports the one in use.
+#' The package ships a bundle; [update_catalog()] installs another one from a
+#' local archive and [catalog_version()] reports the one in use.
 #'
 #' @section Conditions:
 #' Lookups signal conditions of the classes apb-catalog raises in Python:

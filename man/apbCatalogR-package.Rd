@@ -13,8 +13,8 @@ for a meaning, without data; \link{DataCatalog} answers on a result read with
 \code{\link[=read_parsed_levels]{read_parsed_levels()}}.
 }
 \details{
-The package ships a bundle; \code{\link[=update_catalog]{update_catalog()}} downloads a newer one and
-\code{\link[=catalog_version]{catalog_version()}} reports the one in use.
+The package ships a bundle; \code{\link[=update_catalog]{update_catalog()}} installs another one from a
+local archive and \code{\link[=catalog_version]{catalog_version()}} reports the one in use.
 }
 \section{Conditions}{
 

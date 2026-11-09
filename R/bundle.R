@@ -1,10 +1,9 @@
-# The bundle apb-catalog releases: catalogue tables and expected answers. The
-# package ships one; update_catalog() downloads newer ones into the user cache.
-# The newest readable bundle is used.
+# The bundle apb-catalog builds: catalogue tables and expected answers. The
+# package ships one; update_catalog() installs others into the user cache. The
+# newest readable bundle is used.
 
 BUNDLE_FORMAT <- 4L
 BUNDLE_NAME <- "apb-catalog-bundle"
-RELEASES <- "https://github.com/anndata-omics-bridge/apb-catalog/releases"
 
 state <- new.env(parent = emptyenv())
 
@@ -114,7 +113,7 @@ reset_bundle <- function() {
 #' The catalog in use
 #'
 #' Reports the bundle lookups answer from: its version, whether it was shipped
-#' with the package or downloaded by [update_catalog()], and the apb2 version
+#' with the package or installed by [update_catalog()], and the apb2 version
 #' its rule levels come from.
 #'
 #' @return A list with `version`, `origin` (`"shipped"` or `"cache"`), `path`
@@ -132,31 +131,22 @@ catalog_version <- function() {
     )
 }
 
-#' Download a newer catalog
+#' Install a catalog bundle
 #'
-#' Downloads the bundle of an apb-catalog release from GitHub into the user
-#' cache, so lookups use it without a package update. Later sessions keep using
-#' the newest bundle, shipped or downloaded. It works from the next apb-catalog
-#' release, the first to ship the bundle.
+#' Installs a bundle archive into the user cache, so lookups use it without a
+#' package update. apb-catalog's `make bundle` writes the archive, as
+#' `build/apb-catalog-bundle.tar.gz`. Later sessions keep using the newest
+#' bundle, shipped or installed. Nothing is downloaded.
 #'
-#' @param version The apb-catalog release, such as `"0.2.0"`; `NULL` downloads
-#'   the latest release.
+#' @param path Path to the bundle archive, a `.tar.gz` file.
 #' @return The [catalog_version()] now in use, invisibly.
 #' @export
 #' @examples
 #' if (interactive()) {
-#'   update_catalog()
+#'     update_catalog("apb-catalog/build/apb-catalog-bundle.tar.gz")
 #' }
-update_catalog <- function(version = NULL) {
-    url <- if (is.null(version)) {
-        sprintf("%s/latest/download/%s.tar.gz", RELEASES, BUNDLE_NAME)
-    } else {
-        sprintf("%s/download/v%s/%s.tar.gz", RELEASES, version, BUNDLE_NAME)
-    }
-    archive <- tempfile(fileext = ".tar.gz")
-    on.exit(unlink(archive), add = TRUE)
-    utils::download.file(url, archive, mode = "wb", quiet = TRUE)
-    install_bundle(archive)
+update_catalog <- function(path) {
+    install_bundle(path)
 }
 
 # Unpack one bundle archive into the user cache, under its version.

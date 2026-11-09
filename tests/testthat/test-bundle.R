@@ -1,6 +1,6 @@
-# The newest readable bundle is used: shipped with the package or downloaded into the user cache.
+# The newest readable bundle is used: shipped with the package or installed into the user cache.
 
-# A copy of the shipped bundle claiming another version and format, packed as a release asset.
+# A copy of the shipped bundle claiming another version and format, packed as `make bundle` packs it.
 bundle_archive <- function(version, format = BUNDLE_FORMAT) {
     root <- withr::local_tempdir(.local_envir = parent.frame())
     folder <- file.path(root, "apb-catalog-bundle")
@@ -39,21 +39,21 @@ local_cache <- function(envir = parent.frame()) {
     withr::defer(apbCatalogR:::reset_bundle(), envir = envir)
 }
 
-test_that("without a download the shipped bundle answers", {
+test_that("without an installed bundle the shipped one answers", {
     local_cache()
     expect_identical(catalog_version()$origin, "shipped")
 })
 
-test_that("a newer downloaded bundle wins over the shipped one", {
+test_that("a newer installed bundle wins over the shipped one", {
     local_cache()
-    apbCatalogR:::install_bundle(bundle_archive("999.0.0"))
+    update_catalog(bundle_archive("999.0.0"))
     expect_identical(
         catalog_version()[c("version", "origin")],
         list(version = "999.0.0", origin = "cache")
     )
 })
 
-test_that("an older downloaded bundle does not win over a newer shipped one", {
+test_that("an older installed bundle does not win over a newer shipped one", {
     local_cache()
     apbCatalogR:::install_bundle(bundle_archive("0.0.1"))
     expect_identical(catalog_version()$origin, "shipped")

@@ -1,3 +1,7 @@
+# apbCatalogR 0.99.1
+
+* `update_catalog(path)` installs a bundle archive from a local file, such as the one apb-catalog's `make bundle` writes; the package no longer downloads anything.
+
 # apbCatalogR 0.99.0
 
 * First version: apb-catalog's API in R on the apb-catalog bundle: the R6 classes `Catalog` and `DataCatalog`, `catalogues()`, `rule_coverage()`, `catalogue_table()` and the conditions `UnresolvedField` and `MissingRequiredField`.
