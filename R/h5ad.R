@@ -88,41 +88,34 @@ json_shape <- function(value) {
 
 h5_level <- function(stored, level, name) {
     storage <- level$storage
-    obs_keys <- as.character(unlist(storage$obs_key_columns))
-    var_keys <- as.character(unlist(storage$var_key_columns))
-    obs <- declared_types(stored$obs, storage$obs)
-    var <- declared_types(stored$var, storage$var)
-    obs_names <- axis_names(obs, obs_keys)
-    var_names <- axis_names(var, var_keys)
-    rownames(obs) <- obs_names
-    rownames(var) <- var_names
+    axes <- keyed_axes(
+        declared_types(stored$obs, storage$obs),
+        declared_types(stored$var, storage$var),
+        as.character(unlist(storage$obs_key_columns)),
+        as.character(unlist(storage$var_key_columns))
+    )
     entries <- storage$layers
     layer_order <- vapply(entries, function(entry) entry$name, character(1))
-    layers <- h5_layers(stored, entries, obs_names, var_names)
     primary <- layer_order[vapply(
         entries,
         function(entry) identical(entry$location, "X"),
         logical(1)
     )]
-    apb <- level$apb
-    apb$storage <- list(
-        level = name,
-        primary_layer = primary,
-        layer_order = layer_order,
-        obs_key_columns = obs_keys,
-        var_key_columns = var_keys
-    )
     export_keys <- as.character(unlist(storage$export_uns))
-    AnnData(
-        X = layers[[primary]],
-        obs = obs,
-        var = var,
-        layers = layers[setdiff(layer_order, primary)],
-        obsm = h5_aligned(stored$obsm, storage$obsm, obs_names),
-        varm = h5_aligned(stored$varm, storage$varm, var_names),
-        obsp = h5_pairwise(stored$obsp, storage$obsp, obs_names),
-        varp = h5_pairwise(stored$varp, storage$varp, var_names),
-        uns = c(list(apb = apb), json_shape(stored$uns[export_keys]))
+    level_anndata(
+        name,
+        axes,
+        h5_layers(stored, entries, axes$obs_names, axes$var_names),
+        layer_order,
+        primary,
+        level$apb,
+        list(
+            obsm = h5_aligned(stored$obsm, storage$obsm, axes$obs_names),
+            varm = h5_aligned(stored$varm, storage$varm, axes$var_names),
+            obsp = h5_pairwise(stored$obsp, storage$obsp, axes$obs_names),
+            varp = h5_pairwise(stored$varp, storage$varp, axes$var_names)
+        ),
+        json_shape(stored$uns[export_keys])
     )
 }
 

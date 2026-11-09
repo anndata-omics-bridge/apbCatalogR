@@ -2,6 +2,7 @@
 
 * `update_catalog(path)` installs a bundle archive from a local file, such as the one apb-catalog's `make bundle` writes; the package no longer downloads anything.
 * The Functional Genomics Center Zurich is listed as funder.
+* Reading `.h5ad` and Parquet or DuckDB results ends in one shared step that names the rows and builds the `AnnData`; results are read as before.
 
 # apbCatalogR 0.99.0
 

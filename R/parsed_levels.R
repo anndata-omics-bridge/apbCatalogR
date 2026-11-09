@@ -235,16 +235,65 @@ axis_names <- function(frame, keys) {
     )
 }
 
-read_level <- function(path, entry, name, read) {
-    directory <- file.path(path, "levels", entry$directory %||% name)
-    obs_keys <- as.character(unlist(entry$obs$key_columns))
-    var_keys <- as.character(unlist(entry$var$key_columns))
-    obs <- read(directory, entry$obs)
-    var <- read(directory, entry$var)
+# A level's obs and var with row names from their key columns.
+keyed_axes <- function(obs, var, obs_keys, var_keys) {
     obs_names <- axis_names(obs, obs_keys)
     var_names <- axis_names(var, var_keys)
     rownames(obs) <- obs_names
     rownames(var) <- var_names
+    list(
+        obs = obs,
+        var = var,
+        obs_keys = obs_keys,
+        var_keys = var_keys,
+        obs_names = obs_names,
+        var_names = var_names
+    )
+}
+
+# One level as AnnData: the primary layer is X, the others stay layers, and
+# uns$apb records how the level is stored. `aligned` holds obsm, varm, obsp and
+# varp; both readers end here.
+level_anndata <- function(
+    name,
+    axes,
+    layers,
+    layer_order,
+    primary,
+    apb,
+    aligned,
+    uns
+) {
+    apb$storage <- list(
+        level = name,
+        primary_layer = primary,
+        layer_order = layer_order,
+        obs_key_columns = axes$obs_keys,
+        var_key_columns = axes$var_keys
+    )
+    AnnData(
+        X = layers[[primary]],
+        obs = axes$obs,
+        var = axes$var,
+        layers = layers[setdiff(layer_order, primary)],
+        obsm = aligned$obsm,
+        varm = aligned$varm,
+        obsp = aligned$obsp,
+        varp = aligned$varp,
+        uns = c(list(apb = apb), uns)
+    )
+}
+
+read_level <- function(path, entry, name, read) {
+    directory <- file.path(path, "levels", entry$directory %||% name)
+    axes <- keyed_axes(
+        read(directory, entry$obs),
+        read(directory, entry$var),
+        as.character(unlist(entry$obs$key_columns)),
+        as.character(unlist(entry$var$key_columns))
+    )
+    obs_names <- axes$obs_names
+    var_names <- axes$var_names
     layer_order <- as.character(unlist(entry$layer_order))
     layers <- setNames(
         lapply(layer_order, function(layer) {
@@ -258,25 +307,20 @@ read_level <- function(path, entry, name, read) {
         }),
         layer_order
     )
-    primary <- entry$primary_layer
-    apb <- entry$apb %||% list()
-    apb$storage <- list(
-        level = name,
-        primary_layer = primary,
-        layer_order = layer_order,
-        obs_key_columns = obs_keys,
-        var_key_columns = var_keys
-    )
-    AnnData(
-        X = layers[[primary]],
-        obs = obs,
-        var = var,
-        layers = layers[setdiff(layer_order, primary)],
-        obsm = read_aligned(directory, entry, "obsm", obs_names, read),
-        varm = read_aligned(directory, entry, "varm", var_names, read),
-        obsp = read_pairwise(directory, entry, "obsp", obs_names, read),
-        varp = read_pairwise(directory, entry, "varp", var_names, read),
-        uns = c(list(apb = apb), entry$export_uns %||% list())
+    level_anndata(
+        name,
+        axes,
+        layers,
+        layer_order,
+        entry$primary_layer,
+        entry$apb %||% list(),
+        list(
+            obsm = read_aligned(directory, entry, "obsm", obs_names, read),
+            varm = read_aligned(directory, entry, "varm", var_names, read),
+            obsp = read_pairwise(directory, entry, "obsp", obs_names, read),
+            varp = read_pairwise(directory, entry, "varp", var_names, read)
+        ),
+        entry$export_uns %||% list()
     )
 }
 
