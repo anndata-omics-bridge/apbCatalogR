@@ -237,3 +237,29 @@ test_that("a catalog answers its own prefix and no vendor name", {
     expect_null(ion$layers$get("v:Precursor_Quantity"))
     expect_error(ion$layers$get("c:pep"), "unknown prefix 'c'.*a, v")
 })
+
+test_that("a key is one character string", {
+    layers <- levels_of()$level$layers
+    expect_error(layers$get(42), "key is one character string")
+    expect_error(layers$get(c("pep", "q_value")), "key is one character string")
+    expect_error(layers[[NA_character_]], "key is one character string")
+})
+
+test_that("a Catalog names one software, version and set", {
+    expect_error(
+        Catalog$new(NULL, "2.2.0", "abundance_alpha"),
+        "software is one character string"
+    )
+    expect_error(
+        Catalog$new(c("DIA-NN", "MaxQuant"), "2.2.0", "abundance_alpha"),
+        "software is one character string"
+    )
+    expect_error(
+        Catalog$new("DIA-NN", 2.2, "abundance_alpha"),
+        "version is one character string"
+    )
+    expect_error(
+        rule_coverage(c("abundance_alpha", "confidence_alpha")),
+        "catalogue is one character string"
+    )
+})

@@ -113,6 +113,7 @@ ParsedLevels <- R6Class(
 #' utils::untar(archive, exdir = results)
 #' read_parsed_levels(file.path(results, "edge-two-levels.parquet"))
 read_parsed_levels <- function(path) {
+    check_path(path)
     if (grepl("\\.h5ad$", path)) {
         return(read_h5ad_levels(path))
     }

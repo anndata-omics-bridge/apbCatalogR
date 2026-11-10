@@ -78,3 +78,10 @@ test_that("a bundle of a newer format is refused and the next one is used", {
     expect_warning(version <- catalog_version(), "update apbCatalogR")
     expect_identical(version$origin, "shipped")
 })
+
+test_that("installing a missing archive is refused", {
+    local_cache()
+    missing <- file.path(tempdir(), "missing.tar.gz")
+    expect_error(update_catalog(missing), "missing.tar.gz does not exist")
+    expect_identical(catalog_version()$origin, "shipped")
+})

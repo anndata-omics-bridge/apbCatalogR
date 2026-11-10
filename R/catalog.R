@@ -104,6 +104,21 @@ check_enforce <- function(enforce) {
     }
 }
 
+# An argument that names one thing, such as a set, a key or a path.
+check_string <- function(value, argument) {
+    if (!is.character(value) || length(value) != 1L || is.na(value)) {
+        stop(sprintf("%s is one character string", argument), call. = FALSE)
+    }
+}
+
+# A path that must exist.
+check_path <- function(path) {
+    check_string(path, "path")
+    if (!file.exists(path)) {
+        stop(sprintf("%s does not exist", path), call. = FALSE)
+    }
+}
+
 # Check the named sets' requirements once, when the catalog opens. Under
 # enforce = "required" the missing recommended fields give one
 # MissingRequiredField warning; under "recommended" they signal with the
@@ -369,6 +384,9 @@ Catalog <- R6Class(
         #'   recommended fields give one warning. An error when the set has no
         #'   requirements.
         initialize = function(software, version, catalog, enforce = NULL) {
+            check_string(software, "software")
+            check_string(version, "version")
+            check_string(catalog, "catalog")
             check_enforce(enforce)
             set <- catalogue_set(catalog)
             matched <- rules_matching(software, version)

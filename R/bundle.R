@@ -146,6 +146,7 @@ catalog_version <- function() {
 #'     update_catalog("apb-catalog/build/apb-catalog-bundle.tar.gz")
 #' }
 update_catalog <- function(path) {
+    check_path(path)
     install_bundle(path)
 }
 

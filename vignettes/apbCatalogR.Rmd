@@ -26,6 +26,20 @@ and the levels apb2 converts for each software version. One bundle ships with
 the package, together with a test bundle of synthetic results and the answers
 apb-catalog gives on them.
 
+apbCatalogR gives R one way into the quantification outputs of the 14 tools
+apb2 converts: AlphaDIA, AlphaPept, DIA-NN, FragPipe, i2MassChroQ, MaxQuant,
+MetaMorpheus, MSAngel, PEAKS, ProlineStudio, quantms, Sage, Spectronaut and
+WOMBAT-P, and of ProteoBench's custom upload format. A meaning, such as a PEP
+or a normalized protein intensity, is asked for by the same key whichever tool
+reported it. Code that hands a result's quantities to a Bioconductor package
+for differential expression analysis is therefore written once for all 14
+tools; such packages include DEP, DEqMS, limma, limpa, msqrob2, MSstats, proDA
+and prolfqua.
+
+apbCatalogR is on Bioconductor because anndataR and MuData are: they bring to
+R the AnnData and MuData formats apb2 writes its results in, and apbCatalogR
+hands each level back as an anndataR `AnnData`.
+
 ```{r actors, echo = FALSE, out.width = "100%"}
 #| fig.cap: >
 #|   Who does what. The integrator converts the results of quantification

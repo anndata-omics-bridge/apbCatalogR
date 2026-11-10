@@ -66,6 +66,7 @@ catalogues <- function() {
 #' @examples
 #' head(rule_coverage("abundance_alpha"))
 rule_coverage <- function(catalogue) {
+    check_string(catalogue, "catalogue")
     set <- catalogue_set(catalogue)
     variants <- coverage_variants(set)
     found <- found_fields(set, variants)

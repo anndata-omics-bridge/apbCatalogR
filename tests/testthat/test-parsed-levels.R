@@ -75,3 +75,12 @@ test_that("root records split into the parse record and the post-parse metadata"
 test_that("a directory that is no APB result is refused", {
     expect_error(read_parsed_levels(tempdir()), "not an APB Parquet result")
 })
+
+test_that("a path is one existing file or directory", {
+    missing <- file.path(tempdir(), "missing.h5ad")
+    expect_error(read_parsed_levels(missing), "missing.h5ad does not exist")
+    expect_error(
+        read_parsed_levels(c("a.parquet", "b.parquet")),
+        "path is one character string"
+    )
+})

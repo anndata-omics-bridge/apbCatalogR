@@ -317,6 +317,7 @@ VENDOR <- "v"
 # name; a set's prefix that set alone; v: the own name alone, with no lookup and
 # no qualifiers.
 slot_route <- function(lookup, name, qualifiers) {
+    check_string(name, "key")
     colon <- regexpr(":", name, fixed = TRUE)
     if (colon < 0L) {
         return(list(lookup = lookup, key = name, own = TRUE))

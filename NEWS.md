@@ -1,3 +1,8 @@
+# apbCatalogR 0.99.2
+
+* `Catalog$new()`, `rule_coverage()`, `read_parsed_levels()`, `update_catalog()` and every key lookup check their arguments: a software, version, set, key or path that is not one character string, or a path that does not exist, is an error that says so.
+* The vignette says why apbCatalogR is on Bioconductor.
+
 # apbCatalogR 0.99.1
 
 * `update_catalog(path)` installs a bundle archive from a local file, such as the one apb-catalog's `make bundle` writes; the package no longer downloads anything.
