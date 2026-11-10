@@ -38,12 +38,35 @@ level_view <- function(
             retained
         )
     }
+    produced <- producer_entries(set, rule_level, retained, obs_columns, ran)
+    annotated <- filter(
+        level_entries(set, "annotation", rule_level, obs_columns),
+        source_convention(.data$source) %in% conventions
+    )
+    entries <- bind_rows(vendor, produced$entries, annotated)
+    if (reviewed) {
+        rule <- list(software = software, pattern = pattern, level = rule_level)
+        return(ReviewedLevel$new(name, rule, entries, produced$pending))
+    }
+    ProducedLevel$new(name, software, pattern, entries, produced$pending)
+}
+
+# The entries of a set's sources of one type on a level, bound to its obs
+# columns.
+level_entries <- function(set, type, level, obs_columns) {
+    set$entries |>
+        filter(.data$type == .env$type) |>
+        entries_on(level) |>
+        bind_entries(obs_columns)
+}
+
+# The apps' entries on a level: those of apps that have run whose field the
+# level holds, and the `pending` entries of apps that have not, with the
+# `reason` they wait.
+producer_entries <- function(set, level, retained, obs_columns, ran) {
     producers <- set$producers
     run <- producers$producer[ran(producers)]
-    offered <- set$entries |>
-        filter(.data$type == "producer") |>
-        entries_on(rule_level) |>
-        bind_entries(obs_columns)
+    offered <- level_entries(set, "producer", level, obs_columns)
     pending <- offered |>
         filter(!(.data$source %in% run)) |>
         mutate(
@@ -52,23 +75,13 @@ level_view <- function(
                 producers$instruction[match(.data$source, producers$producer)]
             )
         )
-    annotated <- set$entries |>
-        filter(
-            .data$type == "annotation",
-            source_convention(.data$source) %in% conventions
-        ) |>
-        entries_on(rule_level) |>
-        bind_entries(obs_columns)
-    entries <- bind_rows(
-        vendor,
-        held_entries(filter(offered, .data$source %in% run), retained),
-        annotated
+    list(
+        entries = held_entries(
+            filter(offered, .data$source %in% run),
+            retained
+        ),
+        pending = pending
     )
-    if (reviewed) {
-        rule <- list(software = software, pattern = pattern, level = rule_level)
-        return(ReviewedLevel$new(name, rule, entries, pending))
-    }
-    ProducedLevel$new(name, software, pattern, entries, pending)
 }
 
 # Every field the set's entries name on one level: without data, the catalogue
@@ -536,32 +549,7 @@ DataCatalog <- R6Class(
             )) %||%
                 character(0)
             enforce_sets(private$sets, enforce)
-            lookup <- list(
-                find = function(level, location, key, qualifiers) {
-                    private$find(level, location, key, qualifiers)
-                },
-                find_all = function(level, location, key) {
-                    composed_fields(
-                        private$sets,
-                        private$known,
-                        level,
-                        location,
-                        key
-                    )
-                },
-                offered = function(level, location) {
-                    composed_keys(private$sets, level, location)
-                },
-                known = private$known,
-                sets = setNames(
-                    lapply(private$sets, function(lookups) lookups$alone()),
-                    vapply(
-                        private$sets,
-                        function(lookups) lookups$set$vocabulary$prefix,
-                        character(1)
-                    )
-                )
-            )
+            lookup <- composed_lookup(private$sets, private$known)
             self$levels <- setNames(
                 lapply(names(result$levels), function(name) {
                     Level$new(name, result$levels[[name]], lookup)
@@ -621,19 +609,44 @@ DataCatalog <- R6Class(
                 stop("no catalogue set named", call. = FALSE)
             }
             private$sets[[1L]]
-        },
-
-        # The field one key names, asked of every set that defines the key; the
-        # first found.
-        find = function(level, location, key, qualifiers) {
-            references <- lapply(
-                defining_sets(private$sets, private$known, key, qualifiers),
-                function(lookups) lookups$find(level, location, key, qualifiers)
-            )
-            Find(Negate(is.null), references)
         }
     )
 )
+
+# How a DataCatalog's levels answer keys from its composed sets: `find`,
+# `find_all`, `offered`, `known` and one lookup per set prefix.
+composed_lookup <- function(sets, known) {
+    list(
+        find = function(level, location, key, qualifiers) {
+            composed_find(sets, known, level, location, key, qualifiers)
+        },
+        find_all = function(level, location, key) {
+            composed_fields(sets, known, level, location, key)
+        },
+        offered = function(level, location) {
+            composed_keys(sets, level, location)
+        },
+        known = known,
+        sets = setNames(
+            lapply(sets, function(lookups) lookups$alone()),
+            vapply(
+                sets,
+                function(lookups) lookups$set$vocabulary$prefix,
+                character(1)
+            )
+        )
+    )
+}
+
+# The field one key names, asked of every set that defines the key; the first
+# found.
+composed_find <- function(sets, known, level, location, key, qualifiers) {
+    references <- lapply(
+        defining_sets(sets, known, key, qualifiers),
+        function(lookups) lookups$find(level, location, key, qualifiers)
+    )
+    Find(Negate(is.null), references)
+}
 
 # The sets DataCatalog$new(result, name) opens: see answers().
 DataCatalog$answering_sets <- function(result) {

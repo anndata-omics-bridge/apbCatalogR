@@ -69,51 +69,60 @@ rule_coverage <- function(catalogue) {
     set <- catalogue_set(catalogue)
     variants <- coverage_variants(set)
     found <- found_fields(set, variants)
-    required <- variants |>
-        select(".variant", "level") |>
-        inner_join(
-            mutate(
-                set$requirements,
-                .requirement = seq_len(nrow(set$requirements))
-            ),
-            by = "level",
-            relationship = "many-to-many"
-        )
-    described <- found |>
-        inner_join(
-            select(
-                inner_join(
-                    required,
-                    tibble(
-                        location = rep(names(READS), lengths(READS)),
-                        read = unlist(READS, use.names = FALSE)
-                    ),
-                    by = "location",
-                    relationship = "many-to-many"
-                ),
-                ".variant",
-                ".requirement",
-                "read",
-                "key",
-                required = "requirement"
-            ),
-            by = c(".variant", "key", location = "read"),
-            relationship = "many-to-many"
-        )
+    required <- variant_requirements(set, variants)
+    described <- described_requirements(found, required)
     missing <- anti_join(
         required,
         described,
         by = c(".variant", ".requirement")
     )
     found$requirement <- first_requirement(found, described)
-    rows <- bind_rows(
-        found_rows(found),
-        missing_rows(set, missing)
-    )
+    rows <- bind_rows(found_rows(found), missing_rows(set, missing))
     rows <- bind_rows(
         rows,
         tibble(.variant = setdiff(variants$.variant, rows$.variant))
     )
+    ordered_rows(rows, required, variant_verdicts(variants, required, missing))
+}
+
+# The set's requirement rows on each rule level, numbered in the set's order.
+variant_requirements <- function(set, variants) {
+    requirements <- mutate(
+        set$requirements,
+        .requirement = seq_len(nrow(set$requirements))
+    )
+    variants |>
+        select(".variant", "level") |>
+        inner_join(requirements, by = "level", relationship = "many-to-many")
+}
+
+# The requirement rows each found field answers: its key, at a location that
+# reads the field.
+described_requirements <- function(found, required) {
+    reads <- required |>
+        inner_join(
+            location_reads(),
+            by = "location",
+            relationship = "many-to-many"
+        ) |>
+        select(
+            ".variant",
+            ".requirement",
+            "read",
+            "key",
+            required = "requirement"
+        )
+    inner_join(
+        found,
+        reads,
+        by = c(".variant", "key", location = "read"),
+        relationship = "many-to-many"
+    )
+}
+
+# Rows in the order of the requirements their key answers, vendor fields before
+# producer fields; stable otherwise. Each row gets its level's columns.
+ordered_rows <- function(rows, required, verdicts) {
     ranks <- required |>
         distinct(.data$.variant, .data$key, .keep_all = TRUE) |>
         select(".variant", "key", .rank = ".requirement")
@@ -123,10 +132,7 @@ rule_coverage <- function(catalogue) {
             produced = !is.na(.data$producer)
         ) |>
         left_join(ranks, by = c(".variant", "key")) |>
-        left_join(
-            variant_verdicts(variants, required, missing),
-            by = ".variant"
-        ) |>
+        left_join(verdicts, by = ".variant") |>
         arrange(
             .data$.variant,
             coalesce(.data$.rank, Inf),

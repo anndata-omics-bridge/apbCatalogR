@@ -32,16 +32,24 @@ set_columns <- function(set) {
     )
 }
 
-# The requirement rows each location of a requirement reads: var reads var and
+# The locations each requirement location reads, as a table: var reads var and
 # varm.
-requirement_reads <- function(requirements) {
-    reads <- tibble(
+location_reads <- function() {
+    tibble(
         location = rep(names(READS), lengths(READS)),
         read = unlist(READS, use.names = FALSE)
     )
+}
+
+# The requirement rows each location of a requirement reads.
+requirement_reads <- function(requirements) {
     requirements |>
         mutate(.requirement = seq_len(nrow(requirements))) |>
-        inner_join(reads, by = "location", relationship = "many-to-many") |>
+        inner_join(
+            location_reads(),
+            by = "location",
+            relationship = "many-to-many"
+        ) |>
         select(
             ".requirement",
             required_level = "level",

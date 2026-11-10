@@ -225,25 +225,7 @@ bundle_entries <- function(bundle) {
         rows$entry_id <- row_entry_ids(rows)
         check_pairs(rows)
         keys <- bundle_keys(bundle)
-        unkeyed <- anti_join(rows, keys, by = c("set", "key"))
-        if (nrow(unkeyed) > 0L) {
-            stop(
-                sprintf(
-                    "%s: a field has no key",
-                    sub("/.*$", "", unkeyed$software[[1L]])
-                ),
-                call. = FALSE
-            )
-        }
-        qualifiers <- rows |>
-            filter(.data$qualifier != "") |>
-            select("set", "entry_id", "key", "qualifier", "value") |>
-            pivot_wider(
-                names_from = "qualifier",
-                values_from = "value",
-                names_prefix = "qualifier.",
-                values_fn = function(values) values[[1L]]
-            )
+        check_keyed(rows, keys)
         entries <- rows |>
             distinct(.data$set, .data$entry_id, .data$key) |>
             left_join(entry_ids(bundle), by = "entry_id") |>
@@ -251,7 +233,10 @@ bundle_entries <- function(bundle) {
                 select(keys, "set", "key", "kind"),
                 by = c("set", "key")
             ) |>
-            left_join(qualifiers, by = c("set", "entry_id", "key")) |>
+            left_join(
+                entry_qualifiers(rows),
+                by = c("set", "entry_id", "key")
+            ) |>
             mutate(
                 location = .data$attribute,
                 prefix = if_else(
@@ -264,6 +249,34 @@ bundle_entries <- function(bundle) {
             select(-"attribute")
         typed_entries(bundle, entries)
     })
+}
+
+# Every catalog.csv row names one of its set's keys.
+check_keyed <- function(rows, keys) {
+    unkeyed <- anti_join(rows, keys, by = c("set", "key"))
+    if (nrow(unkeyed) > 0L) {
+        stop(
+            sprintf(
+                "%s: a field has no key",
+                sub("/.*$", "", unkeyed$software[[1L]])
+            ),
+            call. = FALSE
+        )
+    }
+}
+
+# Each field's qualifier values, one `qualifier.<name>` column per qualifier; a
+# field's first row of a qualifier gives its value.
+entry_qualifiers <- function(rows) {
+    rows |>
+        filter(.data$qualifier != "") |>
+        select("set", "entry_id", "key", "qualifier", "value") |>
+        pivot_wider(
+            names_from = "qualifier",
+            values_from = "value",
+            names_prefix = "qualifier.",
+            values_fn = function(values) values[[1L]]
+        )
 }
 
 # Each entry's type and its place in catalogue order. A vendor no packaged rule
@@ -284,6 +297,27 @@ typed_entries <- function(bundle, entries) {
                 )
             )
         )
+    check_vendors(typed, software)
+    typed |>
+        mutate(entry_rank = seq_len(nrow(typed))) |>
+        mutate(
+            .by = "set",
+            source_rank = if_else(
+                .data$type == "vendor",
+                match(.data$source, software),
+                match(.data$source, unique(.data$source))
+            )
+        ) |>
+        arrange(
+            match(.data$set, catalogue_rows(bundle, "sets")$set),
+            match(.data$type, c("vendor", "producer", "annotation")),
+            .data$source_rank,
+            .data$entry_rank
+        )
+}
+
+# Every vendor of a set is software a packaged rule declares.
+check_vendors <- function(typed, software) {
     unknown <- filter(
         typed,
         .data$type == "vendor",
@@ -303,22 +337,6 @@ typed_entries <- function(bundle, entries) {
             call. = FALSE
         )
     }
-    typed |>
-        mutate(entry_rank = seq_len(nrow(typed))) |>
-        mutate(
-            .by = "set",
-            source_rank = if_else(
-                .data$type == "vendor",
-                match(.data$source, software),
-                match(.data$source, unique(.data$source))
-            )
-        ) |>
-        arrange(
-            match(.data$set, catalogue_rows(bundle, "sets")$set),
-            match(.data$type, c("vendor", "producer", "annotation")),
-            .data$source_rank,
-            .data$entry_rank
-        )
 }
 
 # The rule version patterns each vendor entry was reviewed for: its version's,
