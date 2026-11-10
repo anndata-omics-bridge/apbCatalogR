@@ -29,11 +29,7 @@ wanted_text <- function(request) {
 
 unresolved_field <- function(resolution) {
     request <- resolution$request
-    names <- vapply(
-        resolution$candidates,
-        function(candidate) candidate$reference$name,
-        character(1)
-    )
+    names <- as.character(resolution$candidates$name)
     message <- sprintf(
         "%s on %s is %s: %s%s",
         wanted_text(request),

@@ -24,10 +24,15 @@
 #'
 #' @keywords internal
 #' @importFrom anndataR AnnData read_h5ad
+#' @importFrom dplyr all_of anti_join any_of arrange bind_rows coalesce
+#' @importFrom dplyr cross_join distinct filter if_else inner_join left_join
+#' @importFrom dplyr mutate select semi_join summarise tibble
 #' @importFrom jsonlite fromJSON toJSON
 #' @importFrom Matrix sparseMatrix
 #' @importFrom R6 R6Class
+#' @importFrom rlang .data .env
 #' @importFrom stats setNames
+#' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom tools R_user_dir
 #' @importFrom utils read.csv untar
 "_PACKAGE"

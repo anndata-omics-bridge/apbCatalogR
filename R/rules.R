@@ -4,19 +4,14 @@
 
 # Every software version apb2 has a rule for, in apb2's order: its label, which
 # entries name, and the rule's version pattern, which a converted result stores.
-software_versions <- function() {
-    bundle <- current_bundle()
+software_versions <- function(bundle = current_bundle()) {
     bundle$memo("versions", function() {
         rows <- catalogue_rows(bundle, "versions")
-        lapply(seq_len(nrow(rows)), function(index) {
-            list(
-                software_name = rows$software[[index]],
-                version = rows$version[[index]],
-                software_version_pattern = rows$software_version_pattern[[
-                    index
-                ]]
-            )
-        })
+        tibble(
+            software_name = rows$software,
+            version = rows$version,
+            software_version_pattern = rows$software_version_pattern
+        )
     })
 }
 
@@ -115,93 +110,60 @@ check_id_names <- function(text, attribute, key, column) {
     }
 }
 
+# Every entry id of catalog.csv once, parsed into its fields.
+entry_ids <- function(bundle = current_bundle()) {
+    bundle$memo("entry_ids", function() {
+        ids <- unique(row_entry_ids(catalogue_rows(bundle, "catalog")))
+        bind_rows(lapply(ids, function(id) {
+            c(list(entry_id = id), entry_id_fields(id))
+        }))
+    })
+}
+
 # Every level an entry names for a software version: versions in versions.csv's
 # order, each version's levels in the order the entries first name them; `*`
 # names every version of its source.
-rule_levels <- function() {
-    bundle <- current_bundle()
+rule_levels <- function(bundle = current_bundle()) {
     bundle$memo("rule_levels", function() {
-        rows <- catalogue_rows(bundle, "catalog")
-        entry_ids <- unique(paste(
-            rows$software,
-            rows$location,
-            rows$name,
-            sep = "/"
-        ))
-        ids <- Filter(
-            function(found) found$level != ANY_VERSION,
-            lapply(entry_ids, entry_id_fields)
-        )
-        sources <- vapply(ids, function(found) found$source, character(1))
-        labels <- vapply(ids, function(found) found$version, character(1))
-        levels <- vapply(ids, function(found) found$level, character(1))
-        found <- list()
-        for (version in software_versions()) {
-            named <- sources == version$software_name &
-                labels %in% c(ANY_VERSION, version$version)
-            for (level in unique(levels[named])) {
-                found[[length(found) + 1L]] <- list(
-                    software_name = version$software_name,
-                    software_version_pattern = version$software_version_pattern,
-                    version = version$version,
-                    level = level
-                )
-            }
-        }
-        found
+        named <- entry_ids(bundle) |>
+            filter(.data$level != ANY_VERSION) |>
+            select("source", label = "version", "level")
+        software_versions(bundle) |>
+            inner_join(
+                named,
+                by = c(software_name = "source"),
+                relationship = "many-to-many"
+            ) |>
+            filter(
+                .data$label == ANY_VERSION | .data$label == .data$version
+            ) |>
+            distinct(
+                .data$software_name,
+                .data$software_version_pattern,
+                .data$version,
+                .data$level
+            )
     })
 }
 
 # The rule levels of one software whose version pattern admits a version.
 rules_matching <- function(software, version) {
-    Filter(
-        function(found) {
-            tolower(found$software_name) == tolower(software) &&
-                grepl(found$software_version_pattern, version, perl = TRUE)
-        },
-        rule_levels()
-    )
+    rule_levels() |>
+        filter(
+            tolower(.data$software_name) == tolower(.env$software),
+            vapply(
+                .data$software_version_pattern,
+                grepl,
+                logical(1),
+                x = .env$version,
+                perl = TRUE
+            )
+        )
 }
 
-# The rule's version pattern for one software's labelled version.
-version_pattern <- function(software, version) {
-    for (found in software_versions()) {
-        if (
-            identical(found$software_name, software) &&
-                identical(found$version, version)
-        ) {
-            return(found$software_version_pattern)
-        }
-    }
-    stop(
-        sprintf("versions.csv has no %s version '%s'", software, version),
-        call. = FALSE
-    )
-}
-
-# The rule version patterns an entry id's version names: one for a label, and
-# for `*` every pattern of the software, none for an app or an annotation
-# convention.
-version_patterns <- function(software, version) {
-    if (version != ANY_VERSION) {
-        return(version_pattern(software, version))
-    }
-    found <- Filter(
-        function(found) identical(found$software_name, software),
-        software_versions()
-    )
-    vapply(found, function(found) found$software_version_pattern, character(1))
-}
-
-# The concise reading of one rule's software version pattern.
-version_label <- function(pattern) {
-    for (found in software_versions()) {
-        if (identical(found$software_version_pattern, pattern)) {
-            return(found$version)
-        }
-    }
-    stop(
-        sprintf("no packaged rule declares the version pattern '%s'", pattern),
-        call. = FALSE
-    )
+# The concise reading of each rule's software version pattern: the label of the
+# first version with that pattern.
+version_label <- function(patterns) {
+    versions <- software_versions()
+    versions$version[match(patterns, versions$software_version_pattern)]
 }

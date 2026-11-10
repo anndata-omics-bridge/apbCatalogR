@@ -18,60 +18,88 @@ field_request <- function(level, location, key, qualifiers, kind = NULL) {
     )
 }
 
-# Whether an entry answers the request apart from qualifiers it leaves unknown:
-# an entry of the key asked for, or of another key when it leaves unknown what
-# the request asks.
-request_admits <- function(request, entry) {
-    selects <- is.na(request$location) ||
-        entry$reference$location %in% READS[[request$location]]
-    keyed <- is.null(request$key) ||
-        identical(entry$key, request$key) ||
-        length(request_undecided(request, entry)) > 0L
-    selects && length(request_mismatched(request, entry)) == 0L && keyed
-}
-
-# What the request asks that an entry's kind or known values contradict.
-request_mismatched <- function(request, entry) {
-    kind <- !is.null(request$kind) && entry$kind != request$kind
-    c(
-        if (kind) "kind",
-        unlist(Filter(
-            function(name) {
-                entry$qualifiers[[name]] != UNKNOWN &&
-                    !(entry$qualifiers[[name]] %in% request$qualifiers[[name]])
-            },
-            names(request$qualifiers)
+# For each entry, what the request asks that its known qualifier values
+# contradict (`mismatched`), and the qualifiers asked that it leaves unknown
+# (`undecided`, a list column). A kind is always known; a field whose meaning
+# the reviewer could not establish is not catalogued.
+qualifier_checks <- function(entries, request) {
+    names <- names(request$qualifiers)
+    if (length(names) == 0L || nrow(entries) == 0L) {
+        return(tibble(
+            mismatched = rep(FALSE, nrow(entries)),
+            undecided = rep(list(character(0)), nrow(entries))
         ))
+    }
+    accepted <- tibble(
+        qualifier = rep(names, lengths(request$qualifiers)),
+        value = unlist(request$qualifiers, use.names = FALSE)
     )
+    open <- accepted$qualifier[accepted$value == UNKNOWN]
+    entries |>
+        mutate(.row = seq_len(nrow(entries))) |>
+        select(".row", all_of(sprintf("qualifier.%s", names))) |>
+        pivot_longer(
+            -".row",
+            names_to = "qualifier",
+            names_prefix = "qualifier[.]",
+            values_to = "value"
+        ) |>
+        mutate(
+            known = !is.na(.data$value) & .data$value != UNKNOWN,
+            unknown = .data$value %in% UNKNOWN,
+            accepts = paste(.data$qualifier, .data$value) %in%
+                paste(accepted$qualifier, accepted$value)
+        ) |>
+        summarise(
+            .by = ".row",
+            mismatched = any(.data$known & !.data$accepts),
+            undecided = list(.data$qualifier[
+                .data$unknown & !(.data$qualifier %in% open)
+            ])
+        ) |>
+        select("mismatched", "undecided")
 }
 
-# What the request asks that an entry leaves unknown: its qualifiers with the
-# value unknown. A kind is always known; a field whose meaning the reviewer
-# could not establish is not catalogued.
-request_undecided <- function(request, entry) {
-    unlist(Filter(
-        function(name) {
-            entry$qualifiers[[name]] == UNKNOWN &&
-                !(UNKNOWN %in% request$qualifiers[[name]])
-        },
-        names(request$qualifiers)
-    ))
+# The entries that answer the request apart from qualifiers they leave unknown,
+# each with what it leaves `undecided`: an entry of the key asked for, or of
+# another key when it leaves unknown what the request asks.
+admitted_entries <- function(entries, request) {
+    checks <- qualifier_checks(entries, request)
+    entries$undecided <- checks$undecided
+    selects <- if (is.na(request$location)) {
+        rep(TRUE, nrow(entries))
+    } else {
+        entries$location %in% READS[[request$location]]
+    }
+    kind <- if (is.null(request$kind)) {
+        rep(FALSE, nrow(entries))
+    } else {
+        entries$kind != request$kind
+    }
+    keyed <- is.null(request$key) |
+        entries$key %in% request$key |
+        lengths(entries$undecided) > 0L
+    entries[selects & !kind & !checks$mismatched & keyed, ]
 }
 
-new_candidate <- function(entry, undecided = character(0)) {
-    list(
-        entry_id = entry$entry_id,
-        reference = entry$reference,
-        key = entry$key,
-        kind = entry$kind,
-        qualifiers = entry$qualifiers,
-        undecided = undecided
-    )
+# The references of entries, as lists of level, location, name, table and
+# prefix.
+entry_references <- function(entries) {
+    lapply(seq_len(nrow(entries)), function(index) {
+        list(
+            level = entries$level[[index]],
+            location = entries$location[[index]],
+            name = entries$name[[index]],
+            table = entries$table[[index]],
+            prefix = entries$prefix[[index]]
+        )
+    })
 }
 
 # The answer to one request; only a resolved one carries a reference.
-# `requirement` records the requirement a missing field had when the catalog
-# enforced it at init.
+# `candidates` are the entries that may answer, with what each leaves
+# `undecided`. `requirement` records the requirement a missing field had when
+# the catalog enforced it at init.
 Resolution <- R6Class(
     "Resolution",
     public = list(
@@ -86,7 +114,7 @@ Resolution <- R6Class(
             request,
             status,
             reference = NULL,
-            candidates = list(),
+            candidates = NULL,
             reasons = character(0)
         ) {
             self$request <- request
@@ -99,14 +127,11 @@ Resolution <- R6Class(
         # The distinct keys the candidates have; an unreviewed level signals
         # UnresolvedField.
         offered = function() {
-            if (self$status == "unknown" && length(self$candidates) == 0L) {
+            keys <- as.character(self$candidates$key)
+            if (self$status == "unknown" && length(keys) == 0L) {
                 stop(unresolved_field(self))
             }
-            sort_c(unique(vapply(
-                self$candidates,
-                function(candidate) candidate$key,
-                character(1)
-            )))
+            sort_c(unique(keys))
         },
 
         # The reference, NULL when the field is missing; ambiguous and unknown
@@ -121,28 +146,14 @@ Resolution <- R6Class(
 )
 
 # Resolve only when exactly one entry matches, none is undecided and none is
-# pending.
+# pending. `pending` entries carry the `reason` they wait.
 resolve_entries <- function(entries, pending, request, missing) {
-    compatible <- lapply(
-        Filter(function(entry) request_admits(request, entry), entries),
-        function(entry) {
-            new_candidate(entry, request_undecided(request, entry))
-        }
-    )
-    waiting <- Filter(
-        function(found) request_admits(request, found$entry),
-        pending
-    )
-    decided <- vapply(
-        compatible,
-        function(candidate) length(candidate$undecided) == 0L,
-        logical(1)
-    )
-    matches <- compatible[decided]
-    candidates <- c(
-        compatible,
-        lapply(waiting, function(found) new_candidate(found$entry))
-    )
+    compatible <- admitted_entries(entries, request)
+    waiting <- admitted_entries(pending, request)
+    waiting$undecided <- rep(list(character(0)), nrow(waiting))
+    decided <- lengths(compatible$undecided) == 0L
+    matches <- compatible[decided, ]
+    candidates <- bind_rows(compatible, waiting)
     unresolved <- function(status, reasons) {
         Resolution$new(
             request,
@@ -151,20 +162,20 @@ resolve_entries <- function(entries, pending, request, missing) {
             reasons = reasons
         )
     }
-    if (length(matches) > 1L) {
+    if (nrow(matches) > 1L) {
         return(unresolved("ambiguous", ambiguous_reason(matches)))
     }
-    if (length(waiting) > 0L) {
-        return(unresolved("unknown", pending_reasons(waiting)))
+    if (nrow(waiting) > 0L) {
+        return(unresolved("unknown", unique(waiting$reason)))
     }
     if (!all(decided)) {
-        return(unresolved("unknown", undecided_reasons(compatible[!decided])))
+        return(unresolved("unknown", undecided_reasons(compatible[!decided, ])))
     }
-    if (length(matches) == 1L) {
+    if (nrow(matches) == 1L) {
         return(Resolution$new(
             request,
             "resolved",
-            reference = matches[[1L]]$reference,
+            reference = entry_references(matches)[[1L]],
             candidates = candidates
         ))
     }
@@ -173,44 +184,29 @@ resolve_entries <- function(entries, pending, request, missing) {
 
 # Why several entries match: their names.
 ambiguous_reason <- function(matches) {
-    names <- vapply(
-        matches,
-        function(candidate) candidate$reference$name,
-        character(1)
-    )
     sprintf(
         "%d entries match: %s",
-        length(matches),
-        paste(names, collapse = ", ")
+        nrow(matches),
+        paste(matches$name, collapse = ", ")
     )
-}
-
-# Why pending entries leave a request unknown, each reason once.
-pending_reasons <- function(waiting) {
-    unique(vapply(waiting, function(found) found$reason, character(1)))
 }
 
 # Why entries leave a request unknown: the qualifiers each leaves open.
 undecided_reasons <- function(undecided) {
-    vapply(
-        undecided,
-        function(candidate) {
-            sprintf(
-                "%s leaves %s unknown",
-                candidate$reference$name,
-                paste(candidate$undecided, collapse = ", ")
-            )
-        },
-        character(1)
+    sprintf(
+        "%s leaves %s unknown",
+        undecided$name,
+        vapply(undecided$undecided, paste, character(1), collapse = ", ")
     )
 }
 
 # How a level is bound to its set. Each view answers resolve(request) and
 # carries its level, entries and software version pattern.
 
-# A level with a reviewed rule; `entries` are those whose fields the level
-# holds. `pending` entries belong to producers that have not run; a request they
-# would answer is unknown until the producer runs.
+# A level with a reviewed rule (`rule`: software, pattern and level); `entries`
+# are those whose fields the level holds. `pending` entries belong to producers
+# that have not run; a request they would answer is unknown until the producer
+# runs.
 ReviewedLevel <- R6Class(
     "ReviewedLevel",
     public = list(
@@ -219,7 +215,7 @@ ReviewedLevel <- R6Class(
         entries = NULL,
         pending = NULL,
 
-        initialize = function(level, rule, entries, pending = list()) {
+        initialize = function(level, rule, entries, pending) {
             self$level <- level
             self$rule <- rule
             self$entries <- entries
@@ -227,20 +223,17 @@ ReviewedLevel <- R6Class(
         },
 
         resolve = function(request) {
-            variant <- self$rule$variant
             missing <- sprintf(
                 "no reviewed %s %s entry on %s matches",
-                self$rule$catalogue$software_name,
-                variant$software_version_pattern,
+                self$rule$software,
+                self$rule$pattern,
                 self$level
             )
             resolve_entries(self$entries, self$pending, request, missing)
         }
     ),
     active = list(
-        software_version_pattern = function() {
-            self$rule$variant$software_version_pattern
-        }
+        software_version_pattern = function() self$rule$pattern
     )
 )
 
@@ -255,13 +248,7 @@ ProducedLevel <- R6Class(
         entries = NULL,
         pending = NULL,
 
-        initialize = function(
-            level,
-            software,
-            pattern,
-            entries,
-            pending = list()
-        ) {
+        initialize = function(level, software, pattern, entries, pending) {
             self$level <- level
             self$software_name <- software
             self$software_version_pattern <- pattern
@@ -288,7 +275,7 @@ UnreviewedLevel <- R6Class(
         software_name = NULL,
         software_version_pattern = NULL,
         reason = NULL,
-        entries = list(),
+        entries = NULL,
 
         initialize = function(level, software, pattern, reason) {
             self$level <- level

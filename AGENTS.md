@@ -8,7 +8,7 @@ apb-catalog's API in R, on the bundle apb-catalog releases. It reimplements the 
 
 - `inst/extdata/bundle/` is apb-catalog's bundle and `inst/extdata/test-bundle/` its test bundle, both unchanged; a release of apb-catalog replaces them by pull request. Never edit them by hand: change apb-catalog and rebuild with `make bundle` there
 - `tests/testthat/test-cases.R` runs every answer the test bundle records; a change that makes R answer differently from Python is a bug in R, or a change that belongs in apb-catalog first
-- Each R file mirrors one apb-catalog module: `source.R`, `rules.R`, `resolver.R`, `catalog.R`, `coverage.R`, `table.R`
+- Each R file mirrors one apb-catalog module: `source.R`, `rules.R`, `resolver.R`, `catalog.R`, `coverage.R`, `table.R`; inside, lookups query the bundle's tables with dplyr and tidyr, not a copy of Python's object model
 
 ## Conventions
 

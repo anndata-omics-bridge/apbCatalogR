@@ -12,80 +12,13 @@ KEY_COLUMNS <- c(
 )
 
 # The column an entry names: its name, or the prefix it is found by.
-field_name <- function(entry) {
-    reference <- entry$reference
-    if (!is.na(reference$name)) {
-        return(reference$name)
-    }
-    paste0("prefix:", reference$prefix)
+field_name <- function(name, prefix) {
+    if_else(is.na(name), paste0("prefix:", prefix), name)
 }
 
 # The set's qualifiers, in vocabulary order; the kind is a column of its own.
 qualifier_names <- function(set) {
     names(set$vocabulary$qualifiers)
-}
-
-# One table row: where the entry's field lives, its key and qualifiers, and its
-# requirement.
-entry_row <- function(set_name, set, source, software_version_pattern, entry) {
-    reference <- entry$reference
-    requirement <- NA_character_
-    for (row in set$requirements) {
-        if (row_describes(row, entry)) {
-            requirement <- row$requirement
-            break
-        }
-    }
-    qualifiers <- qualifier_names(set)
-    c(
-        list(
-            set = set_name,
-            source = source,
-            software_version_pattern = software_version_pattern,
-            level = reference$level,
-            location = reference$location,
-            table = reference$table,
-            name = field_name(entry),
-            key = entry$key,
-            kind = entry$kind
-        ),
-        setNames(
-            as.list(unname(entry$qualifiers[qualifiers])),
-            sprintf("qualifier.%s", qualifiers)
-        ),
-        list(requirement = requirement, entry_id = entry$entry_id)
-    )
-}
-
-# Every row of one set: vendor entries once per software version pattern, the
-# others once, without a pattern.
-set_rows <- function(set_name, set) {
-    rows <- list()
-    for (vendor in set$catalogues) {
-        for (entry in vendor$entries) {
-            for (pattern in entry$software_version_pattern) {
-                rows[[length(rows) + 1L]] <- entry_row(
-                    set_name,
-                    set,
-                    vendor$label,
-                    pattern,
-                    entry
-                )
-            }
-        }
-    }
-    for (source in c(set$producers, set$annotations)) {
-        for (entry in source$entries) {
-            rows[[length(rows) + 1L]] <- entry_row(
-                set_name,
-                set,
-                source$label,
-                NA_character_,
-                entry
-            )
-        }
-    }
-    rows
 }
 
 set_columns <- function(set) {
@@ -99,28 +32,88 @@ set_columns <- function(set) {
     )
 }
 
-# A data frame from rows given as named lists; a column a row lacks is NA there.
-# `lists` names list columns.
-records_frame <- function(rows, columns, lists = character(0)) {
-    frame <- data.frame(row.names = seq_along(rows))
-    for (column in columns) {
-        values <- lapply(rows, function(row) row[[column]])
-        if (column %in% lists) {
-            frame[[column]] <- I(values)
-        } else {
-            frame[[column]] <- unlist(lapply(values, function(value) {
-                if (is.null(value)) NA else value
-            }))
-        }
-    }
-    if (length(rows) == 0L) {
-        frame <- as.data.frame(setNames(
-            rep(list(character(0)), length(columns)),
-            columns
-        ))
-    }
-    rownames(frame) <- NULL
-    frame
+# The requirement rows each location of a requirement reads: var reads var and
+# varm.
+requirement_reads <- function(requirements) {
+    reads <- tibble(
+        location = rep(names(READS), lengths(READS)),
+        read = unlist(READS, use.names = FALSE)
+    )
+    requirements |>
+        mutate(.requirement = seq_len(nrow(requirements))) |>
+        inner_join(reads, by = "location", relationship = "many-to-many") |>
+        select(
+            ".requirement",
+            required_level = "level",
+            "read",
+            "key",
+            "requirement"
+        )
+}
+
+# Each entry's requirement: that of the first requirement row on its level, or
+# on every level, whose location reads the entry's field and whose key is the
+# entry's; NA when none.
+entry_requirements <- function(entries, requirements) {
+    found <- entries |>
+        mutate(.row = seq_len(nrow(entries))) |>
+        select(".row", "level", "location", "key") |>
+        inner_join(
+            requirement_reads(requirements),
+            by = c("key", location = "read"),
+            relationship = "many-to-many"
+        ) |>
+        filter(
+            .data$level == .data$required_level | .data$level == ANY_VERSION
+        ) |>
+        summarise(
+            .by = ".row",
+            requirement = .data$requirement[which.min(.data$.requirement)]
+        )
+    requirement <- rep(NA_character_, nrow(entries))
+    requirement[found$.row] <- found$requirement
+    requirement
+}
+
+# The table rows of a set's entries: where each field lives, its key and
+# qualifiers, and its requirement; `pattern` gives each row's software version
+# pattern.
+entry_rows <- function(set, entries, pattern) {
+    set_name <- set$name
+    requirement <- entry_requirements(entries, set$requirements)
+    entries |>
+        mutate(
+            set = .env$set_name,
+            software_version_pattern = .env$pattern,
+            name = field_name(.data$name, .data$prefix),
+            requirement = .env$requirement
+        ) |>
+        select(all_of(set_columns(set)))
+}
+
+# Every row of one set: vendor entries once per software version pattern, the
+# others once, without a pattern.
+set_rows <- function(set) {
+    entries <- set$entries |>
+        left_join(set$patterns, by = "entry_rank") |>
+        arrange(
+            match(.data$type, c("vendor", "producer", "annotation")),
+            .data$source_rank,
+            .data$entry_rank,
+            .data$pattern_rank
+        )
+    entry_rows(set, entries, entries$software_version_pattern)
+}
+
+# A data frame of the columns asked for, in that order; a column the rows lack
+# is NA.
+column_frame <- function(rows, columns) {
+    rows <- as.data.frame(rows %||% tibble())
+    missing <- setdiff(columns, names(rows))
+    rows[missing] <- lapply(missing, function(column) {
+        rep(NA_character_, nrow(rows))
+    })
+    rows[columns]
 }
 
 #' The catalogue sets as one long table
@@ -139,17 +132,15 @@ records_frame <- function(rows, columns, lists = character(0)) {
 #' @examples
 #' head(catalogue_table("confidence_alpha"))
 catalogue_table <- function(catalogue = NULL) {
-    names <- if (is.null(catalogue)) set_names() else catalogue
-    rows <- list()
-    columns <- character(0)
-    for (name in names) {
-        set <- catalogue_set(name)
-        rows <- c(rows, set_rows(name, set))
-        columns <- union(columns, set_columns(set))
-    }
-    qualifiers <- columns[startsWith(columns, "qualifier.")]
-    records_frame(
-        rows,
+    sets <- lapply(catalogue %||% set_names(), catalogue_set)
+    qualifiers <- unique(unlist(
+        lapply(sets, function(set) {
+            sprintf("qualifier.%s", qualifier_names(set))
+        }),
+        use.names = FALSE
+    ))
+    column_frame(
+        bind_rows(lapply(sets, set_rows)),
         c(KEY_COLUMNS, "key", "kind", qualifiers, "requirement", "entry_id")
     )
 }

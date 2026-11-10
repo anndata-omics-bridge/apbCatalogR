@@ -49,28 +49,16 @@ test_that("an entry of every level takes the level it answers on", {
         )$level,
         "*"
     )
-    entries <- unlist(
-        lapply(
-            apbCatalogR:::catalogue_set("obs_annotation_alpha")$annotations,
-            function(found) found$entries
-        ),
-        FALSE
-    )
-    group <- Find(
-        function(entry) identical(entry$reference$prefix, "group"),
-        entries
-    )
+    entries <- apbCatalogR:::catalogue_set("obs_annotation_alpha")$entries
+    group <- entries[entries$prefix %in% "group", ]
     expect_identical(group$entry_id, "annotation:prolfquapp/*/*/obs/-/group*")
-    bound <- apbCatalogR:::bound_entry(
-        apbCatalogR:::entry_on(group, "protein"),
-        "group_x"
+    bound <- apbCatalogR:::bind_entries(
+        apbCatalogR:::entries_on(group, "protein"),
+        c("Run", "group_x")
     )
     expect_identical(
         bound$entry_id,
         "annotation:prolfquapp/*/protein/obs/-/group_x"
     )
-    expect_identical(
-        c(bound$reference$level, bound$reference$name),
-        c("protein", "group_x")
-    )
+    expect_identical(c(bound$level, bound$name), c("protein", "group_x"))
 })
