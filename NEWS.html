@@ -247,6 +247,15 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<section id="apbcatalogr-0.99.1" class="level1">
+<h1>apbCatalogR 0.99.1</h1>
+<ul>
+<li><code>update_catalog(path)</code> installs a bundle archive from a local file, such as the one apb-catalog’s <code>make bundle</code> writes; the package no longer downloads anything.</li>
+<li>The Functional Genomics Center Zurich is listed as funder.</li>
+<li>Reading <code>.h5ad</code> and Parquet or DuckDB results ends in one shared step that names the rows and builds the <code>AnnData</code>; results are read as before.</li>
+<li>Catalogue lookups query the bundle’s tables with dplyr and tidyr instead of walking nested lists built from them; every answer is unchanged. apbCatalogR now imports dplyr, tidyr and rlang.</li>
+</ul>
+</section>
 <section id="apbcatalogr-0.99.0" class="level1">
 <h1>apbCatalogR 0.99.0</h1>
 <ul>

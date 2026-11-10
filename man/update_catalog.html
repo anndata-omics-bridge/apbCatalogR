@@ -259,19 +259,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/update_catalog.html">update_catalog</a></li></ol></nav></header><section id="download-a-newer-catalog" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="download-a-newer-catalog">Download a newer catalog</h2>
+<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/update_catalog.html">update_catalog</a></li></ol></nav></header><section id="install-a-catalog-bundle" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="install-a-catalog-bundle">Install a catalog bundle</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Downloads the bundle of an apb-catalog release from GitHub into the user cache, so lookups use it without a package update. Later sessions keep using the newest bundle, shipped or downloaded. It works from the next apb-catalog release, the first to ship the bundle.</p>
+<p>Installs a bundle archive into the user cache, so lookups use it without a package update. apb-catalog’s <code style="white-space: pre;">make bundle</code> writes the archive, as <code>build/apb-catalog-bundle.tar.gz</code>. Later sessions keep using the newest bundle, shipped or installed. Nothing is downloaded.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">update_catalog(version = NULL)
+<pre><code class="language-R">update_catalog(path)
 </code></pre>
 </section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table role="presentation"><tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="version">version</code>
+<code id="path">path</code>
 </td>
 <td>
-The apb-catalog release, such as <code>“0.2.0”</code>; <code>NULL</code> downloads the latest release.
+Path to the bundle archive, a <code>.tar.gz</code> file.
 </td>
 </tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalog_version.html">catalog_version()</a></code> now in use, invisibly.</p>
@@ -280,7 +280,7 @@ The apb-catalog release, such as <code>“0.2.0”</code>; <code>NULL</code> dow
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/update_catalog.html">update_catalog</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/update_catalog.html">update_catalog</a></span><span class="op">(</span><span class="st">"apb-catalog/build/apb-catalog-bundle.tar.gz"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
