@@ -19,8 +19,8 @@
 #' @field var The level's per-feature columns, from `var` or a `varm` table,
 #'   read with `[[`, `[` or `$get()`.
 #' @field obs The level's per-sample columns, read with `[[` or `[`.
-#' @return The class generator; a [DataCatalog]'s `levels` hold its objects.
-#' @keywords internal
+#' @return The class generator, not exported: a [DataCatalog]'s `levels` hold
+#'   its objects, which the catalog creates.
 Level <- R6Class(
     "Level",
     public = list(
@@ -93,8 +93,8 @@ Level <- R6Class(
 #'   keys it offers.
 #' @field var The level's per-feature column names, read with `[[` or `[`.
 #' @field obs The level's per-sample column names, read with `[[` or `[`.
-#' @return The class generator; a [Catalog]'s `levels` hold its objects.
-#' @keywords internal
+#' @return The class generator, not exported: a [Catalog]'s `levels` hold its
+#'   objects, which the catalog creates.
 LevelNames <- R6Class(
     "LevelNames",
     public = list(
@@ -138,14 +138,16 @@ LevelNames <- R6Class(
 
 #' One slot of a level, read by key first
 #'
-#' As cf_xarray's accessor: `[[` reads a key, else the level's own name;
-#' `$keys()` lists the catalog's keys only. `$get()` returns `NULL` where `[[`
-#' signals an error, `$name()` the field's name; both take the qualifiers a key
-#' leaves open. A set's prefix, `"c:q_value"`, asks that set alone and never
-#' the level's own name; `"v:q_value"` asks the level's own name alone.
+#' `[[` reads a key, else the level's own name; `$keys()` lists the catalog's
+#' keys only. `$get()` returns `NULL` where `[[` signals an error, `$name()` the
+#' field's name; both take the qualifiers a key leaves open. A set's prefix,
+#' `"c:q_value"`, asks that set alone and never the level's own name;
+#' `"v:q_value"` asks the level's own name alone. The design follows the Python
+#' package [cf_xarray](https://cf-xarray.readthedocs.io), whose accessor finds a
+#' variable by its CF-convention standard name before its own name.
 #'
-#' @return The class generator; a [Level]'s `layers` is its object.
-#' @keywords internal
+#' @return The class generator, not exported: a [Level]'s `layers` is its
+#'   object.
 Slot <- R6Class(
     "Slot",
     public = list(
@@ -252,8 +254,8 @@ Slot <- R6Class(
 #' `obs[c("group")]` holds every column the key names, each under its own name,
 #' where `obs[["group"]]` signals `UnresolvedField` because there are several.
 #'
-#' @return The class generator; a [Level]'s `var` and `obs` are its objects.
-#' @keywords internal
+#' @return The class generator, not exported: a [Level]'s `var` and `obs` are
+#'   its objects.
 Columns <- R6Class(
     "Columns",
     inherit = Slot,

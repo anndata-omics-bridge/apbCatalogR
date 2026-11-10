@@ -4,7 +4,8 @@
 \alias{LevelNames}
 \title{One level of a software version's rule, holding names}
 \value{
-The class generator; a \link{Catalog}'s \code{levels} hold its objects.
+The class generator, not exported: a \link{Catalog}'s \code{levels} hold its
+objects, which the catalog creates.
 }
 \description{
 The slots of a \link{Level} without data: \code{layers}, \code{var} and \code{obs} answer a key
@@ -12,7 +13,6 @@ with the field's name, a \code{varm} column as \code{table/column}. There is no 
 \code{obs_names}, \code{var_names} or own name: a name that is no key the level answers
 signals an error.
 }
-\keyword{internal}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

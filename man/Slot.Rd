@@ -4,16 +4,18 @@
 \alias{Slot}
 \title{One slot of a level, read by key first}
 \value{
-The class generator; a \link{Level}'s \code{layers} is its object.
+The class generator, not exported: a \link{Level}'s \code{layers} is its
+object.
 }
 \description{
-As cf_xarray's accessor: \code{[[} reads a key, else the level's own name;
-\verb{$keys()} lists the catalog's keys only. \verb{$get()} returns \code{NULL} where \code{[[}
-signals an error, \verb{$name()} the field's name; both take the qualifiers a key
-leaves open. A set's prefix, \code{"c:q_value"}, asks that set alone and never
-the level's own name; \code{"v:q_value"} asks the level's own name alone.
+\code{[[} reads a key, else the level's own name; \verb{$keys()} lists the catalog's
+keys only. \verb{$get()} returns \code{NULL} where \code{[[} signals an error, \verb{$name()} the
+field's name; both take the qualifiers a key leaves open. A set's prefix,
+\code{"c:q_value"}, asks that set alone and never the level's own name;
+\code{"v:q_value"} asks the level's own name alone. The design follows the Python
+package \href{https://cf-xarray.readthedocs.io}{cf_xarray}, whose accessor finds a
+variable by its CF-convention standard name before its own name.
 }
-\keyword{internal}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{

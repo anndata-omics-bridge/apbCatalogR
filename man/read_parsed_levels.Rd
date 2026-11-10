@@ -17,9 +17,29 @@ A \link{ParsedLevels} object.
 Reads a result apb2 wrote into a \link{ParsedLevels} object, one anndataR
 \code{AnnData} per level, the same for every format: a \code{.h5ad} file, a \code{.duckdb}
 file, or the directory apb2 writes for a \code{.parquet} result. Reading Parquet
-needs the \code{arrow} package, DuckDB the \code{duckdb} and \code{DBI} packages; \code{.h5ad}
-needs nothing beyond anndataR.
+needs the \code{arrow} package, DuckDB the \code{duckdb} and \code{DBI} packages, \code{.h5ad}
+the \code{rhdf5} package, with which anndataR reads it.
 }
+\section{Input layout}{
+
+apb2's \code{convert} command writes the result; each format records its format
+name and version, and a result of another format or version is refused:
+\itemize{
+\item \strong{Parquet}: a directory ending in \code{.parquet} whose \code{manifest.json}
+(format \code{apb2-parsed-levels-parquet}, version 9) names every level and
+table. Each level is a folder under \verb{levels/} with \code{obs.parquet},
+\code{var.parquet}, one file per layer in \verb{layers/} (features by observations)
+and the tables of \verb{obsm/}, \verb{varm/}, \verb{obsp/} and \verb{varp/}. The result's own
+tables are in \verb{annotation_tables/} and \verb{feature_relations/}.
+\item \strong{DuckDB}: one \code{.duckdb} file (format \code{apb2-parsed-levels-duckdb},
+version 8) holding the same manifest in the table \code{apb2_result_metadata};
+each table the manifest names is a database table.
+\item \strong{h5ad}: one \code{.h5ad} file of a one-level result in anndata's layout
+(format \code{apb2-parsed-levels}, version 8), with apb2's storage descriptor in
+\code{uns$apb}. An \code{.h5ad} file other software wrote has none and is refused.
+}
+}
+
 \examples{
 results <- tempfile()
 archive <- system.file(

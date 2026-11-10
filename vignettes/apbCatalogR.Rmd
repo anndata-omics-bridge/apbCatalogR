@@ -160,7 +160,9 @@ confidence$fields()[, c("set", "location", "name", "key", "present")]
 ```
 
 Each level of the catalog has anndataR's slots. A name is read as a key first,
-then as the level's own layer or column, as cf_xarray reads `ds.cf[...]`:
+then as the level's own layer or column, as the Python package
+[cf_xarray](https://cf-xarray.readthedocs.io) finds an xarray variable by its
+CF-convention standard name first. `?Level` and `?Slot` list the methods:
 
 ```{r levels}
 ion <- confidence$levels$peptidoform_ion

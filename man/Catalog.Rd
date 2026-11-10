@@ -25,8 +25,8 @@ catalog$levels$peptidoform_ion$layers$keys()
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{
-    \item{\code{levels}}{One level per rule level, with a \link{DataCatalog}'s slots
-holding names.}
+    \item{\code{levels}}{One \link{LevelNames} per rule level, with a
+\link{DataCatalog}'s slots holding names.}
   }
   \if{html}{\out{</div>}}
 }

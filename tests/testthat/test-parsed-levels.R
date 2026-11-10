@@ -76,6 +76,89 @@ test_that("a directory that is no APB result is refused", {
     expect_error(read_parsed_levels(tempdir()), "not an APB Parquet result")
 })
 
+# The parts of one level every format stores alike.
+level_parts <- function(level) {
+    list(
+        X = level$X,
+        layers = level$layers,
+        obs = level$obs,
+        var = level$var,
+        obsm = level$obsm,
+        varm = level$varm,
+        obsp = level$obsp,
+        varp = level$varp
+    )
+}
+
+# A result read from another format holds what its Parquet result holds; JSON
+# records compare as mappings, since h5ad stores their keys in name order.
+expect_same_result <- function(actual, expected, label) {
+    expect_identical(
+        names(actual$levels),
+        names(expected$levels),
+        label = label
+    )
+    for (name in names(expected$levels)) {
+        expect_identical(
+            level_parts(actual$levels[[name]]),
+            level_parts(expected$levels[[name]]),
+            label = paste(label, name)
+        )
+        expect_true(
+            json_equal(
+                actual$levels[[name]]$uns$apb,
+                expected$levels[[name]]$uns$apb
+            ),
+            label = paste(label, name, "uns$apb")
+        )
+    }
+    for (record in c("uns", "metadata", "hierarchy")) {
+        expect_true(
+            json_equal(actual[[record]], expected[[record]]),
+            label = paste(label, record)
+        )
+    }
+    expect_identical(
+        actual$annotation_tables,
+        expected$annotation_tables,
+        label = label
+    )
+    expect_identical(
+        actual$feature_relations,
+        expected$feature_relations,
+        label = label
+    )
+}
+
+# Each Parquet result's copy in another format, `suffix`, read as the Parquet
+# result reads; `levels` limits it to results of at most that many levels.
+expect_format_reads_as_parquet <- function(suffix, levels = Inf) {
+    for (path in list.files(
+        results_dir(),
+        pattern = "\\.parquet$",
+        full.names = TRUE
+    )) {
+        expected <- read_parsed_levels(path)
+        if (length(expected$levels) > levels) {
+            next
+        }
+        other <- sub("\\.parquet$", suffix, path)
+        expect_true(file.exists(other), label = basename(other))
+        expect_same_result(read_parsed_levels(other), expected, basename(other))
+    }
+}
+
+test_that("every DuckDB result reads as its Parquet result", {
+    skip_if_not_installed("duckdb")
+    skip_if_not_installed("DBI")
+    expect_format_reads_as_parquet(".duckdb")
+})
+
+test_that("every one-level h5ad result reads as its Parquet result", {
+    skip_if_not_installed("rhdf5")
+    expect_format_reads_as_parquet(".h5ad", levels = 1L)
+})
+
 test_that("a path is one existing file or directory", {
     missing <- file.path(tempdir(), "missing.h5ad")
     expect_error(read_parsed_levels(missing), "missing.h5ad does not exist")

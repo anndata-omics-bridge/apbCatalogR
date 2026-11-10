@@ -4,13 +4,13 @@
 \alias{Columns}
 \title{A var or obs slot, also read by several names}
 \value{
-The class generator; a \link{Level}'s \code{var} and \code{obs} are its objects.
+The class generator, not exported: a \link{Level}'s \code{var} and \code{obs} are
+its objects.
 }
 \description{
 \code{obs[c("group")]} holds every column the key names, each under its own name,
 where \code{obs[["group"]]} signals \code{UnresolvedField} because there are several.
 }
-\keyword{internal}
 \section{Super class}{
 \code{\link[apbCatalogR:Slot]{Slot}} -> \code{Columns}
 }

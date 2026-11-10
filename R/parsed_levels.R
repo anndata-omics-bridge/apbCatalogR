@@ -97,8 +97,25 @@ ParsedLevels <- R6Class(
 #' Reads a result apb2 wrote into a [ParsedLevels] object, one anndataR
 #' `AnnData` per level, the same for every format: a `.h5ad` file, a `.duckdb`
 #' file, or the directory apb2 writes for a `.parquet` result. Reading Parquet
-#' needs the `arrow` package, DuckDB the `duckdb` and `DBI` packages; `.h5ad`
-#' needs nothing beyond anndataR.
+#' needs the `arrow` package, DuckDB the `duckdb` and `DBI` packages, `.h5ad`
+#' the `rhdf5` package, with which anndataR reads it.
+#'
+#' @section Input layout:
+#' apb2's `convert` command writes the result; each format records its format
+#' name and version, and a result of another format or version is refused:
+#'
+#' * **Parquet**: a directory ending in `.parquet` whose `manifest.json`
+#'   (format `apb2-parsed-levels-parquet`, version 9) names every level and
+#'   table. Each level is a folder under `levels/` with `obs.parquet`,
+#'   `var.parquet`, one file per layer in `layers/` (features by observations)
+#'   and the tables of `obsm/`, `varm/`, `obsp/` and `varp/`. The result's own
+#'   tables are in `annotation_tables/` and `feature_relations/`.
+#' * **DuckDB**: one `.duckdb` file (format `apb2-parsed-levels-duckdb`,
+#'   version 8) holding the same manifest in the table `apb2_result_metadata`;
+#'   each table the manifest names is a database table.
+#' * **h5ad**: one `.h5ad` file of a one-level result in anndata's layout
+#'   (format `apb2-parsed-levels`, version 8), with apb2's storage descriptor in
+#'   `uns$apb`. An `.h5ad` file other software wrote has none and is refused.
 #'
 #' @param path The result, such as `converted.h5ad`, `converted.duckdb` or the
 #'   directory `converted.parquet`.
@@ -163,17 +180,23 @@ manifest_levels <- function(manifest, path, read) {
         uns = apb$parse %||% list(),
         metadata = apb[setdiff(names(apb), c("parse", "hierarchy"))],
         hierarchy = apb$hierarchy,
-        annotation_tables = read_named_tables(
-            file.path(path, "annotation_tables"),
-            manifest$annotation_table_order,
-            manifest$annotation_tables,
-            read
+        annotation_tables = with_metadata(
+            read_named_tables(
+                file.path(path, "annotation_tables"),
+                manifest$annotation_table_order,
+                manifest$annotation_tables,
+                read
+            ),
+            manifest$annotation_tables
         ),
-        feature_relations = read_named_tables(
-            file.path(path, "feature_relations"),
-            manifest$feature_relation_order,
-            manifest$feature_relations,
-            read
+        feature_relations = with_metadata(
+            read_named_tables(
+                file.path(path, "feature_relations"),
+                manifest$feature_relation_order,
+                manifest$feature_relations,
+                read
+            ),
+            manifest$feature_relations
         )
     )
 }
@@ -185,9 +208,11 @@ read_table <- function(directory, entry) {
     as.data.frame(arrow::read_parquet(file.path(directory, entry$file)))
 }
 
-# A table with the text and category columns its schema declares, for a store
-# that keeps neither: anndata stores repeated strings as categories, DuckDB
-# stores categories as text. Categories are ordered, as Parquet stores them.
+# A table with the text, category and integer columns its schema declares, for a
+# store that keeps them otherwise: anndata stores repeated strings as
+# categories, DuckDB stores categories as text, and DBI reads DuckDB's BIGINT
+# as double. Categories are ordered, as Parquet stores them; an Int64 column is
+# integer when every value fits, as arrow reads it from Parquet.
 declared_types <- function(frame, table) {
     columns <- as.character(unlist(table$columns))
     frame[columns] <- Map(
@@ -207,6 +232,14 @@ declared_column <- function(values, dtype) {
             ordered = TRUE
         ))
     }
+    if (
+        dtype$name %in%
+            INTEGER_DTYPES &&
+            is.double(values) &&
+            fits_integer(values)
+    ) {
+        return(as.integer(values))
+    }
     if (identical(dtype$name, "String") && is.factor(values)) {
         as.character(values)
     } else {
@@ -214,19 +247,37 @@ declared_column <- function(values, dtype) {
     }
 }
 
+# The schema's integer types that arrow reads from Parquet as R integers.
+INTEGER_DTYPES <- c("Int8", "Int16", "Int32", "Int64", "UInt8", "UInt16")
+
+# Whether every value is a whole number R's integer type holds.
+fits_integer <- function(values) {
+    known <- values[!is.na(values)]
+    all(abs(known) <= .Machine$integer.max & known == trunc(known))
+}
+
 read_named_tables <- function(directory, order, entries, read) {
     names <- as.character(unlist(order))
     setNames(
-        lapply(names, function(name) {
+        lapply(names, function(name) read(directory, entries[[name]])),
+        names
+    )
+}
+
+# Annotation tables and feature relations with their metadata, all of the
+# manifest entry but where and how the table is stored, as the attribute `apb`.
+with_metadata <- function(tables, entries) {
+    setNames(
+        lapply(names(tables), function(name) {
             entry <- entries[[name]]
-            table <- read(directory, entry)
+            table <- tables[[name]]
             attr(table, "apb") <- entry[setdiff(
                 names(entry),
                 c("file", "columns", "schema")
             )]
             table
         }),
-        names
+        names(tables)
     )
 }
 

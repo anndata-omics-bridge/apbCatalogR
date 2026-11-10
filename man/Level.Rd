@@ -4,7 +4,8 @@
 \alias{Level}
 \title{One level of a result, read through a catalog}
 \value{
-The class generator; a \link{DataCatalog}'s \code{levels} hold its objects.
+The class generator, not exported: a \link{DataCatalog}'s \code{levels} hold
+its objects, which the catalog creates.
 }
 \description{
 anndataR's slots of one level: \code{X}, \code{layers}, \code{var}, \code{obs}, \code{obs_names} and
@@ -17,7 +18,6 @@ signals an error when it is neither; a prefix makes the lookup exact,
 alone.
 \code{obs[c("group", "Run")]} reads every column the names name as a data frame.
 }
-\keyword{internal}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

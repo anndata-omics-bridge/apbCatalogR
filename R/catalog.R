@@ -428,8 +428,8 @@ fields_frame <- function(rows, set) {
 Catalog <- R6Class(
     "Catalog",
     public = list(
-        #' @field levels One level per rule level, with a [DataCatalog]'s slots
-        #'   holding names.
+        #' @field levels One [LevelNames] per rule level, with a
+        #'   [DataCatalog]'s slots holding names.
         levels = NULL,
 
         #' @description Bind a catalogue set to the rule levels of one software

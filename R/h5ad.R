@@ -8,6 +8,9 @@ H5_FORMAT_VERSION <- "8"
 # uns[[level]]$apb in the file, becomes the level's uns$apb; the root's part, at
 # uns$apb in the file, becomes the result's uns, metadata and hierarchy.
 read_h5ad_levels <- function(path) {
+    if (!requireNamespace("rhdf5", quietly = TRUE)) {
+        stop(sprintf("reading %s needs the rhdf5 package", path), call. = FALSE)
+    }
     stored <- read_h5ad(path, as = "InMemoryAnnData")
     root <- h5_namespace(stored$uns$apb, path, "uns$apb")
     entries <- root$storage$levels
@@ -34,8 +37,8 @@ read_h5ad_levels <- function(path) {
         uns = apb$parse %||% list(),
         metadata = apb[setdiff(names(apb), c("parse", "hierarchy"))],
         hierarchy = apb$hierarchy,
-        annotation_tables = list(),
-        feature_relations = list()
+        annotation_tables = setNames(list(), character(0)),
+        feature_relations = setNames(list(), character(0))
     )
 }
 
@@ -140,11 +143,14 @@ h5_layers <- function(stored, entries, obs_names, var_names) {
     )
 }
 
-# The obsm or varm tables of one level under their logical names, named like the
-# axis they align with.
+# The obsm or varm tables of one level under their logical names, with the
+# column types their schema declares, named like the axis they align with.
 h5_aligned <- function(stored, entries, names) {
     tables <- lapply(entries, function(entry) {
-        table <- as.data.frame(stored[[entry$physical_name]])
+        table <- declared_types(
+            as.data.frame(stored[[entry$physical_name]]),
+            entry
+        )
         rownames(table) <- names
         table
     })

@@ -3,6 +3,9 @@
 * `Catalog$new()`, `rule_coverage()`, `read_parsed_levels()`, `update_catalog()` and every key lookup check their arguments: a software, version, set, key or path that is not one character string, or a path that does not exist, is an error that says so.
 * The vignette says why apbCatalogR is on Bioconductor.
 * apbCatalogR no longer imports dplyr, tidyr and rlang: catalogue lookups use base R again, now with `lapply()`, `vapply()`, `Map()`, `Filter()`, `Find()` and `Reduce()` instead of `for` loops, and are about 20 times faster than in 0.99.1. Every answer is unchanged.
+* A `.duckdb` or `.h5ad` result reads exactly as its Parquet result: DuckDB's integer columns and layers are integer, not double; an `.h5ad` result's `varm` tables have the column types their schema declares, text where anndata stored categories; `varm` tables no longer carry an empty `apb` attribute. The test bundle holds every synthetic result also as `.duckdb` and, for a one-level result, as `.h5ad`, and a test reads each as its Parquet result.
+* Reading a `.h5ad` result needs the `rhdf5` package, with which anndataR reads HDF5; apbCatalogR suggests it and names it when it is missing.
+* `?read_parsed_levels` describes the layout of each format it reads. `Level`, `LevelNames`, `Slot` and `Columns`, the objects a catalog's `levels` hold, are in the help index with their methods `$get()`, `$name()`, `$keys()`, `[[` and `[`.
 
 # apbCatalogR 0.99.1
 
