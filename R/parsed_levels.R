@@ -190,23 +190,28 @@ read_table <- function(directory, entry) {
 # stores categories as text. Categories are ordered, as Parquet stores them.
 declared_types <- function(frame, table) {
     columns <- as.character(unlist(table$columns))
-    for (index in seq_along(columns)) {
-        dtype <- table$schema[[index]]
-        column <- columns[[index]]
-        if (!is.null(dtype$enum_categories)) {
-            categories <- as.character(unlist(dtype$enum_categories))
-            frame[[column]] <- factor(
-                as.character(frame[[column]]),
-                levels = categories,
-                ordered = TRUE
-            )
-        } else if (
-            identical(dtype$name, "String") && is.factor(frame[[column]])
-        ) {
-            frame[[column]] <- as.character(frame[[column]])
-        }
-    }
+    frame[columns] <- Map(
+        declared_column,
+        frame[columns],
+        table$schema[seq_along(columns)]
+    )
     frame[columns]
+}
+
+# One column as its schema type declares it.
+declared_column <- function(values, dtype) {
+    if (!is.null(dtype$enum_categories)) {
+        return(factor(
+            as.character(values),
+            levels = as.character(unlist(dtype$enum_categories)),
+            ordered = TRUE
+        ))
+    }
+    if (identical(dtype$name, "String") && is.factor(values)) {
+        as.character(values)
+    } else {
+        values
+    }
 }
 
 read_named_tables <- function(directory, order, entries, read) {
@@ -404,30 +409,24 @@ level_rule_version <- function(level) {
 
 # The address keys of the fields a level holds.
 level_retained <- function(level) {
-    found <- c(
+    c(
         address_key("layers", NA, level_layer_names(level)),
         address_key("var", NA, colnames(level$var)),
-        address_key("obs", NA, colnames(level$obs))
-    )
-    for (table in names(level$varm)) {
-        found <- c(
-            found,
+        address_key("obs", NA, colnames(level$obs)),
+        unlist(lapply(names(level$varm), function(table) {
             address_key("varm", table, colnames(level$varm[[table]]))
-        )
-    }
-    found
+        }))
+    )
 }
 
 # The single value of each field apb2 left out of the level, by address key.
 level_left_out <- function(level) {
     single <- level_apb(level)$parse$result$uninformative_fields$single_valued
-    found <- list()
-    for (location in names(single)) {
-        for (name in names(single[[location]])) {
-            found[[address_key(location, NA, name)]] <- json_text(
-                single[[location]][[name]]$value
-            )
-        }
-    }
-    found
+    concat(lapply(names(single), function(location) {
+        fields <- single[[location]]
+        setNames(
+            lapply(fields, function(field) json_text(field$value)),
+            address_key(location, NA, names(fields))
+        )
+    }))
 }

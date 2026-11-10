@@ -65,7 +65,7 @@ choose_bundle <- function(dirs, origins) {
         integer(1)
     )
     readable <- formats == BUNDLE_FORMAT
-    for (index in which(formats > BUNDLE_FORMAT)) {
+    lapply(which(formats > BUNDLE_FORMAT), function(index) {
         warning(
             sprintf(
                 "bundle %s in %s has format %s; update apbCatalogR to read it",
@@ -75,22 +75,22 @@ choose_bundle <- function(dirs, origins) {
             ),
             call. = FALSE
         )
-    }
+    })
     if (!any(readable)) {
         stop(
             "no bundle this apbCatalogR version can read; update apbCatalogR",
             call. = FALSE
         )
     }
-    versions <- lapply(manifests, function(manifest) {
-        package_version(manifest$version)
-    })
-    best <- NULL
-    for (index in which(readable)) {
-        if (is.null(best) || versions[[index]] > versions[[best]]) {
-            best <- index
-        }
-    }
+    versions <- package_version(vapply(
+        manifests,
+        function(manifest) as.character(manifest$version),
+        character(1)
+    ))
+    # The first of the newest readable bundles.
+    candidates <- which(readable)
+    newest <- versions[candidates] == max(versions[candidates])
+    best <- candidates[newest][[1L]]
     Bundle$new(dirs[[best]], origins[[best]])
 }
 

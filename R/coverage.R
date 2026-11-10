@@ -32,17 +32,32 @@ SEVERITY <- c(required = "fail", recommended = "warn", optional = "pass")
 #' @examples
 #' catalogues()
 catalogues <- function() {
-    bundle <- current_bundle()
-    sets <- catalogue_rows(bundle, "sets")
-    terms <- catalogue_rows(bundle, "terms")
-    entries <- bundle_entries(bundle)
-    data.frame(
-        catalogue = sets$set,
-        prefix = sets$prefix,
-        purpose = sets$purpose,
-        used_by = I(lapply(sets$used_by, cell_list)),
-        has_requirements = sets$set %in% terms$set[terms$requirement != ""],
-        entries = tabulate(match(entries$set, sets$set), nrow(sets))
+    rows <- lapply(set_names(), function(name) {
+        set <- catalogue_set(name)
+        list(
+            catalogue = name,
+            prefix = set$vocabulary$prefix,
+            purpose = set$description$purpose,
+            used_by = set$description$used_by,
+            has_requirements = length(set$requirements) > 0L,
+            entries = sum(vapply(
+                set$sources(),
+                function(source) length(source$entries),
+                integer(1)
+            ))
+        )
+    })
+    records_frame(
+        rows,
+        c(
+            "catalogue",
+            "prefix",
+            "purpose",
+            "used_by",
+            "has_requirements",
+            "entries"
+        ),
+        lists = "used_by"
     )
 }
 
@@ -68,232 +83,139 @@ catalogues <- function() {
 rule_coverage <- function(catalogue) {
     check_string(catalogue, "catalogue")
     set <- catalogue_set(catalogue)
-    variants <- coverage_variants(set)
-    found <- found_fields(set, variants)
-    required <- variant_requirements(set, variants)
-    described <- described_requirements(found, required)
-    missing <- anti_join(
-        required,
-        described,
-        by = c(".variant", ".requirement")
-    )
-    found$requirement <- first_requirement(found, described)
-    rows <- bind_rows(found_rows(found), missing_rows(set, missing))
-    rows <- bind_rows(
-        rows,
-        tibble(.variant = setdiff(variants$.variant, rows$.variant))
-    )
-    ordered_rows(rows, required, variant_verdicts(variants, required, missing))
-}
-
-# The set's requirement rows on each rule level, numbered in the set's order.
-variant_requirements <- function(set, variants) {
-    requirements <- mutate(
-        set$requirements,
-        .requirement = seq_len(nrow(set$requirements))
-    )
-    variants |>
-        select(".variant", "level") |>
-        inner_join(requirements, by = "level", relationship = "many-to-many")
-}
-
-# The requirement rows each found field answers: its key, at a location that
-# reads the field.
-described_requirements <- function(found, required) {
-    reads <- required |>
-        inner_join(
-            location_reads(),
-            by = "location",
-            relationship = "many-to-many"
-        ) |>
-        select(
-            ".variant",
-            ".requirement",
-            "read",
-            "key",
-            required = "requirement"
+    rows <- concat(lapply(set$catalogues, function(vendor) {
+        concat(lapply(vendor$variants, function(variant) {
+            variant_rows(
+                set,
+                vendor$software_name,
+                variant,
+                variant_entries(vendor, variant)
+            )
+        }))
+    }))
+    if (!set$needs_review) {
+        rows <- c(
+            rows,
+            concat(lapply(rule_levels(), function(found) {
+                variant <- list(
+                    level = found$level,
+                    software_version_pattern = found$software_version_pattern
+                )
+                variant_rows(set, found$software_name, variant, list())
+            }))
         )
-    inner_join(
-        found,
-        reads,
-        by = c(".variant", "key", location = "read"),
-        relationship = "many-to-many"
+    }
+    records_frame(rows, COVERAGE_COLUMNS)
+}
+
+variant_rows <- function(set, software, variant, vendor_entries) {
+    found <- c(
+        lapply(vendor_entries, function(entry) {
+            list(entry = entry, producer = NULL)
+        }),
+        producer_fields(set$producers, variant)
+    )
+    required <- Filter(
+        function(row) row$level == variant$level,
+        set$requirements
+    )
+    missing <- unmet_requirements(required, found)
+    verdict <- if (length(required) > 0L) {
+        coverage_verdict(vapply(missing, function(row) row$requirement, ""))
+    } else {
+        NA
+    }
+    base <- list(
+        software = software,
+        version = version_label(variant$software_version_pattern),
+        software_version_pattern = variant$software_version_pattern,
+        level = variant$level,
+        verdict = verdict
+    )
+    rows <- lapply(found, function(item) {
+        c(
+            base,
+            coverage_field(item$entry, item$producer),
+            list(requirement = row_requirement(required, item$entry))
+        )
+    })
+    rows <- c(
+        rows,
+        lapply(missing, function(row) c(base, requirement_field(set, row)))
+    )
+    if (length(rows) == 0L) {
+        rows <- list(base)
+    }
+    required_order(rows, required)
+}
+
+# The requirement rows no found field describes.
+unmet_requirements <- function(required, found) {
+    Filter(
+        function(row) {
+            !any(vapply(
+                found,
+                function(item) row_describes(row, item$entry),
+                logical(1)
+            ))
+        },
+        required
+    )
+}
+
+# A coverage row's field for a required key no field answers.
+requirement_field <- function(set, row) {
+    key <- set$key(row$key)
+    list(
+        key = row$key,
+        kind = key$kind,
+        qualifiers = qualifier_pairs(key$fixed),
+        location = row$location,
+        requirement = row$requirement
+    )
+}
+
+# The apps' fields on a rule level: every entry of an app counts, with what to
+# run.
+producer_fields <- function(producers, variant) {
+    unlist(
+        lapply(producers, function(producer) {
+            lapply(entries_on(producer, variant$level), function(entry) {
+                list(entry = entry, producer = producer)
+            })
+        }),
+        recursive = FALSE
     )
 }
 
 # Rows in the order of the requirements their key answers, vendor fields before
-# producer fields; stable otherwise. Each row gets its level's columns.
-ordered_rows <- function(rows, required, verdicts) {
-    ranks <- required |>
-        distinct(.data$.variant, .data$key, .keep_all = TRUE) |>
-        select(".variant", "key", .rank = ".requirement")
-    rows |>
-        mutate(
-            .order = seq_len(nrow(rows)),
-            produced = !is.na(.data$producer)
-        ) |>
-        left_join(ranks, by = c(".variant", "key")) |>
-        left_join(verdicts, by = ".variant") |>
-        arrange(
-            .data$.variant,
-            coalesce(.data$.rank, Inf),
-            .data$produced,
-            .data$.order
-        ) |>
-        column_frame(COVERAGE_COLUMNS)
+# producer fields; stable otherwise.
+required_order <- function(rows, required) {
+    keys <- vapply(required, function(row) row$key, character(1))
+    ranks <- vapply(
+        rows,
+        function(row) {
+            index <- match(row$key %||% NA_character_, keys)
+            if (is.na(index)) length(required) else index - 1L
+        },
+        numeric(1)
+    )
+    produced <- vapply(rows, function(row) !is.null(row$producer), logical(1))
+    rows[order(ranks, produced, method = "radix")]
 }
 
-# The rule levels a set is checked on: those it reviews, vendor by vendor, or
-# for a set without vendor catalogues every level the bundle's entries name for
-# each version of versions.csv.
-coverage_variants <- function(set) {
-    levels <- rule_levels()
-    if (set$needs_review) {
-        software <- unique(levels$software_name)
-        levels <- levels[order(match(levels$software_name, software)), ]
+# The requirement of the first requirement row that describes the entry.
+row_requirement <- function(required, entry) {
+    row <- Find(function(row) row_describes(row, entry), required)
+    if (is.null(row)) NA_character_ else row$requirement
+}
+
+qualifier_pairs <- function(qualifiers) {
+    if (length(qualifiers) == 0L) {
+        return(NA_character_)
     }
-    levels |>
-        mutate(
-            .variant = seq_len(nrow(levels)),
-            software = .data$software_name,
-            version = version_label(.data$software_version_pattern)
-        )
-}
-
-# The fields each rule level supplies: the vendor entries reviewed for it, then
-# every entry of an app on the level, with what to run.
-found_fields <- function(set, variants) {
-    vendor <- set$entries |>
-        filter(.data$type == "vendor") |>
-        inner_join(set$patterns, by = "entry_rank")
-    reviewed <- variants |>
-        select(
-            ".variant",
-            "software_name",
-            "software_version_pattern",
-            "level"
-        ) |>
-        inner_join(
-            vendor,
-            by = c(
-                software_name = "source",
-                "software_version_pattern",
-                "level"
-            ),
-            relationship = "many-to-many"
-        )
-    produced <- variants |>
-        select(".variant", variant_level = "level") |>
-        cross_join(filter(set$entries, .data$type == "producer")) |>
-        filter(
-            .data$level == .data$variant_level | .data$level == ANY_VERSION
-        ) |>
-        left_join(set$producers, by = c(source = "producer")) |>
-        mutate(producer = .data$source)
-    bind_rows(reviewed, produced) |>
-        arrange(.data$.variant) |>
-        mutate(.found = seq_along(.data$.variant))
-}
-
-# Each found field's requirement: that of the first requirement row it answers.
-first_requirement <- function(found, described) {
-    first <- summarise(
-        described,
-        .by = ".found",
-        requirement = .data$required[which.min(.data$.requirement)]
-    )
-    requirement <- rep(NA_character_, nrow(found))
-    requirement[first$.found] <- first$requirement
-    requirement
-}
-
-# Each level's verdict when its set has requirements on it: fail when a required
-# field is unsupported, warn when a recommended one is, pass otherwise.
-variant_verdicts <- function(variants, required, missing) {
-    verdicts <- required |>
-        mutate(
-            missed = paste(.data$.variant, .data$.requirement) %in%
-                paste(missing$.variant, missing$.requirement)
-        ) |>
-        summarise(
-            .by = ".variant",
-            verdict = coverage_verdict(.data$requirement[.data$missed])
-        )
-    variants |>
-        select(
-            ".variant",
-            "software",
-            "version",
-            "software_version_pattern",
-            "level"
-        ) |>
-        left_join(verdicts, by = ".variant")
-}
-
-# Coverage rows of the fields found: key, kind, the other qualifiers as
-# name=value, origin, the app and what to run before the field exists.
-found_rows <- function(found) {
-    qualifiers <- grep("^qualifier[.]", names(found), value = TRUE)
-    values <- tibble(
-        .found = integer(0),
-        qualifier = character(0),
-        value = character(0)
-    )
-    if (length(qualifiers) > 0L) {
-        values <- found |>
-            select(".found", all_of(qualifiers)) |>
-            pivot_longer(
-                -".found",
-                names_to = "qualifier",
-                names_prefix = "qualifier[.]",
-                values_drop_na = TRUE
-            )
-    }
-    tibble(
-        .variant = found$.variant,
-        key = found$key,
-        kind = found$kind,
-        qualifiers = qualifier_text(
-            filter(values, .data$qualifier != "origin"),
-            found$.found
-        ),
-        origin = found[["qualifier.origin"]] %||% rep(NA, nrow(found)),
-        producer = found$producer %||% rep(NA_character_, nrow(found)),
-        requirement = found$requirement,
-        location = found$location,
-        table = found$table,
-        column = found$name,
-        needs = found$instruction %||% rep(NA_character_, nrow(found))
-    )
-}
-
-# Coverage rows of the required keys no field answers.
-missing_rows <- function(set, missing) {
-    rows <- mutate(missing, .missing = seq_len(nrow(missing)))
-    fixed <- rows |>
-        select(".missing", "key") |>
-        inner_join(set$fixed, by = "key", relationship = "many-to-many") |>
-        select(".missing", "qualifier", "value")
-    tibble(
-        .variant = rows$.variant,
-        key = rows$key,
-        kind = set$keys$kind[match(rows$key, set$keys$key)],
-        qualifiers = qualifier_text(fixed, rows$.missing, ".missing"),
-        location = rows$location,
-        requirement = rows$requirement
-    )
-}
-
-# Each row's qualifier values as name=value pairs, sorted by name and joined by
-# ";"; NA for a row with none.
-qualifier_text <- function(values, rows, by = ".found") {
-    joined <- values |>
-        arrange(.data[[by]], .data$qualifier) |>
-        summarise(
-            .by = all_of(by),
-            text = paste0(.data$qualifier, "=", .data$value, collapse = ";")
-        )
-    joined$text[match(rows, joined[[by]])]
+    ordered <- sort_c(names(qualifiers))
+    paste(paste0(ordered, "=", qualifiers[ordered]), collapse = ";")
 }
 
 coverage_verdict <- function(requirements) {
@@ -302,4 +224,26 @@ coverage_verdict <- function(requirements) {
         return("fail")
     }
     if ("warn" %in% severities) "warn" else "pass"
+}
+
+coverage_field <- function(entry, producer) {
+    reference <- entry$reference
+    others <- entry$qualifiers
+    origin <- if ("origin" %in% names(others)) {
+        others[["origin"]]
+    } else {
+        NA_character_
+    }
+    others <- others[names(others) != "origin"]
+    list(
+        key = entry$key,
+        kind = entry$kind,
+        qualifiers = qualifier_pairs(others),
+        origin = origin,
+        producer = if (is.null(producer)) NULL else producer$producer,
+        location = reference$location,
+        table = reference$table,
+        column = reference$name,
+        needs = if (is.null(producer)) NA_character_ else producer$instruction
+    )
 }

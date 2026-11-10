@@ -14,6 +14,24 @@ sort_c <- function(values) {
     sort(values, method = "radix")
 }
 
+# The lists in `lists` joined into one list, in order; names inside them stay.
+concat <- function(lists) {
+    do.call(c, c(list(list()), unname(lists)))
+}
+
+# Values by name as repeated `found[[name]] <- value` leaves them: a name's
+# last value, at the place of its first.
+named_last <- function(values, names) {
+    if (length(values) == 0L) {
+        return(list())
+    }
+    distinct <- unique(names)
+    setNames(
+        values[length(names) + 1L - match(distinct, rev(names))],
+        distinct
+    )
+}
+
 # Equality of two JSON values, ignoring the order of object members, as Python's
 # dict equality does.
 json_equal <- function(left, right) {

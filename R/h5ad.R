@@ -65,11 +65,15 @@ h5_namespace <- function(namespace, path, where) {
             call. = FALSE
         )
     }
-    apb <- json_shape(namespace[setdiff(names(namespace), "storage")])
-    for (where in storage$json_values) {
-        keys <- as.character(unlist(where))
-        apb[[keys]] <- fromJSON(apb[[keys]], simplifyVector = FALSE)
-    }
+    apb <- Reduce(
+        function(apb, where) {
+            keys <- as.character(unlist(where))
+            apb[[keys]] <- fromJSON(apb[[keys]], simplifyVector = FALSE)
+            apb
+        },
+        storage$json_values,
+        json_shape(namespace[setdiff(names(namespace), "storage")])
+    )
     list(storage = storage, apb = apb)
 }
 

@@ -39,13 +39,10 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports: 
     anndataR (>= 1.2.2),
-    dplyr (>= 1.1.0),
     jsonlite,
     Matrix,
     R6,
-    rlang,
     stats,
-    tidyr,
     tools,
     utils
 Config/roxygen2/version: 8.1.1

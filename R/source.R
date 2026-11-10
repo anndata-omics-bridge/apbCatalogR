@@ -18,18 +18,22 @@ check_predicate <- function(vocabulary, kind, qualifiers) {
     if (!is.null(kind)) {
         check_kind(vocabulary, kind)
     }
-    for (name in names(qualifiers)) {
-        accepted <- qualifiers[[name]]
-        if (length(accepted) == 0L) {
-            stop(
-                sprintf("qualifier '%s' accepts no value", name),
-                call. = FALSE
-            )
-        }
-        for (value in accepted) {
-            check_value(vocabulary, name, value)
-        }
-    }
+    Map(
+        function(name, accepted) {
+            if (length(accepted) == 0L) {
+                stop(
+                    sprintf("qualifier '%s' accepts no value", name),
+                    call. = FALSE
+                )
+            }
+            lapply(accepted, function(value) {
+                check_value(vocabulary, name, value)
+            })
+        },
+        names(qualifiers),
+        qualifiers
+    )
+    invisible(NULL)
 }
 
 check_kind <- function(vocabulary, kind) {
@@ -70,6 +74,16 @@ check_value <- function(vocabulary, name, value) {
     }
 }
 
+new_reference <- function(found) {
+    list(
+        level = found$level,
+        location = found$location,
+        name = found$name %||% NA_character_,
+        table = found$table %||% NA_character_,
+        prefix = found$prefix %||% NA_character_
+    )
+}
+
 # The location, varm table and name a level's retained fields are indexed by, as
 # one string.
 address_key <- function(location, table, name) {
@@ -101,22 +115,20 @@ row_entry_ids <- function(rows) {
     paste(rows$software, rows$location, rows$name, sep = "/")
 }
 
-# A catalog.csv row pairs a qualifier with a value, never qualifies the kind,
-# and marks fixed as true or false; the first row that does not is refused.
-check_pairs <- function(rows) {
-    bad <- (rows$qualifier == "") != (rows$value == "") |
-        rows$qualifier == "kind" |
-        !(rows$fixed %in% c("true", "false")) |
-        (rows$fixed == "true" & rows$qualifier == "")
-    first <- which(bad)[1L]
-    if (!is.na(first)) {
-        check_pair(
-            rows$entry_id[[first]],
-            rows$qualifier[[first]],
-            rows$value[[first]],
-            rows$fixed[[first]]
-        )
-    }
+# The qualifier and value of an entry's catalog.csv rows, one pair per row, as a
+# named character vector; a row with neither adds none. Half a pair, a pair
+# qualifying the kind, or a fixed other than true or false, or true without a
+# qualifier, is refused.
+row_pairs <- function(label, rows) {
+    mapply(
+        check_pair,
+        qualifier = rows$qualifier,
+        value = rows$value,
+        fixed = rows$fixed,
+        MoreArgs = list(label = label)
+    )
+    paired <- rows$qualifier != ""
+    setNames(rows$value[paired], rows$qualifier[paired])
 }
 
 check_pair <- function(label, qualifier, value, fixed) {
@@ -154,227 +166,56 @@ check_pair <- function(label, qualifier, value, fixed) {
     }
 }
 
-
-# Every key of every set, from terms.csv, the catalogue's root: the name callers
-# ask by, its kind and PSI-MS terms, the same on every row of the key.
-# apb-catalog checks the bundle's terms when it writes them.
-bundle_keys <- function(bundle) {
-    bundle$memo("keys", function() {
-        keys <- catalogue_rows(bundle, "terms") |>
-            summarise(
-                .by = all_of(c("set", "key")),
-                kinds = list(sort_c(unique(.data$kind))),
-                terms = list(sort_c(unique(.data$psi_ms)))
-            )
-        bad <- which(lengths(keys$kinds) != 1L | lengths(keys$terms) != 1L)
-        if (length(bad) > 0L) {
-            first <- bad[[1L]]
+# A set's keys from its terms.csv rows, the catalogue's root: each the name
+# callers ask by, its kind and PSI-MS terms, the same on every row of the key,
+# and the qualifier values it fixes, one row per value; a row with neither fixes
+# none. apb-catalog checks the bundle's terms when it writes them.
+term_keys <- function(name, rows) {
+    names <- unique(rows$key)
+    keys <- lapply(names, function(key) {
+        found <- rows[rows$key == key, , drop = FALSE]
+        kinds <- sort_c(unique(found$kind))
+        terms <- sort_c(unique(found$psi_ms))
+        if (length(kinds) != 1L || length(terms) != 1L) {
             stop(
                 sprintf(
                     "%s: key '%s' has the kinds %s and the PSI-MS terms %s; %s",
-                    keys$set[[first]],
-                    keys$key[[first]],
-                    paste(keys$kinds[[first]], collapse = ", "),
-                    paste(keys$terms[[first]], collapse = ", "),
+                    name,
+                    key,
+                    paste(kinds, collapse = ", "),
+                    paste(terms, collapse = ", "),
                     "every row of a key has one of each"
                 ),
                 call. = FALSE
             )
         }
-        keys |>
-            mutate(kind = unlist(.data$kinds), psi_ms = unlist(.data$terms)) |>
-            select("set", "key", "kind", "psi_ms")
+        pairs <- found[found$qualifier != "", , drop = FALSE]
+        pairs <- pairs[!duplicated(pairs$qualifier), , drop = FALSE]
+        list(
+            key = key,
+            kind = kinds,
+            fixed = setNames(pairs$value, pairs$qualifier),
+            psi_ms = cell_list(terms)
+        )
     })
-}
-
-# The qualifier values each key fixes: one row per qualifier, the first a key's
-# terms.csv rows name.
-bundle_fixed <- function(bundle) {
-    bundle$memo("fixed", function() {
-        catalogue_rows(bundle, "terms") |>
-            filter(.data$qualifier != "") |>
-            distinct(.data$set, .data$key, .data$qualifier, .keep_all = TRUE) |>
-            select("set", "key", "qualifier", "value")
-    })
+    setNames(keys, names)
 }
 
 # The requirement rows of a set's terms.csv: one per term, a key at one
-# location, that states one, as level, location, key and requirement.
-set_requirements <- function(bundle, name) {
-    catalogue_rows(bundle, "terms") |>
-        filter(.data$set == .env$name, .data$requirement != "") |>
-        distinct(.data$key, .data$location, .keep_all = TRUE) |>
-        mutate(
-            level = sub("/.*$", "", .data$location),
-            location = sub("/.*$", "", sub("^[^/]*/?", "", .data$location))
-        ) |>
-        select("level", "location", "key", "requirement")
-}
-
-# Every catalogued field of the bundle, one row per field and key: where it
-# lives (`level`, `location`, `table`, and `name` or the obs column `prefix`),
-# its key and kind, its qualifier values as `qualifier.<name>` columns, and its
-# `source` and its `type`: vendor (conversion software), producer (an app) or
-# annotation. Rows are in catalogue order: sets as sets.csv lists them, vendors
-# in rule-level order, then apps, then annotation conventions, each source's
-# fields in the order catalog.csv first names them; `entry_rank` identifies a
-# row.
-bundle_entries <- function(bundle) {
-    bundle$memo("entries", function() {
-        rows <- catalogue_rows(bundle, "catalog")
-        rows$entry_id <- row_entry_ids(rows)
-        check_pairs(rows)
-        keys <- bundle_keys(bundle)
-        check_keyed(rows, keys)
-        entries <- rows |>
-            distinct(.data$set, .data$entry_id, .data$key) |>
-            left_join(entry_ids(bundle), by = "entry_id") |>
-            left_join(
-                select(keys, "set", "key", "kind"),
-                by = c("set", "key")
-            ) |>
-            left_join(
-                entry_qualifiers(rows),
-                by = c("set", "entry_id", "key")
-            ) |>
-            mutate(
-                location = .data$attribute,
-                prefix = if_else(
-                    endsWith(.data$name, "*"),
-                    sub("\\*$", "", .data$name),
-                    NA_character_
-                ),
-                name = if_else(is.na(.data$prefix), .data$name, NA_character_)
-            ) |>
-            select(-"attribute")
-        typed_entries(bundle, entries)
-    })
-}
-
-# Every catalog.csv row names one of its set's keys.
-check_keyed <- function(rows, keys) {
-    unkeyed <- anti_join(rows, keys, by = c("set", "key"))
-    if (nrow(unkeyed) > 0L) {
-        stop(
-            sprintf(
-                "%s: a field has no key",
-                sub("/.*$", "", unkeyed$software[[1L]])
-            ),
-            call. = FALSE
+# location, that states one.
+term_requirements <- function(rows) {
+    stated <- rows[rows$requirement != "", , drop = FALSE]
+    terms <- paste(stated$key, stated$location, sep = "\x1f")
+    lapply(which(!duplicated(terms)), function(index) {
+        parts <- c(
+            strsplit(stated$location[[index]], "/", fixed = TRUE)[[1L]],
+            ""
         )
-    }
-}
-
-# Each field's qualifier values, one `qualifier.<name>` column per qualifier; a
-# field's first row of a qualifier gives its value.
-entry_qualifiers <- function(rows) {
-    rows |>
-        filter(.data$qualifier != "") |>
-        select("set", "entry_id", "key", "qualifier", "value") |>
-        pivot_wider(
-            names_from = "qualifier",
-            values_from = "value",
-            names_prefix = "qualifier.",
-            values_fn = function(values) values[[1L]]
-        )
-}
-
-# Each entry's type and its place in catalogue order. A vendor no packaged rule
-# declares is refused.
-typed_entries <- function(bundle, entries) {
-    producers <- catalogue_rows(bundle, "producers")
-    software <- unique(rule_levels(bundle)$software_name)
-    typed <- entries |>
-        mutate(
-            type = if_else(
-                startsWith(.data$source, "annotation:"),
-                "annotation",
-                if_else(
-                    paste(.data$set, .data$source) %in%
-                        paste(producers$set, producers$producer),
-                    "producer",
-                    "vendor"
-                )
-            )
-        )
-    check_vendors(typed, software)
-    typed |>
-        mutate(entry_rank = seq_len(nrow(typed))) |>
-        mutate(
-            .by = "set",
-            source_rank = if_else(
-                .data$type == "vendor",
-                match(.data$source, software),
-                match(.data$source, unique(.data$source))
-            )
-        ) |>
-        arrange(
-            match(.data$set, catalogue_rows(bundle, "sets")$set),
-            match(.data$type, c("vendor", "producer", "annotation")),
-            .data$source_rank,
-            .data$entry_rank
-        )
-}
-
-# Every vendor of a set is software a packaged rule declares.
-check_vendors <- function(typed, software) {
-    unknown <- filter(
-        typed,
-        .data$type == "vendor",
-        !(.data$source %in% software)
-    )
-    if (nrow(unknown) > 0L) {
-        set <- unknown$set[[1L]]
-        stop(
-            sprintf(
-                "%s: no packaged rule declares the software %s",
-                set,
-                paste(
-                    sort_c(unique(unknown$source[unknown$set == set])),
-                    collapse = ", "
-                )
-            ),
-            call. = FALSE
-        )
-    }
-}
-
-# The rule version patterns each vendor entry was reviewed for: its version's,
-# or for `*` every pattern of its software, in versions.csv's order.
-vendor_patterns <- function(bundle) {
-    bundle$memo("patterns", function() {
-        vendor <- bundle_entries(bundle) |>
-            filter(.data$type == "vendor") |>
-            select("entry_rank", "source", label = "version")
-        versions <- software_versions(bundle) |>
-            mutate(pattern_rank = seq_along(.data$version))
-        matched <- vendor |>
-            inner_join(
-                versions,
-                by = c(source = "software_name"),
-                relationship = "many-to-many"
-            ) |>
-            filter(
-                .data$label == ANY_VERSION | .data$label == .data$version
-            )
-        unmatched <- vendor |>
-            filter(.data$label != ANY_VERSION) |>
-            anti_join(matched, by = "entry_rank")
-        if (nrow(unmatched) > 0L) {
-            stop(
-                sprintf(
-                    "versions.csv has no %s version '%s'",
-                    unmatched$source[[1L]],
-                    unmatched$label[[1L]]
-                ),
-                call. = FALSE
-            )
-        }
-        select(
-            matched,
-            "entry_rank",
-            "software_version_pattern",
-            "pattern_rank"
+        list(
+            level = parts[[1L]],
+            location = parts[[2L]],
+            key = stated$key[[index]],
+            requirement = stated$requirement[[index]]
         )
     })
 }
@@ -383,6 +224,126 @@ vendor_patterns <- function(bundle) {
 # it fixes.
 key_accepted <- function(found) {
     as.list(found$fixed)
+}
+
+# One entry from its catalog.csv rows, one per qualifier, its parsed id and its
+# key.
+row_entry <- function(rows, named, key) {
+    if (is.null(key)) {
+        stop(sprintf("%s: a field has no key", named$source), call. = FALSE)
+    }
+    entry_id <- row_entry_ids(rows[1L, , drop = FALSE])
+    reference <- list(
+        level = named$level,
+        location = named$attribute,
+        table = named$table
+    )
+    if (endsWith(named$name, "*")) {
+        reference$prefix <- sub("\\*$", "", named$name)
+    } else {
+        reference$name <- named$name
+    }
+    list(
+        entry_id = entry_id,
+        software_version_pattern = version_patterns(
+            named$source,
+            named$version
+        ),
+        reference = new_reference(reference),
+        key = key$key,
+        kind = key$kind,
+        qualifiers = row_pairs(entry_id, rows)
+    )
+}
+
+# Who an entry comes from: the software, an app, or annotation:<convention>, the
+# first field of its id.
+entry_source <- function(entry) {
+    sub("/.*$", "", entry$entry_id)
+}
+
+# The entry bound to one level's column: its reference and the column of its id.
+bound_entry <- function(entry, name) {
+    reference <- entry$reference
+    entry$entry_id <- paste0(sub("/[^/]*$", "", entry$entry_id), "/", name)
+    entry$reference <- list(
+        level = reference$level,
+        location = reference$location,
+        name = name,
+        table = reference$table,
+        prefix = NA_character_
+    )
+    entry
+}
+
+# One catalogue per software of versions.csv, each reviewing every level the
+# bundle's entries name for its versions, when the set has vendor entries; none
+# otherwise.
+vendor_catalogues <- function(name, entries) {
+    if (length(entries) == 0L) {
+        return(list())
+    }
+    levels <- rule_levels()
+    software <- unique(vapply(
+        levels,
+        function(found) found$software_name,
+        character(1)
+    ))
+    unknown <- setdiff(names(entries), software)
+    if (length(unknown) > 0L) {
+        stop(
+            sprintf(
+                "%s: no packaged rule declares the software %s",
+                name,
+                paste(sort_c(unknown), collapse = ", ")
+            ),
+            call. = FALSE
+        )
+    }
+    lapply(software, function(vendor) {
+        variants <- Filter(
+            function(found) found$software_name == vendor,
+            levels
+        )
+        list(
+            type = "vendor",
+            label = vendor,
+            software_name = vendor,
+            variants = lapply(variants, function(found) {
+                list(
+                    level = found$level,
+                    software_version_pattern = found$software_version_pattern
+                )
+            }),
+            entries = entries[[vendor]] %||% list()
+        )
+    })
+}
+
+# An app's catalogue, such as apb-fasta's; its producers.csv row names the run
+# it waits for and what to run.
+producer_catalogue <- function(producer, entries, run) {
+    list(
+        type = "producer",
+        label = producer,
+        producer = producer,
+        requires = cell_list(run$requires, "."),
+        instruction = if (identical(run$instruction, "")) {
+            NA_character_
+        } else {
+            run$instruction
+        },
+        entries = entries
+    )
+}
+
+annotation_catalogue <- function(convention, entries) {
+    list(
+        type = "annotation",
+        label = paste0("annotation:", convention),
+        convention = convention,
+        entries = entries
+    )
 }
 
 # A set's vocabulary from its sets.csv row, its kinds, its qualifiers and their
@@ -408,126 +369,101 @@ set_vocabulary <- function(head, kind_rows, qualifier_rows, value_rows) {
     )
 }
 
-# The vendor entries a set reviewed for one software version's level.
-entries_for <- function(set, software, pattern, level) {
-    reviewed <- filter(set$patterns, .data$software_version_pattern == pattern)
-    set$entries |>
-        filter(
-            .data$type == "vendor",
-            .data$source == .env$software,
-            .data$level == .env$level
-        ) |>
-        semi_join(reviewed, by = "entry_rank")
+# The entries a vendor catalogue reviewed for one of its rule variants.
+variant_entries <- function(vendor, variant) {
+    Filter(
+        function(entry) {
+            variant$software_version_pattern %in%
+                entry$software_version_pattern &&
+                entry$reference$level == variant$level
+        },
+        vendor$entries
+    )
 }
 
-# The entries on one level: those of the level, and those of every level (`*`)
-# taking the level in their id and reference.
-entries_on <- function(entries, level) {
-    entries |>
-        filter(.data$level %in% c(.env$level, ANY_VERSION)) |>
-        mutate(
-            entry_id = if_else(
-                .data$level == ANY_VERSION,
-                paste(
-                    sub("^([^/]*/[^/]*)/.*$", "\\1", .data$entry_id),
-                    .env$level,
-                    sub("^([^/]*/){3}", "", .data$entry_id),
-                    sep = "/"
-                ),
-                .data$entry_id
-            ),
-            level = .env$level
-        )
+# The entries a producer or annotation catalogue supplies on one level, those of
+# every level included.
+entries_on <- function(source, level) {
+    Filter(Negate(is.null), lapply(source$entries, entry_on, level = level))
 }
 
-# The entries bound to the level's obs columns: an entry found by prefix binds
-# to every column it matches, each named in the entry's id, so a lookup reports
-# them as ambiguous; one that matches none drops out.
-bind_entries <- function(entries, obs_columns) {
-    entries <- mutate(entries, .position = seq_len(nrow(entries)))
-    columns <- tibble(.column = obs_columns, .order = seq_along(obs_columns))
-    bound <- entries |>
-        filter(!is.na(.data$prefix)) |>
-        cross_join(columns) |>
-        filter(startsWith(tolower(.data$.column), tolower(.data$prefix))) |>
-        mutate(
-            entry_id = paste0(
-                sub("/[^/]*$", "", .data$entry_id),
-                "/",
-                .data$.column
-            ),
-            name = .data$.column,
-            prefix = NA_character_
-        )
-    entries |>
-        filter(is.na(.data$prefix)) |>
-        mutate(.order = 0L) |>
-        bind_rows(bound) |>
-        arrange(.data$.position, .data$.order) |>
-        select(-any_of(c(".position", ".order", ".column")))
-}
-
-# The address keys of entries' fields.
-entry_addresses <- function(entries) {
-    if (is.null(entries) || nrow(entries) == 0L) {
-        return(character(0))
+# The entry on one level: itself, an entry of every level (`*`) taking that
+# level in its reference and id, or NULL on another level.
+entry_on <- function(entry, level) {
+    if (entry$reference$level == level) {
+        return(entry)
     }
-    address_key(entries$location, entries$table, entries$name)
-}
-
-# The entries whose field the level holds.
-held_entries <- function(entries, retained) {
-    entries[entry_addresses(entries) %in% retained, ]
-}
-
-# Whether a result's metadata records the path a producer's run writes.
-producer_ran <- function(requires, metadata) {
-    section <- metadata
-    for (depth in seq_along(requires)) {
-        key <- requires[[depth]]
-        if (!(key %in% names(section))) {
-            return(FALSE)
-        }
-        if (depth == length(requires)) {
-            break
-        }
-        section <- section[[key]]
-        if (!is.list(section) || is.null(names(section))) {
-            return(FALSE)
-        }
+    if (entry$reference$level != ANY_VERSION) {
+        return(NULL)
     }
-    TRUE
+    fields <- strsplit(entry$entry_id, "/", fixed = TRUE)[[1L]]
+    fields[[3L]] <- level
+    entry$entry_id <- paste(fields, collapse = "/")
+    entry$reference$level <- level
+    entry
 }
 
-# Why a producer's entries wait: it has not run, and what to run.
-pending_reason <- function(producer, instruction) {
-    sprintf("%s has not run on this result; %s", producer, instruction)
+# Whether a result's metadata records a producer's run.
+producer_ran <- function(producer, metadata) {
+    has_path(metadata, as.character(unlist(producer$requires)))
 }
 
-# The annotation convention of an annotation source.
-source_convention <- function(source) {
-    sub("^annotation:", "", source)
+# Whether nested named lists hold the path of keys, each key but the last naming
+# a named list.
+has_path <- function(section, keys) {
+    if (length(keys) == 0L) {
+        return(TRUE)
+    }
+    if (!(keys[[1L]] %in% names(section))) {
+        return(FALSE)
+    }
+    if (length(keys) == 1L) {
+        return(TRUE)
+    }
+    inner <- section[[keys[[1L]]]]
+    if (!is.list(inner) || is.null(names(inner))) {
+        return(FALSE)
+    }
+    has_path(inner, keys[-1L])
 }
 
-# One packaged catalogue set: its vocabulary, keys, requirements, apps and
-# annotation conventions, and its entries, the bundle's rows of the set with a
-# column for each of its qualifiers. A set with vendor entries answers only for
-# a reviewed rule level; one made only of apps' and annotation entries needs no
-# review.
+pending_reason <- function(producer) {
+    sprintf(
+        "%s has not run on this result; %s",
+        producer$producer,
+        producer$instruction
+    )
+}
+
+annotation_applies <- function(annotation, metadata) {
+    annotation$convention %in% names(metadata)
+}
+
+# Whether an entry on a requirement row's level answers the row.
+row_describes <- function(row, entry) {
+    entry$reference$level %in%
+        c(row$level, ANY_VERSION) &&
+        entry$reference$location %in% READS[[row$location]] &&
+        identical(entry$key, row$key)
+}
+
+# One packaged catalogue set: its vocabulary, keys, vendor, producer and
+# annotation catalogues and requirements, indexed by software and version.
+# Producers hold the fields apps write after conversion and annotations the
+# sample-annotation fields; both apply to every software version. A set made
+# only of them has no vendor catalogue and needs no review.
 CatalogueSet <- R6Class(
     "CatalogueSet",
     public = list(
         name = NULL,
         vocabulary = NULL,
         vocabulary_version = NULL,
-        description = NULL,
         keys = NULL,
-        fixed = NULL,
-        requirements = NULL,
+        description = NULL,
+        catalogues = NULL,
         producers = NULL,
-        conventions = NULL,
-        entries = NULL,
-        patterns = NULL,
+        annotations = NULL,
+        requirements = NULL,
 
         initialize = function(bundle, name) {
             rows <- function(table) {
@@ -535,6 +471,12 @@ CatalogueSet <- R6Class(
                 found[found$set == name, , drop = FALSE]
             }
             head <- set_head(rows("sets"), name)
+            keys <- term_keys(name, rows("terms"))
+            by_source <- source_entries(rows("catalog"), keys)
+            sources <- names(by_source)
+            runs <- rows("producers")
+            annotation <- startsWith(sources, "annotation:")
+            app <- !annotation & sources %in% runs$producer
             self$name <- name
             self$vocabulary <- set_vocabulary(
                 head,
@@ -546,88 +488,60 @@ CatalogueSet <- R6Class(
                 "catalogues",
                 "datapackage.json"
             )$version
+            self$keys <- keys
             self$description <- list(
                 purpose = head$purpose,
                 used_by = cell_list(head$used_by)
             )
-            self$keys <- filter(bundle_keys(bundle), .data$set == .env$name)
-            self$fixed <- filter(bundle_fixed(bundle), .data$set == .env$name)
-            self$requirements <- set_requirements(bundle, name)
-            self$entries <- set_entries(bundle, name, self$vocabulary)
-            self$patterns <- semi_join(
-                vendor_patterns(bundle),
-                self$entries,
-                by = "entry_rank"
+            self$catalogues <- vendor_catalogues(
+                name,
+                by_source[!annotation & !app]
             )
-            self$producers <- set_producers(rows("producers"), self$entries)
-            self$conventions <- unique(source_convention(
-                self$entries$source[self$entries$type == "annotation"]
-            ))
+            self$producers <- lapply(which(app), function(index) {
+                run <- runs[runs$producer == sources[[index]], , drop = FALSE]
+                producer_catalogue(sources[[index]], by_source[[index]], run)
+            })
+            self$annotations <- lapply(which(annotation), function(index) {
+                annotation_catalogue(
+                    sub("^annotation:", "", sources[[index]]),
+                    by_source[[index]]
+                )
+            })
+            self$requirements <- term_requirements(rows("terms"))
+            private$by_version <- reviewed_versions(self$catalogues)
         },
 
-        # One of the set's keys, with the qualifier values it fixes; an unknown
-        # name signals an error naming the set's keys.
+        # Every catalogue of the set: vendor, producer and annotation.
+        sources = function() {
+            c(self$catalogues, self$producers, self$annotations)
+        },
+
+        # The rule reviewed for one software version's level, or NULL.
+        reviewed = function(software, pattern, level) {
+            private$by_version[[paste(software, pattern, level, sep = "\x1f")]]
+        },
+
+        # One of the set's keys; an unknown name signals an error naming the
+        # set's keys.
         key = function(name) {
-            found <- self$keys[self$keys$key == name, , drop = FALSE]
-            if (nrow(found) == 0L) {
-                known <- paste(sort_c(self$keys$key), collapse = ", ")
+            found <- self$keys[[name]]
+            if (is.null(found)) {
+                known <- paste(sort_c(names(self$keys)), collapse = ", ")
                 stop(
                     sprintf("unknown key '%s'; keys: %s", name, known),
                     call. = FALSE
                 )
             }
-            fixed <- self$fixed[self$fixed$key == name, , drop = FALSE]
-            list(
-                key = name,
-                kind = found$kind[[1L]],
-                fixed = setNames(fixed$value, fixed$qualifier),
-                psi_ms = cell_list(found$psi_ms[[1L]])
-            )
-        },
-
-        # Whether the set reviewed one software version's level: it has vendor
-        # entries and the bundle's entries name that level for the version.
-        reviewed = function(software, pattern, level) {
-            self$needs_review &&
-                any(
-                    rule_levels()$software_name == software &
-                        rule_levels()$software_version_pattern == pattern &
-                        rule_levels()$level == level
-                )
+            found
         }
     ),
     active = list(
         # Whether a level answers only once a vendor catalogue reviewed its
         # rule.
-        needs_review = function() any(self$entries$type == "vendor")
-    )
+        needs_review = function() length(self$catalogues) > 0L
+    ),
+    private = list(by_version = list())
 )
-
-# A set's rows of the bundle's entries, with exactly its qualifier columns, in
-# vocabulary order.
-set_entries <- function(bundle, name, vocabulary) {
-    columns <- sprintf("qualifier.%s", names(vocabulary$qualifiers))
-    entries <- filter(bundle_entries(bundle), .data$set == .env$name)
-    entries[setdiff(columns, names(entries))] <- NA_character_
-    others <- grep("^qualifier[.]", names(entries), value = TRUE)
-    select(entries, -all_of(setdiff(others, columns)))
-}
-
-# The apps a set's entries come from, in catalogue order, with the run each
-# waits for (`requires`, a list column) and what to run.
-set_producers <- function(runs, entries) {
-    sources <- unique(entries$source[entries$type == "producer"])
-    found <- runs[match(sources, runs$producer), , drop = FALSE]
-    tibble(
-        producer = sources,
-        requires = lapply(found$requires, cell_list, separator = "."),
-        instruction = if_else(
-            found$instruction == "",
-            NA_character_,
-            found$instruction
-        )
-    )
-}
 
 # The sets.csv row describing the set; an unknown set signals an error naming
 # the packaged ones.
@@ -643,6 +557,50 @@ set_head <- function(head, name) {
         )
     }
     head
+}
+
+# A set's entries from its catalog.csv rows, one entry per field and key,
+# grouped by the source their ids name, in the order the sources first appear.
+source_entries <- function(rows, keys) {
+    ids <- row_entry_ids(rows)
+    fields <- paste(ids, rows$key, sep = "\x1f")
+    groups <- split(
+        seq_len(nrow(rows)),
+        factor(fields, levels = unique(fields))
+    )
+    entries <- lapply(unname(groups), function(index) {
+        field <- rows[index, , drop = FALSE]
+        row_entry(
+            field,
+            entry_id_fields(ids[[index[[1L]]]]),
+            keys[[field$key[[1L]]]]
+        )
+    })
+    named_sources <- vapply(entries, entry_source, character(1))
+    split(entries, factor(named_sources, levels = unique(named_sources)))
+}
+
+# Each vendor catalogue's reviewed rule levels, by software, version pattern and
+# level.
+reviewed_versions <- function(catalogues) {
+    found <- concat(lapply(catalogues, function(vendor) {
+        lapply(vendor$variants, function(variant) {
+            list(catalogue = vendor, variant = variant)
+        })
+    }))
+    keys <- vapply(
+        found,
+        function(one) {
+            paste(
+                one$catalogue$software_name,
+                one$variant$software_version_pattern,
+                one$variant$level,
+                sep = "\x1f"
+            )
+        },
+        character(1)
+    )
+    named_last(found, keys)
 }
 
 catalogue_set <- function(name) {

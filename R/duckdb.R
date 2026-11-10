@@ -8,13 +8,15 @@ DUCKDB_METADATA_TABLE <- "apb2_result_metadata"
 # the Parquet manifest, kept in one table; each table it names is a database
 # table instead of a Parquet file.
 read_duckdb_levels <- function(path) {
-    for (package in c("duckdb", "DBI")) {
-        if (!requireNamespace(package, quietly = TRUE)) {
-            stop(
-                sprintf("reading %s needs the %s package", path, package),
-                call. = FALSE
-            )
-        }
+    packages <- c("duckdb", "DBI")
+    absent <- packages[
+        !vapply(packages, requireNamespace, logical(1), quietly = TRUE)
+    ]
+    if (length(absent) > 0L) {
+        stop(
+            sprintf("reading %s needs the %s package", path, absent[[1L]]),
+            call. = FALSE
+        )
     }
     # Reading a result loads no extension, so duckdb needs no shared home under
     # ~/.duckdb.

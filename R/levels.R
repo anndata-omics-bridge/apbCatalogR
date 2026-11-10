@@ -276,12 +276,11 @@ Columns <- R6Class(
         #' @param names Keys, or the level's own names.
         #' @return A data frame; names without data.
         get_all = function(names) {
-            found <- list()
-            for (name in names) {
-                for (reference in private$fields(name)) {
-                    found[[slot_name(reference)]] <- reference
-                }
-            }
+            references <- concat(lapply(names, private$fields))
+            found <- named_last(
+                references,
+                vapply(references, slot_name, character(1))
+            )
             private$combine(lapply(found, private$read))
         }
     ),

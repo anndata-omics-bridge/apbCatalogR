@@ -2,13 +2,13 @@
 
 * `Catalog$new()`, `rule_coverage()`, `read_parsed_levels()`, `update_catalog()` and every key lookup check their arguments: a software, version, set, key or path that is not one character string, or a path that does not exist, is an error that says so.
 * The vignette says why apbCatalogR is on Bioconductor.
+* apbCatalogR no longer imports dplyr, tidyr and rlang: catalogue lookups use base R again, now with `lapply()`, `vapply()`, `Map()`, `Filter()`, `Find()` and `Reduce()` instead of `for` loops, and are about 20 times faster than in 0.99.1. Every answer is unchanged.
 
 # apbCatalogR 0.99.1
 
 * `update_catalog(path)` installs a bundle archive from a local file, such as the one apb-catalog's `make bundle` writes; the package no longer downloads anything.
 * The Functional Genomics Center Zurich is listed as funder.
 * Reading `.h5ad` and Parquet or DuckDB results ends in one shared step that names the rows and builds the `AnnData`; results are read as before.
-* Catalogue lookups query the bundle's tables with dplyr and tidyr instead of walking nested lists built from them; every answer is unchanged. apbCatalogR now imports dplyr, tidyr and rlang.
 
 # apbCatalogR 0.99.0
 
