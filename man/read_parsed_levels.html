@@ -193,8 +193,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/Columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/DataCatalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DataCatalog</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/Level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Level</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/LevelNames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LevelNames</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -213,6 +231,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/Slot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -261,7 +285,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/read_parsed_levels.html">read_parsed_levels</a></li></ol></nav></header><section id="read-an-apb-result" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="read-an-apb-result">Read an APB result</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Reads a result apb2 wrote into a ParsedLevels object, one anndataR <code>AnnData</code> per level, the same for every format: a <code>.h5ad</code> file, a <code>.duckdb</code> file, or the directory apb2 writes for a <code>.parquet</code> result. Reading Parquet needs the <code>arrow</code> package, DuckDB the <code>duckdb</code> and <code>DBI</code> packages; <code>.h5ad</code> needs nothing beyond anndataR.</p>
+<p>Reads a result apb2 wrote into a ParsedLevels object, one anndataR <code>AnnData</code> per level, the same for every format: a <code>.h5ad</code> file, a <code>.duckdb</code> file, or the directory apb2 writes for a <code>.parquet</code> result. Reading Parquet needs the <code>arrow</code> package, DuckDB the <code>duckdb</code> and <code>DBI</code> packages, <code>.h5ad</code> the <code>rhdf5</code> package, with which anndataR reads it.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
 <pre><code class="language-R">read_parsed_levels(path)
 </code></pre>
@@ -275,7 +299,19 @@ The result, such as <code>converted.h5ad</code>, <code>converted.duckdb</code> o
 </td>
 </tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>A ParsedLevels object.</p>
-</section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
+</section><section id="input-layout" class="level3"><h3 class="anchored" data-anchor-id="input-layout">Input layout</h3>
+<p>apb2’s <code>convert</code> command writes the result; each format records its format name and version, and a result of another format or version is refused:</p>
+<ul>
+<li>
+<p><strong>Parquet</strong>: a directory ending in <code>.parquet</code> whose <code>manifest.json</code> (format <code>apb2-parsed-levels-parquet</code>, version 9) names every level and table. Each level is a folder under <code style="white-space: pre;">levels/</code> with <code>obs.parquet</code>, <code>var.parquet</code>, one file per layer in <code style="white-space: pre;">layers/</code> (features by observations) and the tables of <code style="white-space: pre;">obsm/</code>, <code style="white-space: pre;">varm/</code>, <code style="white-space: pre;">obsp/</code> and <code style="white-space: pre;">varp/</code>. The result’s own tables are in <code style="white-space: pre;">annotation_tables/</code> and <code style="white-space: pre;">feature_relations/</code>.</p>
+</li>
+<li>
+<p><strong>DuckDB</strong>: one <code>.duckdb</code> file (format <code>apb2-parsed-levels-duckdb</code>, version 8) holding the same manifest in the table <code>apb2_result_metadata</code>; each table the manifest names is a database table.</p>
+</li>
+<li>
+<p><strong>h5ad</strong>: one <code>.h5ad</code> file of a one-level result in anndata’s layout (format <code>apb2-parsed-levels</code>, version 8), with apb2’s storage descriptor in <code>uns$apb</code>. An <code>.h5ad</code> file other software wrote has none and is refused.</p>
+</li>
+</ul></section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>

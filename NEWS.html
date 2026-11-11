@@ -175,8 +175,26 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./man/Columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./man/DataCatalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DataCatalog</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./man/Level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Level</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./man/LevelNames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LevelNames</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -195,6 +213,12 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="./man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./man/Slot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -247,13 +271,29 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<section id="apbcatalogr-0.99.3" class="level1">
+<h1>apbCatalogR 0.99.3</h1>
+<ul>
+<li><code>rhdf5</code> is suggested without a minimum version. 0.99.2 asked for 2.57.5, which Bioconductor 3.23 does not have, so its dependencies could not be installed there; reading a <code>.h5ad</code> result works with rhdf5 2.56.</li>
+</ul>
+</section>
+<section id="apbcatalogr-0.99.2" class="level1">
+<h1>apbCatalogR 0.99.2</h1>
+<ul>
+<li><code>Catalog$new()</code>, <code>rule_coverage()</code>, <code>read_parsed_levels()</code>, <code>update_catalog()</code> and every key lookup check their arguments: a software, version, set, key or path that is not one character string, or a path that does not exist, is an error that says so.</li>
+<li>The vignette says why apbCatalogR is on Bioconductor.</li>
+<li>apbCatalogR no longer imports dplyr, tidyr and rlang: catalogue lookups use base R again, now with <code>lapply()</code>, <code>vapply()</code>, <code>Map()</code>, <code>Filter()</code>, <code>Find()</code> and <code>Reduce()</code> instead of <code>for</code> loops, and are about 20 times faster than in 0.99.1. Every answer is unchanged.</li>
+<li>A <code>.duckdb</code> or <code>.h5ad</code> result reads exactly as its Parquet result: DuckDB’s integer columns and layers are integer, not double; an <code>.h5ad</code> result’s <code>varm</code> tables have the column types their schema declares, text where anndata stored categories; <code>varm</code> tables no longer carry an empty <code>apb</code> attribute. The test bundle holds every synthetic result also as <code>.duckdb</code> and, for a one-level result, as <code>.h5ad</code>, and a test reads each as its Parquet result.</li>
+<li>Reading a <code>.h5ad</code> result needs the <code>rhdf5</code> package, with which anndataR reads HDF5; apbCatalogR suggests it and names it when it is missing.</li>
+<li><code>?read_parsed_levels</code> describes the layout of each format it reads. <code>Level</code>, <code>LevelNames</code>, <code>Slot</code> and <code>Columns</code>, the objects a catalog’s <code>levels</code> hold, are in the help index with their methods <code>$get()</code>, <code>$name()</code>, <code>$keys()</code>, <code>[[</code> and <code>[</code>.</li>
+</ul>
+</section>
 <section id="apbcatalogr-0.99.1" class="level1">
 <h1>apbCatalogR 0.99.1</h1>
 <ul>
 <li><code>update_catalog(path)</code> installs a bundle archive from a local file, such as the one apb-catalog’s <code>make bundle</code> writes; the package no longer downloads anything.</li>
 <li>The Functional Genomics Center Zurich is listed as funder.</li>
 <li>Reading <code>.h5ad</code> and Parquet or DuckDB results ends in one shared step that names the rows and builds the <code>AnnData</code>; results are read as before.</li>
-<li>Catalogue lookups query the bundle’s tables with dplyr and tidyr instead of walking nested lists built from them; every answer is unchanged. apbCatalogR now imports dplyr, tidyr and rlang.</li>
 </ul>
 </section>
 <section id="apbcatalogr-0.99.0" class="level1">

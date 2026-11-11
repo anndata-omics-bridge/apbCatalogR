@@ -194,8 +194,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/Columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/DataCatalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DataCatalog</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/Level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Level</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/LevelNames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LevelNames</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -214,6 +232,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/Slot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Slot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -284,6 +308,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header><section id="introduction" class="level1"><h1>Introduction</h1>
 <p>The AnnData Proteomics Bridge (APB) converts the reports of quantification software such as DIA-NN, Spectronaut or MaxQuant into one result layout. The columns keep the vendors’ names, so a posterior error probability is <code>PEP</code> in MaxQuant and <code>EG_PEP</code> in Spectronaut. apb-catalog records what each column means; apbCatalogR implements its API in R, so an R application asks for a meaning and gets the column or its data.</p>
 <p>The package works on a bundle apb-catalog releases: the reviewed catalogue sets and the levels apb2 converts for each software version. One bundle ships with the package, together with a test bundle of synthetic results and the answers apb-catalog gives on them.</p>
+<p>apbCatalogR gives R one way into the quantification outputs of the 14 tools apb2 converts: AlphaDIA, AlphaPept, DIA-NN, FragPipe, i2MassChroQ, MaxQuant, MetaMorpheus, MSAngel, PEAKS, ProlineStudio, quantms, Sage, Spectronaut and WOMBAT-P, and of ProteoBench’s custom upload format. A meaning, such as a PEP or a normalized protein intensity, is asked for by the same key whichever tool reported it. Code that hands a result’s quantities to a Bioconductor package for differential expression analysis is therefore written once for all 14 tools; such packages include DEP, DEqMS, limma, limpa, msqrob2, MSstats, proDA and prolfqua.</p>
+<p>apbCatalogR is on Bioconductor because anndataR and MuData are: they bring to R the AnnData and MuData formats apb2 writes its results in, and apbCatalogR hands each level back as an anndataR <code>AnnData</code>.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -410,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">result</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span></span>
 <span><span class="co">#&gt; InMemoryAnnData object with n_obs × n_vars = 2 × 3</span></span>
 <span><span class="co">#&gt;     obs: 'Raw_file', 'Experiment', 'Fraction'</span></span>
-<span><span class="co">#&gt;     var: 'ProForma_ion', 'Sequence', 'Modified_sequence', 'Modifications', 'Charge', 'Mass', 'Proteins', 'Leading_proteins', 'Leading_razor_protein', 'Leading_Proteins', 'Leading_Razor_Protein', 'protein_Protein_IDs', 'Protein_IDs', 'ProForma_peptidoform', 'ProForma_peptide', 'Reverse', 'Decoy', 'Potential_contaminant', 'apb_Decoy', 'apb_Contaminant'</span></span>
+<span><span class="co">#&gt;     var: 'ProForma_ion', 'Sequence', 'Modified_sequence', 'Modifications', 'Charge', 'Mass', 'Proteins', 'Leading_proteins', 'Leading_razor_protein', 'protein_Protein_IDs', 'Protein_IDs', 'ProForma_peptidoform', 'ProForma_peptide', 'Reverse', 'Potential_contaminant', 'apb_Decoy', 'apb_Contaminant'</span></span>
 <span><span class="co">#&gt;     uns: 'apb'</span></span>
 <span><span class="co">#&gt;     layers: 'MS_MS_count', 'Retention_time', 'Retention_length', 'Calibrated_retention_time', 'Calibrated_retention_time_start', 'Calibrated_retention_time_finish', 'Score', 'PEP'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -434,7 +460,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 7        apb_alpha      var          Protein_IDs protein_assignment    TRUE</span></span>
 <span><span class="co">#&gt; 8        apb_alpha      var             Proteins   fasta_accessions    TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Each level of the catalog has anndataR’s slots. A name is read as a key first, then as the level’s own layer or column, as cf_xarray reads <code>ds.cf[...]</code>:</p>
+<p>Each level of the catalog has anndataR’s slots. A name is read as a key first, then as the level’s own layer or column, as the Python package <a href="https://cf-xarray.readthedocs.io">cf_xarray</a> finds an xarray variable by its CF-convention standard name first. <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Level.html">?Level</a></code> and <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/Slot.html">?Slot</a></code> list the methods:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ion</span> <span class="op">&lt;-</span> <span class="va">confidence</span><span class="op">$</span><span class="va">levels</span><span class="op">$</span><span class="va">peptidoform_ion</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"pep"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>            <span class="co"># a matrix, runs x features</span></span>
@@ -459,8 +485,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># MaxQuant's own layer, as adata$layers[["Score"]]</span></span>
 <span><span class="va">ion</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="st">"Score"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     F0  F1  F2</span></span>
-<span><span class="co">#&gt; S0 0.7 0.8 0.9</span></span>
-<span><span class="co">#&gt; S1 0.8 0.9 1.0</span></span>
+<span><span class="co">#&gt; S0 0.8 0.9 1.0</span></span>
+<span><span class="co">#&gt; S1 0.9 1.0 1.1</span></span>
 <span><span class="co"># A data frame, as adata$obs[c("Raw_file", "Experiment")]</span></span>
 <span><span class="va">ion</span><span class="op">$</span><span class="va">obs</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Raw_file"</span>, <span class="st">"Experiment"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   Raw_file Experiment</span></span>
@@ -623,19 +649,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] apbCatalogR_0.99.1</span></span>
+<span><span class="co">#&gt; [1] apbCatalogR_0.99.3</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] Matrix_1.7-6      bit_4.6.0         jsonlite_2.0.0    dplyr_1.2.1      </span></span>
-<span><span class="co">#&gt;  [5] compiler_4.6.2    tidyselect_1.2.1  Rcpp_1.1.2        assertthat_0.2.1 </span></span>
-<span><span class="co">#&gt;  [9] anndataR_1.2.3    tidyr_1.3.2       arrow_26.0.1      png_0.1-9        </span></span>
-<span><span class="co">#&gt; [13] yaml_2.3.12       fastmap_1.2.0     reticulate_1.47.0 lattice_0.23-1   </span></span>
-<span><span class="co">#&gt; [17] R6_2.6.1          generics_0.1.4    knitr_1.52        htmlwidgets_1.6.4</span></span>
-<span><span class="co">#&gt; [21] tibble_3.3.1      pillar_1.11.1     rlang_1.3.0       xfun_0.62        </span></span>
-<span><span class="co">#&gt; [25] bit64_4.8.6       otel_0.3.0        cli_3.6.6         withr_3.0.3      </span></span>
-<span><span class="co">#&gt; [29] magrittr_2.0.5    digest_0.6.39     grid_4.6.2        lifecycle_1.0.5  </span></span>
-<span><span class="co">#&gt; [33] vctrs_0.7.3       evaluate_1.0.5    glue_1.8.1        rmarkdown_2.32   </span></span>
-<span><span class="co">#&gt; [37] purrr_1.2.2       tools_4.6.2       pkgconfig_2.0.3   htmltools_0.5.9</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt;  [1] vctrs_0.7.3       cli_3.6.6         knitr_1.52        rlang_1.3.0      </span></span>
+<span><span class="co">#&gt;  [5] xfun_0.62         otel_0.3.0        purrr_1.2.2       png_0.1-9        </span></span>
+<span><span class="co">#&gt;  [9] assertthat_0.2.1  jsonlite_2.0.0    glue_1.8.1        bit_4.6.0        </span></span>
+<span><span class="co">#&gt; [13] htmltools_0.5.9   rmarkdown_2.32    grid_4.6.2        evaluate_1.0.5   </span></span>
+<span><span class="co">#&gt; [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5   compiler_4.6.2   </span></span>
+<span><span class="co">#&gt; [21] htmlwidgets_1.6.4 Rcpp_1.1.2        anndataR_1.2.3    lattice_0.23-1   </span></span>
+<span><span class="co">#&gt; [25] digest_0.6.39     R6_2.6.1          tidyselect_1.2.1  reticulate_1.47.0</span></span>
+<span><span class="co">#&gt; [29] magrittr_2.0.5    Matrix_1.7-6      tools_4.6.2       bit64_4.8.6      </span></span>
+<span><span class="co">#&gt; [33] arrow_26.0.1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
