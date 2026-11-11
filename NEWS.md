@@ -1,3 +1,7 @@
+# apbCatalogR 0.99.3
+
+* `rhdf5` is suggested without a minimum version. 0.99.2 asked for 2.57.5, which Bioconductor 3.23 does not have, so its dependencies could not be installed there; reading a `.h5ad` result works with rhdf5 2.56.
+
 # apbCatalogR 0.99.2
 
 * `Catalog$new()`, `rule_coverage()`, `read_parsed_levels()`, `update_catalog()` and every key lookup check their arguments: a software, version, set, key or path that is not one character string, or a path that does not exist, is an error that says so.

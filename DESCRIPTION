@@ -31,7 +31,7 @@ Suggests:
     knitr,
     lintr,
     rcmdcheck,
-    rhdf5 (>= 2.57.5),
+    rhdf5,
     rmarkdown,
     roxygen2,
     testthat (>= 3.0.0),
