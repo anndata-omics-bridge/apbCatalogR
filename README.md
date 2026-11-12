@@ -8,9 +8,9 @@ apb-catalog's API in R: look up the fields of an [APB](https://github.com/anndat
 
 Documentation: [anndata-omics-bridge.github.io/apbCatalogR](https://anndata-omics-bridge.github.io/apbCatalogR/), with the [vignette](https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html) as the walkthrough.
 
-Catalog viewer: [fgcz-ms.uzh.ch/public/apb-catalog](https://fgcz-ms.uzh.ch/public/apb-catalog/), every catalogue set with its entries, requirements and coverage, in the browser.
+Catalog viewer: [fgcz-ms.uzh.ch/public/apb-catalog](https://fgcz-ms.uzh.ch/public/apb-catalog/), every set with its entries, requirements and coverage, in the browser.
 
-Contributing: the catalogs can be extended to suit your application, and you are welcome to create your own; see [Contributing](https://anndata-omics-bridge.github.io/apb-catalog/contributing/).
+Contributing: the sets can be extended to suit your application, and you are welcome to create your own; see [Contributing](https://anndata-omics-bridge.github.io/apb-catalog/contributing/).
 
 ![Who does what: apb2 converts the results of quantification software into an APB result and the integrator fills the catalog; Bioconductor applications such as prolfqua, exploreDE and QFeatures read the result by meaning through the apb-catalog API, in R with apbCatalogR.](vignettes/figures/apb_actors.png)
 
@@ -27,7 +27,7 @@ Columns keep the vendor's names: the posterior error probability is `PEP` in Max
 
 ## apb-catalog
 
-[apb-catalog](https://anndata-omics-bridge.github.io/apb-catalog/) records what those columns mean, in reviewed catalogue sets. A consumer asks a set by key, such as `pep` or `intensity`, and gets the column.
+[apb-catalog](https://anndata-omics-bridge.github.io/apb-catalog/) records what those columns mean, in reviewed sets. A consumer asks a set by key, such as `pep` or `intensity`, and gets the column.
 
 | Set | Fields |
 | --- | --- |
@@ -48,13 +48,13 @@ A lookup answers one of three ways:
 
 ## This package
 
-apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the catalogues come from a bundle shipped with the package.
+apbCatalogR is apb-catalog's Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: `DataCatalog$snapshot()`, `$resolve()`, `attach_snapshot()` and `ResolutionSnapshot` have no R counterpart. It needs no Python: the catalog comes from a bundle shipped with the package.
 
 | Call | Answers |
 | --- | --- |
-| `Catalog$new(software, version, set)` | From the catalogue alone, without data |
+| `Catalog$new(software, software_version, set_name)` | From the catalog alone, without data |
 | `DataCatalog$new(result, set)` | On one result, the named sets alone, and returns the data |
-| `catalogues()`, `rule_coverage()`, `catalogue_table()` | The sets, how each rule covers a set, every entry as a table |
+| `sets()`, `rule_coverage()`, `catalog_table()` | The sets, how each rule covers a set, every entry as a table |
 | `read_parsed_levels(path)` | An APB result, `.h5ad`, `.parquet` or `.duckdb`, as `ParsedLevels`, one anndataR `AnnData` per level |
 
 It does not convert vendor files. Convert with apb2; any of its h5ad, Parquet or DuckDB results reads the same:
@@ -78,7 +78,7 @@ install.packages(c("arrow", "duckdb", "DBI"))
 
 ## Use
 
-Ask the catalogue which column a software version reports:
+Ask the catalog which column a software version reports:
 
 ```r
 library(apbCatalogR)
@@ -105,7 +105,7 @@ ion$var[c("peptidoform_ion")]  # a data.frame
 
 apb-catalog builds two bundles at each release:
 
-- Bundle: the reviewed catalogue sets and the levels apb2 converts for each software version; lookups read only this
+- Bundle: the reviewed sets and the levels apb2 converts for each software version; lookups read only this
 - Test bundle: synthetic results, with apb-catalog's answers on them; the tests check that R gives the same answers
 
 How R gets the latest bundle:

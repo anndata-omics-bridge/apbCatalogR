@@ -1,3 +1,12 @@
+# apbCatalogR 0.99.4
+
+* Names follow apb-catalog's vocabulary: the catalog is apb-catalog as a whole, `abundance_alpha` and the others are its sets, spelled "catalog" throughout. `catalogues()` is `sets()`, with a `set` column instead of `catalogue`; `catalogue_table(catalogue)` is `catalog_table(set_name)`; `rule_coverage(catalogue)` is `rule_coverage(set_name)`.
+* `Catalog$new(software, software_version, set_name, enforce)` replaces `Catalog$new(software, version, catalog, enforce)`: the version is a real software version such as `"2.2.0"`, and a version label such as `2.x` stays `version`. `DataCatalog$new(result, ..., enforce)` is unchanged.
+* `catalog_table()` and `fields()` call the slot `slot`, not `location`, and have a `version` column after `source`: the version label of the entry's id, for a vendor entry of every version the label of the row's version pattern, `*` for an app's or an annotation's entry. `fields()` of a `DataCatalog` composing several sets keeps `catalog_table()`'s column order.
+* `rule_coverage()` has the columns `software`, `version`, `software_version_pattern`, `level`, `slot`, `table`, `name`, `key`, `kind`, one `qualifier.<name>` column per qualifier of the set, `producer`, `requirement`, `needs` and `verdict`: `column` is `name`, `location` is `slot`, and the `qualifiers` string and the `origin` column give way to the `qualifier.<name>` columns, as in `catalog_table()`.
+* Bundle format 5: the tables are in `data/`, not `catalogues/`; the manifest lists `sets`; `catalog.csv` names who writes a field in a `source` column, not `software`. Bundles of format 4 are passed over. The test bundle's cases name `set` and, for `Catalog`, `software_version`.
+* Messages say "set": "unknown set", "no set named", "the set reviews no entries for …", "the sets … set no requirements"; in `Catalog$new()` and `rule_coverage()`, a `software_version` or `set_name` that is not one character string is an error naming that argument.
+
 # apbCatalogR 0.99.3
 
 * `rhdf5` is suggested without a minimum version. 0.99.2 asked for 2.57.5, which Bioconductor 3.23 does not have, so its dependencies could not be installed there; reading a `.h5ad` result works with rhdf5 2.56.

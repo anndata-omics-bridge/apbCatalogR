@@ -2,24 +2,26 @@
 % Please edit documentation in R/coverage.R
 \name{rule_coverage}
 \alias{rule_coverage}
-\title{Check every rule against one catalogue set}
+\title{Check every rule against one set}
 \usage{
-rule_coverage(catalogue)
+rule_coverage(set_name)
 }
 \arguments{
-\item{catalogue}{The set's name.}
+\item{set_name}{The set's name.}
 }
 \value{
-A data frame with columns \code{software}, \code{version} (the label),
-\code{software_version_pattern}, \code{level}, \code{key}, \code{kind}, \code{qualifiers} (the other
-qualifiers as \code{name=value}), \code{origin}, \code{producer} (the app, \code{NA} for the
-conversion software's fields), \code{requirement}, \code{location}, \code{table}, \code{column}
-(\code{NA} when unsupported), \code{needs} (what to run before the field exists) and
-\code{verdict} (\code{NA} for a set without requirements).
+A data frame with columns \code{software} (the quantification software of
+the rule), \code{version} (the label), \code{software_version_pattern}, \code{level},
+\code{slot}, \code{table} (the \code{varm} table, else \code{NA}), \code{name} (the field's name,
+\code{NA} when unsupported), \code{key}, \code{kind}, one \verb{qualifier.<name>} column per
+other qualifier of the set, as in \code{\link[=catalog_table]{catalog_table()}}, \code{producer} (the app,
+\code{NA} for the quantification software's fields), \code{requirement}, \code{needs}
+(what to run before the field exists) and \code{verdict} (\code{NA} for a set
+without requirements).
 }
 \description{
-One row per catalogued or required field of each rule level the set reviews;
-a set without vendor catalogues is checked against every level the bundle's
+One row per cataloged or required field of each rule level the set reviews;
+a set without vendor entries is checked against every level the bundle's
 entries name for each version of \code{versions.csv}. A set with requirements
 judges each level: \code{fail} when a required field is unsupported, \code{warn} when
 a recommended one is, \code{pass} otherwise; an unsupported optional field is

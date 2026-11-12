@@ -1,8 +1,8 @@
-# The bundle apb-catalog builds: catalogue tables and expected answers. The
+# The bundle apb-catalog builds: catalog tables and expected answers. The
 # package ships one; update_catalog() installs others into the user cache. The
 # newest readable bundle is used.
 
-BUNDLE_FORMAT <- 4L
+BUNDLE_FORMAT <- 5L
 BUNDLE_NAME <- "apb-catalog-bundle"
 
 state <- new.env(parent = emptyenv())

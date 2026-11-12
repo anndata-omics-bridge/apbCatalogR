@@ -50,8 +50,8 @@ slots looked up by key.}
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{description}}{What the first catalogue set named holds and who uses
-it; an error when no set was named.}
+    \item{\code{description}}{What the first set named holds and who uses it; an
+error when no set was named.}
   }
   \if{html}{\out{</div>}}
 }
@@ -68,8 +68,8 @@ it; an error when no set was named.}
 \if{html}{\out{<a id="method-DataCatalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-initialize}{}}}
 \subsection{\code{DataCatalog$new()}}{
-  Bind the named catalogue sets, and no others, to the
-levels of one result.
+  Bind the named sets, and no others, to the levels of
+one result.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$new(result, ..., enforce = NULL)}
@@ -79,8 +79,8 @@ levels of one result.
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{result}}{A \link{ParsedLevels} object.}
-      \item{\code{...}}{The catalogue sets, such as \code{"abundance_alpha"} and
-\code{"confidence_alpha"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{...}}{The sets, such as \code{"abundance_alpha"} and
+\code{"confidence_alpha"}; see \code{\link[=sets]{sets()}}.}
       \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal one
 \code{MissingRequiredField} listing every field the named sets require
 at that strength and the result lacks; under \code{"required"}, missing
@@ -95,8 +95,8 @@ has requirements.}
 \if{html}{\out{<a id="method-DataCatalog-fields"></a>}}
 \if{latex}{\out{\hypertarget{method-DataCatalog-fields}{}}}
 \subsection{\code{DataCatalog$fields()}}{
-  Every catalogued field of the result in every composed
-set, one row per field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
+  Every cataloged field of the result in every composed
+set, one row per field, as \code{\link[=catalog_table]{catalog_table()}} shows them.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{DataCatalog$fields()}

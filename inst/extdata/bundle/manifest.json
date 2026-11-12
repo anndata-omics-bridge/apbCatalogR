@@ -1,9 +1,9 @@
 {
-  "bundle_format": 4,
+  "bundle_format": 5,
   "version": "0.1.4",
   "apb_catalog_version": "0.1.4",
   "apb2_version": "0.1.1",
-  "catalogues": [
+  "sets": [
     "abundance_alpha",
     "confidence_alpha",
     "proteobench_entrapment_alpha",
@@ -14,14 +14,14 @@
     "chromatography_alpha"
   ],
   "files": [
-    "catalogues/catalog.csv",
-    "catalogues/datapackage.json",
-    "catalogues/kinds.csv",
-    "catalogues/producers.csv",
-    "catalogues/qualifier_values.csv",
-    "catalogues/qualifiers.csv",
-    "catalogues/sets.csv",
-    "catalogues/terms.csv",
-    "catalogues/versions.csv"
+    "data/catalog.csv",
+    "data/datapackage.json",
+    "data/kinds.csv",
+    "data/producers.csv",
+    "data/qualifier_values.csv",
+    "data/qualifiers.csv",
+    "data/sets.csv",
+    "data/terms.csv",
+    "data/versions.csv"
   ]
 }

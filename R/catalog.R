@@ -17,8 +17,8 @@ bind_entry <- function(entry, obs_columns) {
 
 # Bind one level to its set: the reviewed vendor entries, then the apps' and
 # annotations'. Only entries whose field the level holds answer; an app that has
-# not run leaves its entries pending. A set with vendor catalogues answers only
-# for a reviewed software version.
+# not run leaves its entries pending. A set with vendor entries answers only for
+# a reviewed software version.
 level_view <- function(
     name,
     software,
@@ -43,15 +43,15 @@ level_view <- function(
     if (set$needs_review) {
         if (is.null(reviewed)) {
             unreviewed <- paste(software, pattern, rule_level)
-            reason <- paste("no source catalogue reviewed", unreviewed)
+            reason <- paste("the set reviews no entries for", unreviewed)
             return(UnreviewedLevel$new(name, software, pattern, reason))
         }
         entries <- held_entries(
-            variant_entries(reviewed$catalogue, reviewed$variant),
+            variant_entries(reviewed$vendor, reviewed$variant),
             retained
         )
     }
-    produced <- producer_entries(
+    produced <- level_producer_entries(
         set$producers,
         rule_level,
         retained,
@@ -61,7 +61,7 @@ level_view <- function(
     entries <- c(
         entries,
         produced$entries,
-        annotation_entries(annotations, rule_level, obs_columns)
+        level_annotation_entries(annotations, rule_level, obs_columns)
     )
     if (!is.null(reviewed)) {
         return(ReviewedLevel$new(name, reviewed, entries, produced$pending))
@@ -84,9 +84,9 @@ bound_entries <- function(source, rule_level, obs_columns) {
     )
 }
 
-# Every field the set's entries name on one level: without data, the catalogue
+# Every field the set's entries name on one level: without data, the catalog
 # says what a level holds.
-catalogued_keys <- function(set, level) {
+cataloged_keys <- function(set, level) {
     entries <- unlist(
         lapply(set$sources(), function(source) source$entries),
         recursive = FALSE
@@ -107,7 +107,7 @@ catalogued_keys <- function(set, level) {
 }
 
 # The apps' entries the level holds, and the entries of apps that have not run.
-producer_entries <- function(
+level_producer_entries <- function(
     producers,
     rule_level,
     retained,
@@ -134,7 +134,7 @@ producer_entries <- function(
     )
 }
 
-annotation_entries <- function(annotations, rule_level, obs_columns) {
+level_annotation_entries <- function(annotations, rule_level, obs_columns) {
     unlist(
         lapply(annotations, bound_entries, rule_level, obs_columns),
         recursive = FALSE
@@ -181,7 +181,7 @@ enforce_sets <- function(sets, enforce) {
         names <- vapply(sets, function(lookups) lookups$name, character(1))
         stop(
             sprintf(
-                "catalogues %s set no requirements, so nothing to enforce",
+                "the sets %s set no requirements, so nothing to enforce",
                 paste(names, collapse = ", ")
             ),
             call. = FALSE
@@ -207,7 +207,7 @@ enforce_sets <- function(sets, enforce) {
     invisible(NULL)
 }
 
-# The requests, answers and rows both catalogues share for one set.
+# The requests, answers and rows both catalogs share for one set.
 Lookups <- R6Class(
     "Lookups",
     public = list(
@@ -267,7 +267,7 @@ Lookups <- R6Class(
 
         # Every required or recommended field a bound level lacks, each as its
         # resolution, with its requirement set, and its requirement row; a field
-        # the catalogue cannot decide is not missing.
+        # the catalog cannot decide is not missing.
         missing = function() {
             rows <- Filter(
                 function(row) {
@@ -402,13 +402,30 @@ qualifier_arguments <- function(...) {
     qualifiers
 }
 
-fields_frame <- function(rows, set) {
-    records_frame(rows, c(set_columns(set), "present", "constant"))
+# The rows in catalog_table()'s column order, then present and constant,
+# however many sets and qualifiers they come from; with no rows, the columns of
+# the first set.
+fields_frame <- function(rows, sets) {
+    if (length(rows) == 0L) {
+        columns <- if (length(sets) > 0L) {
+            c(set_columns(sets[[1L]]), "present", "constant")
+        }
+        return(records_frame(list(), columns %||% character(0)))
+    }
+    named <- unique(unlist(lapply(rows, names), use.names = FALSE))
+    records_frame(
+        rows,
+        c(
+            table_columns(named[startsWith(named, "qualifier.")]),
+            "present",
+            "constant"
+        )
+    )
 }
 
 #' Which column one software version reports for each meaning
 #'
-#' Answers from the catalogue alone, without data. The rule levels whose version
+#' Answers from the catalog alone, without data. The rule levels whose version
 #' pattern admits the version give the levels; the set's entries for that
 #' pattern give each level's fields. `levels` have the slots of a
 #' [DataCatalog]'s levels, holding names: a slot answers one of the set's keys,
@@ -418,7 +435,7 @@ fields_frame <- function(rows, set) {
 #' checks the set's requirements against the rule's levels once, when the
 #' catalog opens.
 #'
-#' @field description What this catalogue set holds and who uses it.
+#' @field description What this set holds and who uses it.
 #' @return The class generator; `Catalog$new()` returns a `Catalog`.
 #' @export
 #' @examples
@@ -432,27 +449,31 @@ Catalog <- R6Class(
         #'   [DataCatalog]'s slots holding names.
         levels = NULL,
 
-        #' @description Bind a catalogue set to the rule levels of one software
-        #'   version.
-        #' @param software The software name, such as `"DIA-NN"`.
-        #' @param version The software version, such as `"2.2.0"`.
-        #' @param catalog The catalogue set, such as `"abundance_alpha"` or
-        #'   `"confidence_alpha"`; see [catalogues()].
+        #' @description Bind a set to the rule levels of one software version.
+        #' @param software The quantification software, such as `"DIA-NN"`.
+        #' @param software_version The software's version, such as `"2.2.0"`.
+        #' @param set_name The set, such as `"abundance_alpha"` or
+        #'   `"confidence_alpha"`; see [sets()].
         #' @param enforce `NULL`, `"required"` or `"recommended"`: signal one
         #'   `MissingRequiredField` listing every field the set requires at
         #'   that strength and the rule lacks; under `"required"`, missing
         #'   recommended fields give one warning. An error when the set has no
         #'   requirements.
-        initialize = function(software, version, catalog, enforce = NULL) {
+        initialize = function(
+            software,
+            software_version,
+            set_name,
+            enforce = NULL
+        ) {
             check_string(software, "software")
-            check_string(version, "version")
-            check_string(catalog, "catalog")
+            check_string(software_version, "software_version")
+            check_string(set_name, "set_name")
             check_enforce(enforce)
-            set <- catalogue_set(catalog)
-            matched <- rules_matching(software, version)
-            check_rules_matched(matched, software, version)
+            set <- load_set(set_name)
+            matched <- rules_matching(software, software_version)
+            check_rules_matched(matched, software, software_version)
             views <- rule_views(set, matched)
-            private$lookups <- Lookups$new(catalog, set, views)
+            private$lookups <- Lookups$new(set_name, set, views)
             enforce_sets(list(private$lookups), enforce)
             lookup <- list(
                 find = function(level, location, key, qualifiers) {
@@ -476,8 +497,8 @@ Catalog <- R6Class(
             )
         },
 
-        #' @description Every catalogued field the rule declares, one row per
-        #'   field, as [catalogue_table()] shows them.
+        #' @description Every cataloged field the rule declares, one row per
+        #'   field, as [catalog_table()] shows them.
         #' @return A data frame, with `present` true for each row.
         fields = function() {
             lookups <- private$lookups
@@ -489,7 +510,7 @@ Catalog <- R6Class(
                 }),
                 recursive = FALSE
             )
-            fields_frame(rows, lookups$set)
+            fields_frame(rows, list(lookups$set))
         },
 
         #' @description Print the set and the levels.
@@ -513,7 +534,7 @@ Catalog <- R6Class(
 
 # No packaged rule admitting a software version signals an error naming the
 # version patterns the software's rules have.
-check_rules_matched <- function(matched, software, version) {
+check_rules_matched <- function(matched, software, software_version) {
     if (length(matched) > 0L) {
         return(invisible())
     }
@@ -529,7 +550,7 @@ check_rules_matched <- function(matched, software, version) {
         sprintf(
             "no packaged %s rule admits version '%s'; patterns: %s",
             software,
-            version,
+            software_version,
             paste(sort_c(known), collapse = ", ")
         ),
         call. = FALSE
@@ -556,8 +577,8 @@ check_rules_matched <- function(matched, software, version) {
 #' one whose app has not run on the result or whose annotation it does not
 #' record. It signals no error for such a set, so a consumer can leave it out.
 #'
-#' @field description What the first catalogue set named holds and who uses
-#'   it; an error when no set was named.
+#' @field description What the first set named holds and who uses it; an
+#'   error when no set was named.
 #' @return The class generator; `DataCatalog$new()` returns a `DataCatalog`.
 #' @export
 #' @examples
@@ -580,11 +601,11 @@ DataCatalog <- R6Class(
         #'   slots looked up by key.
         levels = NULL,
 
-        #' @description Bind the named catalogue sets, and no others, to the
-        #'   levels of one result.
+        #' @description Bind the named sets, and no others, to the levels of
+        #'   one result.
         #' @param result A [ParsedLevels] object.
-        #' @param ... The catalogue sets, such as `"abundance_alpha"` and
-        #'   `"confidence_alpha"`; see [catalogues()].
+        #' @param ... The sets, such as `"abundance_alpha"` and
+        #'   `"confidence_alpha"`; see [sets()].
         #' @param enforce `NULL`, `"required"` or `"recommended"`: signal one
         #'   `MissingRequiredField` listing every field the named sets require
         #'   at that strength and the result lacks; under `"required"`, missing
@@ -626,8 +647,8 @@ DataCatalog <- R6Class(
             )
         },
 
-        #' @description Every catalogued field of the result in every composed
-        #'   set, one row per field, as [catalogue_table()] shows them.
+        #' @description Every cataloged field of the result in every composed
+        #'   set, one row per field, as [catalog_table()] shows them.
         #' @return A data frame with `present` and, for a field apb2 left out
         #'   because it held one value, that `constant`.
         fields = function() {
@@ -640,17 +661,10 @@ DataCatalog <- R6Class(
                     )
                 }))
             }))
-            # As polars builds a frame from records: the columns in the order
-            # the rows first name them.
-            columns <- unique(unlist(lapply(rows, names), use.names = FALSE))
-            if (is.null(columns) && length(private$sets) > 0L) {
-                columns <- c(
-                    set_columns(private$sets[[1L]]$set),
-                    "present",
-                    "constant"
-                )
-            }
-            records_frame(rows, columns %||% character(0))
+            fields_frame(
+                rows,
+                lapply(unname(private$sets), function(lookups) lookups$set)
+            )
         },
 
         #' @description Print the set and the levels.
@@ -675,7 +689,7 @@ DataCatalog <- R6Class(
         # The first set named; an error when no set was named.
         first = function() {
             if (length(private$sets) == 0L) {
-                stop("no catalogue set named", call. = FALSE)
+                stop("no set named", call. = FALSE)
             }
             private$sets[[1L]]
         },
@@ -703,13 +717,13 @@ DataCatalog$answering_sets <- function(result) {
         )
     }
     Filter(
-        function(name) answers(catalogue_set(name), result$metadata),
+        function(name) answers(load_set(name), result$metadata),
         set_names()
     )
 }
 
 # One set's view of each level the matched rules convert, by level: every
-# catalogued key retained, and only apps that need no run have run.
+# cataloged key retained, and only apps that need no run have run.
 rule_views <- function(set, matched) {
     views <- lapply(matched, function(found) {
         level_view(
@@ -718,7 +732,7 @@ rule_views <- function(set, matched) {
             found$software_version_pattern,
             found$level,
             set,
-            retained = catalogued_keys(set, found$level),
+            retained = cataloged_keys(set, found$level),
             obs_columns = character(0),
             ran = function(producer) length(producer$requires) == 0L,
             annotations = list()
@@ -732,7 +746,7 @@ rule_views <- function(set, matched) {
 
 # One set bound to every level of a result.
 data_lookups <- function(result, name) {
-    set <- catalogue_set(name)
+    set <- load_set(name)
     check_answers(name, set, result$metadata)
     annotations <- Filter(
         function(annotation) annotation_applies(annotation, result$metadata),
@@ -761,8 +775,8 @@ data_lookups <- function(result, name) {
     Lookups$new(name, set, views)
 }
 
-# Whether a set can answer on a result: it has vendor catalogues, one of its
-# apps has run, or the result records one of its annotation conventions.
+# Whether a set can answer on a result: it has vendor entries, one of its apps
+# has run, or the result records one of its annotation conventions.
 answers <- function(set, metadata) {
     applies <- vapply(
         set$annotations,
@@ -952,7 +966,7 @@ level_fields <- function(lookups, view, level) {
     left_out <- level_left_out(level)
     absent <- Filter(
         function(entry) !(entry$entry_id %in% held),
-        variant_entries(view$rule$catalogue, view$rule$variant)
+        variant_entries(view$rule$vendor, view$rule$variant)
     )
     c(
         rows,

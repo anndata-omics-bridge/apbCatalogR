@@ -7,7 +7,7 @@
 software_versions <- function() {
     bundle <- current_bundle()
     bundle$memo("versions", function() {
-        rows <- catalogue_rows(bundle, "versions")
+        rows <- table_rows(bundle, "versions")
         lapply(seq_len(nrow(rows)), function(index) {
             list(
                 software_name = rows$software[[index]],
@@ -121,9 +121,9 @@ check_id_names <- function(text, attribute, key, column) {
 rule_levels <- function() {
     bundle <- current_bundle()
     bundle$memo("rule_levels", function() {
-        rows <- catalogue_rows(bundle, "catalog")
+        rows <- table_rows(bundle, "catalog")
         entry_ids <- unique(paste(
-            rows$software,
+            rows$source,
             rows$location,
             rows$name,
             sep = "/"

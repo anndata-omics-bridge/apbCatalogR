@@ -1,4 +1,4 @@
-# Paths the packaged catalogue sets do not reach: no packaged producer waits for a run.
+# Paths the packaged sets do not reach: no packaged producer waits for a run.
 
 producer <- list(
     type = "producer",

@@ -2,15 +2,15 @@
 
 test_that("Catalog answers every bundle case as apb-catalog does", {
     for (case in read_cases("catalog.json")) {
-        label <- paste(case$catalogue, case$software, case$version)
+        label <- paste(case$set, case$software, case$software_version)
         if (!is.null(case$error)) {
             expect_error(
-                Catalog$new(case$software, case$version, case$catalogue),
+                Catalog$new(case$software, case$software_version, case$set),
                 label = label
             )
             next
         }
-        catalog <- Catalog$new(case$software, case$version, case$catalogue)
+        catalog <- Catalog$new(case$software, case$software_version, case$set)
         for (request in case$requests) {
             slot <- slot_of(catalog, request)
             outcome <- outcome_of(function() {
@@ -66,10 +66,10 @@ named_data <- function(result, request, name) {
 
 test_that("DataCatalog answers every bundle case as apb-catalog does", {
     for (case in read_cases("data_catalog.json")) {
-        label <- paste(case$result, case$catalogue, case$enforce %||% "")
+        label <- paste(case$result, case$set, case$enforce %||% "")
         result <- synthetic_result(case$result)
         found <- opened_of(function() {
-            DataCatalog$new(result, case$catalogue, enforce = case$enforce)
+            DataCatalog$new(result, case$set, enforce = case$enforce)
         })
         expect_json_equal(
             found$opened,
@@ -125,13 +125,9 @@ test_that("DataCatalog answers every bundle case as apb-catalog does", {
     }
 })
 
-test_that("the catalogue tables match apb-catalog's", {
+test_that("the catalog tables match apb-catalog's", {
     tables <- read_cases("tables.json")
-    expect_json_equal(
-        frame_records(catalogues()),
-        tables$catalogues,
-        "catalogues"
-    )
+    expect_json_equal(frame_records(sets()), tables$sets, "sets")
     for (name in names(tables$rule_coverage)) {
         expect_json_equal(
             frame_records(rule_coverage(name)),
@@ -140,15 +136,15 @@ test_that("the catalogue tables match apb-catalog's", {
         )
     }
     expect_json_equal(
-        frame_records(catalogue_table()),
-        tables$catalogue_table$all,
-        "catalogue_table"
+        frame_records(catalog_table()),
+        tables$catalog_table$all,
+        "catalog_table"
     )
-    for (name in setdiff(names(tables$catalogue_table), "all")) {
+    for (name in setdiff(names(tables$catalog_table), "all")) {
         expect_json_equal(
-            frame_records(catalogue_table(name)),
-            tables$catalogue_table[[name]],
-            paste("catalogue_table", name)
+            frame_records(catalog_table(name)),
+            tables$catalog_table[[name]],
+            paste("catalog_table", name)
         )
     }
 })

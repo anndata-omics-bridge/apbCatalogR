@@ -1,9 +1,9 @@
 {
-  "bundle_format": 4,
+  "bundle_format": 5,
   "version": "0.1.4",
   "apb_catalog_version": "0.1.4",
   "apb2_version": "0.1.1",
-  "catalogues": [
+  "sets": [
     "abundance_alpha",
     "confidence_alpha",
     "proteobench_entrapment_alpha",

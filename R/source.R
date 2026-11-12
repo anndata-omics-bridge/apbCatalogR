@@ -109,10 +109,9 @@ cell_list <- function(text, separator = ";") {
     }
 }
 
-# A catalog.csv row's entry id: its software, location and name joined by
-# `/`.
+# A catalog.csv row's entry id: its source, location and name joined by `/`.
 row_entry_ids <- function(rows) {
-    paste(rows$software, rows$location, rows$name, sep = "/")
+    paste(rows$source, rows$location, rows$name, sep = "/")
 }
 
 # The qualifier and value of an entry's catalog.csv rows, one pair per row, as a
@@ -166,7 +165,7 @@ check_pair <- function(label, qualifier, value, fixed) {
     }
 }
 
-# A set's keys from its terms.csv rows, the catalogue's root: each the name
+# A set's keys from its terms.csv rows, the catalog's root: each the name
 # callers ask by, its kind and PSI-MS terms, the same on every row of the key,
 # and the qualifier values it fixes, one row per value; a row with neither fixes
 # none. apb-catalog checks the bundle's terms when it writes them.
@@ -276,10 +275,10 @@ bound_entry <- function(entry, name) {
     entry
 }
 
-# One catalogue per software of versions.csv, each reviewing every level the
-# bundle's entries name for its versions, when the set has vendor entries; none
-# otherwise.
-vendor_catalogues <- function(name, entries) {
+# One vendor's entries per software of versions.csv, each reviewing every level
+# the bundle's entries name for its versions, when the set has vendor entries;
+# none otherwise.
+vendor_entries <- function(name, entries) {
     if (length(entries) == 0L) {
         return(list())
     }
@@ -320,9 +319,9 @@ vendor_catalogues <- function(name, entries) {
     })
 }
 
-# An app's catalogue, such as apb-fasta's; its producers.csv row names the run
-# it waits for and what to run.
-producer_catalogue <- function(producer, entries, run) {
+# An app's entries, such as apb-fasta's; its producers.csv row names the run it
+# waits for and what to run.
+producer_entries <- function(producer, entries, run) {
     list(
         type = "producer",
         label = producer,
@@ -337,7 +336,8 @@ producer_catalogue <- function(producer, entries, run) {
     )
 }
 
-annotation_catalogue <- function(convention, entries) {
+# One annotation convention's entries, found by column-name prefix.
+annotation_entries <- function(convention, entries) {
     list(
         type = "annotation",
         label = paste0("annotation:", convention),
@@ -369,7 +369,7 @@ set_vocabulary <- function(head, kind_rows, qualifier_rows, value_rows) {
     )
 }
 
-# The entries a vendor catalogue reviewed for one of its rule variants.
+# The entries reviewed for one of a vendor's rule variants.
 variant_entries <- function(vendor, variant) {
     Filter(
         function(entry) {
@@ -381,8 +381,8 @@ variant_entries <- function(vendor, variant) {
     )
 }
 
-# The entries a producer or annotation catalogue supplies on one level, those of
-# every level included.
+# The entries an app or an annotation convention supplies on one level, those
+# of every level included.
 entries_on <- function(source, level) {
     Filter(Negate(is.null), lapply(source$entries, entry_on, level = level))
 }
@@ -447,27 +447,27 @@ row_describes <- function(row, entry) {
         identical(entry$key, row$key)
 }
 
-# One packaged catalogue set: its vocabulary, keys, vendor, producer and
-# annotation catalogues and requirements, indexed by software and version.
-# Producers hold the fields apps write after conversion and annotations the
-# sample-annotation fields; both apply to every software version. A set made
-# only of them has no vendor catalogue and needs no review.
-CatalogueSet <- R6Class(
-    "CatalogueSet",
+# One packaged set: its vocabulary, keys, vendor, producer and annotation
+# entries and requirements, indexed by software and version. Producers hold the
+# fields apps write after conversion and annotations the sample-annotation
+# fields; both apply to every software version. A set made only of them has no
+# vendor entries and needs no review.
+LoadedSet <- R6Class(
+    "LoadedSet",
     public = list(
         name = NULL,
         vocabulary = NULL,
         vocabulary_version = NULL,
         keys = NULL,
         description = NULL,
-        catalogues = NULL,
+        vendors = NULL,
         producers = NULL,
         annotations = NULL,
         requirements = NULL,
 
         initialize = function(bundle, name) {
             rows <- function(table) {
-                found <- catalogue_rows(bundle, table)
+                found <- table_rows(bundle, table)
                 found[found$set == name, , drop = FALSE]
             }
             head <- set_head(rows("sets"), name)
@@ -485,7 +485,7 @@ CatalogueSet <- R6Class(
                 rows("qualifier_values")
             )
             self$vocabulary_version <- bundle$json(
-                "catalogues",
+                "data",
                 "datapackage.json"
             )$version
             self$keys <- keys
@@ -493,27 +493,27 @@ CatalogueSet <- R6Class(
                 purpose = head$purpose,
                 used_by = cell_list(head$used_by)
             )
-            self$catalogues <- vendor_catalogues(
+            self$vendors <- vendor_entries(
                 name,
                 by_source[!annotation & !app]
             )
             self$producers <- lapply(which(app), function(index) {
                 run <- runs[runs$producer == sources[[index]], , drop = FALSE]
-                producer_catalogue(sources[[index]], by_source[[index]], run)
+                producer_entries(sources[[index]], by_source[[index]], run)
             })
             self$annotations <- lapply(which(annotation), function(index) {
-                annotation_catalogue(
+                annotation_entries(
                     sub("^annotation:", "", sources[[index]]),
                     by_source[[index]]
                 )
             })
             self$requirements <- term_requirements(rows("terms"))
-            private$by_version <- reviewed_versions(self$catalogues)
+            private$by_version <- reviewed_versions(self$vendors)
         },
 
-        # Every catalogue of the set: vendor, producer and annotation.
+        # Every source of the set: vendors, producers and annotations.
         sources = function() {
-            c(self$catalogues, self$producers, self$annotations)
+            c(self$vendors, self$producers, self$annotations)
         },
 
         # The rule reviewed for one software version's level, or NULL.
@@ -536,9 +536,9 @@ CatalogueSet <- R6Class(
         }
     ),
     active = list(
-        # Whether a level answers only once a vendor catalogue reviewed its
-        # rule.
-        needs_review = function() length(self$catalogues) > 0L
+        # Whether a level answers only once the set's vendor entries reviewed
+        # its rule.
+        needs_review = function() length(self$vendors) > 0L
     ),
     private = list(by_version = list())
 )
@@ -549,7 +549,7 @@ set_head <- function(head, name) {
     if (nrow(head) != 1L) {
         stop(
             sprintf(
-                "unknown catalogue '%s'; packaged: %s",
+                "unknown set '%s'; packaged: %s",
                 name,
                 paste(set_names(), collapse = ", ")
             ),
@@ -580,19 +580,18 @@ source_entries <- function(rows, keys) {
     split(entries, factor(named_sources, levels = unique(named_sources)))
 }
 
-# Each vendor catalogue's reviewed rule levels, by software, version pattern and
-# level.
-reviewed_versions <- function(catalogues) {
-    found <- concat(lapply(catalogues, function(vendor) {
+# Each vendor's reviewed rule levels, by software, version pattern and level.
+reviewed_versions <- function(vendors) {
+    found <- concat(lapply(vendors, function(vendor) {
         lapply(vendor$variants, function(variant) {
-            list(catalogue = vendor, variant = variant)
+            list(vendor = vendor, variant = variant)
         })
     }))
     keys <- vapply(
         found,
         function(one) {
             paste(
-                one$catalogue$software_name,
+                one$vendor$software_name,
                 one$variant$software_version_pattern,
                 one$variant$level,
                 sep = "\x1f"
@@ -603,27 +602,27 @@ reviewed_versions <- function(catalogues) {
     named_last(found, keys)
 }
 
-catalogue_set <- function(name) {
+load_set <- function(name) {
     bundle <- current_bundle()
-    bundle$memo(paste0("set:", name), function() CatalogueSet$new(bundle, name))
+    bundle$memo(paste0("set:", name), function() LoadedSet$new(bundle, name))
 }
 
 set_names <- function() {
-    catalogue_rows(current_bundle(), "sets")$set
+    table_rows(current_bundle(), "sets")$set
 }
 
-# One catalogue table of the bundle, as a data frame of strings with empty cells
+# One catalog table of the bundle, as a data frame of strings with empty cells
 # as "", read once; its columns must be those datapackage.json declares.
-catalogue_rows <- function(bundle, table) {
+table_rows <- function(bundle, table) {
     bundle$memo(paste0("table:", table), function() {
         found <- read.csv(
-            file.path(bundle$dir, "catalogues", paste0(table, ".csv")),
+            file.path(bundle$dir, "data", paste0(table, ".csv")),
             colClasses = "character",
             na.strings = character(0),
             check.names = FALSE,
             encoding = "UTF-8"
         )
-        resources <- bundle$json("catalogues", "datapackage.json")$resources
+        resources <- bundle$json("data", "datapackage.json")$resources
         resource <- Filter(
             function(found) identical(found$name, table),
             resources

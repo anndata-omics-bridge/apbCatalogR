@@ -21,9 +21,9 @@ MaxQuant and `EG_PEP` in Spectronaut. apb-catalog records what each column
 means; apbCatalogR implements its API in R, so an R application asks for a
 meaning and gets the column or its data.
 
-The package works on a bundle apb-catalog releases: the reviewed catalogue sets
-and the levels apb2 converts for each software version. One bundle ships with
-the package, together with a test bundle of synthetic results and the answers
+The package works on a bundle apb-catalog releases: the reviewed sets and the
+levels apb2 converts for each software version. One bundle ships with the
+package, together with a test bundle of synthetic results and the answers
 apb-catalog gives on them.
 
 apbCatalogR gives R one way into the quantification outputs of the 14 tools
@@ -53,10 +53,10 @@ knitr::include_graphics("figures/apb_actors.png")
 
 The main calls:
 
-- `Catalog$new(software, version, set)`: the fields a version reports
+- `Catalog$new(software, software_version, set_name)`: a version's fields
 - `read_parsed_levels(path)`: an APB result, one anndataR `AnnData` per level
 - `DataCatalog$new(result, ...)`: the data of a result, looked up by key
-- `catalogues()`, `catalogue_table()`: the sets and their entries
+- `sets()`, `catalog_table()`: the sets and their entries
 - `rule_coverage()`: how each software version covers a set
 - `catalog_version()`, `update_catalog()`: the bundle in use, and installing one
 
@@ -72,30 +72,30 @@ library(apbCatalogR)
 catalog_version()
 ```
 
-# Catalogue sets
+# Sets
 
-Each catalogue set serves one kind of consumer, and each holds the fields one
-producer writes: `apb_alpha` what `apb2 convert` writes,
+Each set serves one kind of consumer, and each holds the fields one producer
+writes: `apb_alpha` what `apb2 convert` writes,
 `fasta_peptides_alpha` what `apb-fasta verify-peptides` adds,
 `fasta_proteins_alpha` what `apb-fasta merge-annotations` adds, and
 `obs_annotation_alpha` the sample annotation `apb2 annotate` attaches:
 
 ```{r sets}
-catalogues()[, c("catalogue", "has_requirements", "entries")]
+sets()[, c("set", "has_requirements", "entries")]
 ```
 
-`catalogue_table()` lists the entries of a set, one row per field and software
+`catalog_table()` lists the entries of a set, one row per field and software
 version pattern:
 
 ```{r table}
-entries <- catalogue_table("confidence_alpha")
+entries <- catalog_table("confidence_alpha")
 columns <- c("software_version_pattern", "level", "name", "key")
 entries[entries$source == "Spectronaut", columns]
 ```
 
 # Which column a software version reports
 
-`Catalog` answers from the catalogue alone, without data. Its `levels` are the
+`Catalog` answers from the catalog alone, without data. Its `levels` are the
 levels apb2 converts for that software version, each with the slots `layers`,
 `var` and `obs`, holding field names:
 
@@ -116,7 +116,7 @@ spectronaut$levels$protein$var$keys()
 spectronaut$levels$protein$var[c("q_value", "library_q_value")]
 ```
 
-`$fields()` lists every catalogued field of the version as a table; each
+`$fields()` lists every cataloged field of the version as a table; each
 entry's id names the software, version, level and slot where the field lives:
 
 ```{r catalog-fields}
@@ -153,10 +153,10 @@ pep <- confidence$levels$peptidoform_ion$layers[["pep"]]
 dim(pep)
 ```
 
-`$fields()` lists the catalogued fields the result holds, from both sets:
+`$fields()` lists the cataloged fields the result holds, from both sets:
 
 ```{r data-fields}
-confidence$fields()[, c("set", "location", "name", "key", "present")]
+confidence$fields()[, c("set", "slot", "name", "key", "present")]
 ```
 
 Each level of the catalog has anndataR's slots. A name is read as a key first,
@@ -193,12 +193,12 @@ ion$var[c("peptidoform_ion", "decoy", "contaminant")]
 A vendor may name a column as a key is named, as Sage names its quantification
 q-value `q_value`. A prefix makes the lookup exact: a set's prefix asks that set
 alone and never the level's own field, `v:` the level's own field alone and
-never the catalog. `catalogues()` lists each set's prefix:
+never the catalog. `sets()` lists each set's prefix:
 
 ```{r prefixes}
 ion$layers$name("c:pep")    # the confidence set alone
 ion$layers$name("v:Score")  # MaxQuant's own layer alone
-catalogues()[, c("catalogue", "prefix")]
+sets()[, c("set", "prefix")]
 ```
 
 MaxQuant reports no q-value on this level, so `$get()` gives `NULL`, where
@@ -209,7 +209,7 @@ ion$layers$get("q_value")
 ion$layers$name("pep")
 ```
 
-A lookup the catalogue cannot answer with one field signals `UnresolvedField`
+A lookup the catalog cannot answer with one field signals `UnresolvedField`
 rather than choosing silently. Spectronaut does not document how its protein
 quantity combines the precursors, so asking for a summed one is unknown there:
 

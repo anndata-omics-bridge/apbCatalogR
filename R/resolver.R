@@ -47,7 +47,7 @@ request_mismatched <- function(request, entry) {
 
 # What the request asks that an entry leaves unknown: its qualifiers with the
 # value unknown. A kind is always known; a field whose meaning the reviewer
-# could not establish is not catalogued.
+# could not establish is not cataloged.
 request_undecided <- function(request, entry) {
     unlist(Filter(
         function(name) {
@@ -230,7 +230,7 @@ ReviewedLevel <- R6Class(
             variant <- self$rule$variant
             missing <- sprintf(
                 "no reviewed %s %s entry on %s matches",
-                self$rule$catalogue$software_name,
+                self$rule$vendor$software_name,
                 variant$software_version_pattern,
                 self$level
             )
@@ -244,7 +244,7 @@ ReviewedLevel <- R6Class(
     )
 )
 
-# A level of a set without vendor catalogues, answered by APB's own fields
+# A level of a set without vendor entries, answered by APB's own fields
 # alone.
 ProducedLevel <- R6Class(
     "ProducedLevel",

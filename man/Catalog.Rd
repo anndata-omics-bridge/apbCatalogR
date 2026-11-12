@@ -7,7 +7,7 @@
 The class generator; \code{Catalog$new()} returns a \code{Catalog}.
 }
 \description{
-Answers from the catalogue alone, without data. The rule levels whose version
+Answers from the catalog alone, without data. The rule levels whose version
 pattern admits the version give the levels; the set's entries for that
 pattern give each level's fields. \code{levels} have the slots of a
 \link{DataCatalog}'s levels, holding names: a slot answers one of the set's keys,
@@ -33,7 +33,7 @@ catalog$levels$peptidoform_ion$layers$keys()
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{description}}{What this catalogue set holds and who uses it.}
+    \item{\code{description}}{What this set holds and who uses it.}
   }
   \if{html}{\out{</div>}}
 }
@@ -50,20 +50,19 @@ catalog$levels$peptidoform_ion$layers$keys()
 \if{html}{\out{<a id="method-Catalog-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-Catalog-initialize}{}}}
 \subsection{\code{Catalog$new()}}{
-  Bind a catalogue set to the rule levels of one software
-version.
+  Bind a set to the rule levels of one software version.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{Catalog$new(software, version, catalog, enforce = NULL)}
+    \preformatted{Catalog$new(software, software_version, set_name, enforce = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{software}}{The software name, such as \code{"DIA-NN"}.}
-      \item{\code{version}}{The software version, such as \code{"2.2.0"}.}
-      \item{\code{catalog}}{The catalogue set, such as \code{"abundance_alpha"} or
-\code{"confidence_alpha"}; see \code{\link[=catalogues]{catalogues()}}.}
+      \item{\code{software}}{The quantification software, such as \code{"DIA-NN"}.}
+      \item{\code{software_version}}{The software's version, such as \code{"2.2.0"}.}
+      \item{\code{set_name}}{The set, such as \code{"abundance_alpha"} or
+\code{"confidence_alpha"}; see \code{\link[=sets]{sets()}}.}
       \item{\code{enforce}}{\code{NULL}, \code{"required"} or \code{"recommended"}: signal one
 \code{MissingRequiredField} listing every field the set requires at
 that strength and the rule lacks; under \code{"required"}, missing
@@ -78,8 +77,8 @@ requirements.}
 \if{html}{\out{<a id="method-Catalog-fields"></a>}}
 \if{latex}{\out{\hypertarget{method-Catalog-fields}{}}}
 \subsection{\code{Catalog$fields()}}{
-  Every catalogued field the rule declares, one row per
-field, as \code{\link[=catalogue_table]{catalogue_table()}} shows them.
+  Every cataloged field the rule declares, one row per
+field, as \code{\link[=catalog_table]{catalog_table()}} shows them.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Catalog$fields()}

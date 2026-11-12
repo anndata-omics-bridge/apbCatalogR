@@ -102,7 +102,7 @@ test_that("only the named sets answer, and the names are the AnnData's", {
         none$levels$peptidoform_ion$layers[["Q_Value"]],
         found$result$layers[["Q_Value"]]
     )
-    expect_error(none$description, "no catalogue set named")
+    expect_error(none$description, "no set named")
 })
 
 test_that("get returns NULL where [[ signals an error, and name says which field a key reads", {
@@ -256,10 +256,10 @@ test_that("a Catalog names one software, version and set", {
     )
     expect_error(
         Catalog$new("DIA-NN", 2.2, "abundance_alpha"),
-        "version is one character string"
+        "software_version is one character string"
     )
     expect_error(
         rule_coverage(c("abundance_alpha", "confidence_alpha")),
-        "catalogue is one character string"
+        "set_name is one character string"
     )
 })

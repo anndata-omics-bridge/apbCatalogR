@@ -1,41 +1,37 @@
-# Which catalogued fields every rule supplies, and whether each level meets its
+# Which cataloged fields every rule supplies, and whether each level meets its
 # set; apb_catalog.coverage.
 
+# The columns before the set's qualifier.<name> columns; producer, requirement,
+# needs and verdict follow.
 COVERAGE_COLUMNS <- c(
     "software",
     "version",
     "software_version_pattern",
     "level",
-    "key",
-    "kind",
-    "qualifiers",
-    "origin",
-    "producer",
-    "requirement",
-    "location",
+    "slot",
     "table",
-    "column",
-    "needs",
-    "verdict"
+    "name",
+    "key",
+    "kind"
 )
 
 SEVERITY <- c(required = "fail", recommended = "warn", optional = "pass")
 
-#' The catalogue sets
+#' The catalog's sets
 #'
-#' Every catalogue set of the bundle with its prefix, its purpose, its users and
-#' its number of entries. The prefix asks the set alone, as `"c:q_value"`.
+#' Every set of the bundle with its prefix, its purpose, its users and its
+#' number of entries. The prefix asks the set alone, as `"c:q_value"`.
 #'
-#' @return A data frame with columns `catalogue`, `prefix`, `purpose`, `used_by`
-#'   (a list column), `has_requirements` and `entries`.
+#' @return A data frame with columns `set`, `prefix`, `purpose`, `used_by` (a
+#'   list column), `has_requirements` and `entries`.
 #' @export
 #' @examples
-#' catalogues()
-catalogues <- function() {
+#' sets()
+sets <- function() {
     rows <- lapply(set_names(), function(name) {
-        set <- catalogue_set(name)
+        set <- load_set(name)
         list(
-            catalogue = name,
+            set = name,
             prefix = set$vocabulary$prefix,
             purpose = set$description$purpose,
             used_by = set$description$used_by,
@@ -50,7 +46,7 @@ catalogues <- function() {
     records_frame(
         rows,
         c(
-            "catalogue",
+            "set",
             "prefix",
             "purpose",
             "used_by",
@@ -61,29 +57,31 @@ catalogues <- function() {
     )
 }
 
-#' Check every rule against one catalogue set
+#' Check every rule against one set
 #'
-#' One row per catalogued or required field of each rule level the set reviews;
-#' a set without vendor catalogues is checked against every level the bundle's
+#' One row per cataloged or required field of each rule level the set reviews;
+#' a set without vendor entries is checked against every level the bundle's
 #' entries name for each version of `versions.csv`. A set with requirements
 #' judges each level: `fail` when a required field is unsupported, `warn` when
 #' a recommended one is, `pass` otherwise; an unsupported optional field is
 #' listed but passes.
 #'
-#' @param catalogue The set's name.
-#' @return A data frame with columns `software`, `version` (the label),
-#'   `software_version_pattern`, `level`, `key`, `kind`, `qualifiers` (the other
-#'   qualifiers as `name=value`), `origin`, `producer` (the app, `NA` for the
-#'   conversion software's fields), `requirement`, `location`, `table`, `column`
-#'   (`NA` when unsupported), `needs` (what to run before the field exists) and
-#'   `verdict` (`NA` for a set without requirements).
+#' @param set_name The set's name.
+#' @return A data frame with columns `software` (the quantification software of
+#'   the rule), `version` (the label), `software_version_pattern`, `level`,
+#'   `slot`, `table` (the `varm` table, else `NA`), `name` (the field's name,
+#'   `NA` when unsupported), `key`, `kind`, one `qualifier.<name>` column per
+#'   other qualifier of the set, as in [catalog_table()], `producer` (the app,
+#'   `NA` for the quantification software's fields), `requirement`, `needs`
+#'   (what to run before the field exists) and `verdict` (`NA` for a set
+#'   without requirements).
 #' @export
 #' @examples
 #' head(rule_coverage("abundance_alpha"))
-rule_coverage <- function(catalogue) {
-    check_string(catalogue, "catalogue")
-    set <- catalogue_set(catalogue)
-    rows <- concat(lapply(set$catalogues, function(vendor) {
+rule_coverage <- function(set_name) {
+    check_string(set_name, "set_name")
+    set <- load_set(set_name)
+    rows <- concat(lapply(set$vendors, function(vendor) {
         concat(lapply(vendor$variants, function(variant) {
             variant_rows(
                 set,
@@ -105,7 +103,19 @@ rule_coverage <- function(catalogue) {
             }))
         )
     }
-    records_frame(rows, COVERAGE_COLUMNS)
+    records_frame(rows, coverage_columns(set))
+}
+
+# The coverage table's columns for one set: see rule_coverage().
+coverage_columns <- function(set) {
+    c(
+        COVERAGE_COLUMNS,
+        sprintf("qualifier.%s", qualifier_names(set)),
+        "producer",
+        "requirement",
+        "needs",
+        "verdict"
+    )
 }
 
 variant_rows <- function(set, software, variant, vendor_entries) {
@@ -135,7 +145,7 @@ variant_rows <- function(set, software, variant, vendor_entries) {
     rows <- lapply(found, function(item) {
         c(
             base,
-            coverage_field(item$entry, item$producer),
+            coverage_field(set, item$entry, item$producer),
             list(requirement = row_requirement(required, item$entry))
         )
     })
@@ -163,15 +173,14 @@ unmet_requirements <- function(required, found) {
     )
 }
 
-# A coverage row's field for a required key no field answers.
+# A coverage row's field for a required key no field answers: the key, kind and
+# fixed qualifiers.
 requirement_field <- function(set, row) {
     key <- set$key(row$key)
-    list(
-        key = row$key,
-        kind = key$kind,
-        qualifiers = qualifier_pairs(key$fixed),
-        location = row$location,
-        requirement = row$requirement
+    c(
+        list(key = row$key, kind = key$kind),
+        qualifier_columns(set, key$fixed),
+        list(slot = row$location, requirement = row$requirement)
     )
 }
 
@@ -210,14 +219,6 @@ row_requirement <- function(required, entry) {
     if (is.null(row)) NA_character_ else row$requirement
 }
 
-qualifier_pairs <- function(qualifiers) {
-    if (length(qualifiers) == 0L) {
-        return(NA_character_)
-    }
-    ordered <- sort_c(names(qualifiers))
-    paste(paste0(ordered, "=", qualifiers[ordered]), collapse = ";")
-}
-
 coverage_verdict <- function(requirements) {
     severities <- SEVERITY[requirements]
     if ("fail" %in% severities) {
@@ -226,24 +227,24 @@ coverage_verdict <- function(requirements) {
     if ("warn" %in% severities) "warn" else "pass"
 }
 
-coverage_field <- function(entry, producer) {
+coverage_field <- function(set, entry, producer) {
     reference <- entry$reference
-    others <- entry$qualifiers
-    origin <- if ("origin" %in% names(others)) {
-        others[["origin"]]
-    } else {
-        NA_character_
-    }
-    others <- others[names(others) != "origin"]
-    list(
-        key = entry$key,
-        kind = entry$kind,
-        qualifiers = qualifier_pairs(others),
-        origin = origin,
-        producer = if (is.null(producer)) NULL else producer$producer,
-        location = reference$location,
-        table = reference$table,
-        column = reference$name,
-        needs = if (is.null(producer)) NA_character_ else producer$instruction
+    c(
+        list(
+            slot = reference$location,
+            table = reference$table,
+            name = reference$name,
+            key = entry$key,
+            kind = entry$kind
+        ),
+        qualifier_columns(set, entry$qualifiers),
+        list(
+            producer = if (is.null(producer)) NULL else producer$producer,
+            needs = if (is.null(producer)) {
+                NA_character_
+            } else {
+                producer$instruction
+            }
+        )
     )
 }

@@ -9,7 +9,7 @@ Authors@R: c(
 Description: Looks up the fields of AnnData Proteomics Bridge (APB) results
     by meaning, such as a PEP or an unnormalized intensity, without naming
     vendor columns. Reimplements the apb-catalog API on the bundle apb-catalog
-    releases: reviewed catalogues, apb2's rule levels and expected answers.
+    releases: reviewed sets, apb2's rule levels and expected answers.
     Reads APB results, as h5ad, Parquet or DuckDB, into anndataR objects.
 License: MIT + file LICENSE
 URL: https://anndata-omics-bridge.github.io/apbCatalogR/, https://github.com/anndata-omics-bridge/apbCatalogR

@@ -1,7 +1,7 @@
 #' apbCatalogR: look up APB result fields by meaning
 #'
 #' The R implementation of apb-catalog. It works on the bundle apb-catalog
-#' releases: the reviewed catalogue sets and the levels apb2 converts for each
+#' releases: the reviewed sets and the levels apb2 converts for each
 #' software version. [Catalog] answers which column one software version reports
 #' for a meaning, without data; [DataCatalog] answers on a result read with
 #' [read_parsed_levels()].
@@ -11,7 +11,7 @@
 #'
 #' @section Conditions:
 #' Lookups signal conditions of the classes apb-catalog raises in Python:
-#' * `UnresolvedField`: the catalogue cannot answer with one field; the request
+#' * `UnresolvedField`: the catalog cannot answer with one field; the request
 #'   is ambiguous or unknown. Its `resolution` holds the candidates and reasons.
 #' * `MissingRequiredField`: fields the named sets require are missing, under
 #'   `enforce`, checked once when a catalog opens. Its `missing` lists every

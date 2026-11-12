@@ -7,7 +7,7 @@
 \title{apbCatalogR: look up APB result fields by meaning}
 \description{
 The R implementation of apb-catalog. It works on the bundle apb-catalog
-releases: the reviewed catalogue sets and the levels apb2 converts for each
+releases: the reviewed sets and the levels apb2 converts for each
 software version. \link{Catalog} answers which column one software version reports
 for a meaning, without data; \link{DataCatalog} answers on a result read with
 \code{\link[=read_parsed_levels]{read_parsed_levels()}}.
@@ -20,7 +20,7 @@ local archive and \code{\link[=catalog_version]{catalog_version()}} reports the 
 
 Lookups signal conditions of the classes apb-catalog raises in Python:
 \itemize{
-\item \code{UnresolvedField}: the catalogue cannot answer with one field; the request
+\item \code{UnresolvedField}: the catalog cannot answer with one field; the request
 is ambiguous or unknown. Its \code{resolution} holds the candidates and reasons.
 \item \code{MissingRequiredField}: fields the named sets require are missing, under
 \code{enforce}, checked once when a catalog opens. Its \code{missing} lists every
