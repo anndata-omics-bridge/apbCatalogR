@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/Catalog.html">Catalog</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/Catalog.html">Catalog</a></li></ol></nav>
         <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -169,6 +169,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -177,18 +183,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/Catalog.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogue_table.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -231,6 +225,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -283,9 +283,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/Catalog.html">Catalog</a></li></ol></nav></header><section id="which-column-one-software-version-reports-for-each-meaning" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="which-column-one-software-version-reports-for-each-meaning">Which column one software version reports for each meaning</h2>
+<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/Catalog.html">Catalog</a></li></ol></nav></header><section id="which-column-one-software-version-reports-for-each-meaning" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="which-column-one-software-version-reports-for-each-meaning">Which column one software version reports for each meaning</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>Answers from the catalogue alone, without data. The rule levels whose version pattern admits the version give the levels; the set’s entries for that pattern give each level’s fields. <code>levels</code> have the slots of a DataCatalog’s levels, holding names: a slot answers one of the set’s keys, such as <code>“intensity_norm_settings”</code>, with the field’s name, and its <code style="white-space: pre;">$get()</code> takes further qualifiers, such as <code>unit</code>. Lookups that several fields answer, or that an unreviewed level cannot, signal <code>UnresolvedField</code>. <code>enforce</code> checks the set’s requirements against the rule’s levels once, when the catalog opens.</p>
+<p>Answers from the catalog alone, without data. The rule levels whose version pattern admits the version give the levels; the set’s entries for that pattern give each level’s fields. <code>levels</code> have the slots of a DataCatalog’s levels, holding names: a slot answers one of the set’s keys, such as <code>“intensity_norm_settings”</code>, with the field’s name, and its <code style="white-space: pre;">$get()</code> takes further qualifiers, such as <code>unit</code>. Lookups that several fields answer, or that an unreviewed level cannot, signal <code>UnresolvedField</code>. <code>enforce</code> checks the set’s requirements against the rule’s levels once, when the catalog opens.</p>
 </section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
 <p>The class generator; <code>Catalog$new()</code> returns a <code>Catalog</code>.</p>
 </section><section id="public-fields" class="level3"><h3 class="anchored" data-anchor-id="public-fields">Public fields</h3>
@@ -306,7 +306,7 @@ One LevelNames per rule level, with a DataCatalog’s slots holding names.
 <code>description</code>
 </dt>
 <dd>
-What this catalogue set holds and who uses it.
+What this set holds and who uses it.
 </dd>
 </dl>
 </div>
@@ -333,12 +333,12 @@ Public methods
 <h4 class="anchored">
 <code>Catalog$new()</code>
 </h4>
-<p>Bind a catalogue set to the rule levels of one software version.</p>
+<p>Bind a set to the rule levels of one software version.</p>
 <h5 class="anchored">
 Usage
 </h5>
 <div class="r">
-<pre>Catalog\$new(software, version, catalog, enforce = NULL)</pre>
+<pre>Catalog\$new(software, software_version, set_name, enforce = NULL)</pre>
 </div>
 <h5 class="anchored">
 Arguments
@@ -349,19 +349,19 @@ Arguments
 <code>software</code>
 </dt>
 <dd>
-The software name, such as <code>“DIA-NN”</code>.
+The quantification software, such as <code>“DIA-NN”</code>.
 </dd>
 <dt>
-<code>version</code>
+<code>software_version</code>
 </dt>
 <dd>
-The software version, such as <code>“2.2.0”</code>.
+The software’s version, such as <code>“2.2.0”</code>.
 </dd>
 <dt>
-<code>catalog</code>
+<code>set_name</code>
 </dt>
 <dd>
-The catalogue set, such as <code>“abundance_alpha”</code> or <code>“confidence_alpha”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
+The set, such as <code>“abundance_alpha”</code> or <code>“confidence_alpha”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/sets.html">sets()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
@@ -376,7 +376,7 @@ The catalogue set, such as <code>“abundance_alpha”</code> or <code>“confid
 <h4 class="anchored">
 <code>Catalog$fields()</code>
 </h4>
-<p>Every catalogued field the rule declares, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
+<p>Every cataloged field the rule declares, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalog_table.html">catalog_table()</a></code> shows them.</p>
 <h5 class="anchored">
 Usage
 </h5>

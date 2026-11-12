@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="quarto-1.11.9">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>catalogue_table – apbCatalogR</title>
+<title>sets – apbCatalogR</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/catalogue_table.html">catalogue_table</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/sets.html">sets</a></li></ol></nav>
         <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -169,6 +169,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -177,18 +183,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/Catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogue_table.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -231,6 +225,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sets.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -283,49 +283,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/catalogue_table.html">catalogue_table</a></li></ol></nav></header><section id="the-catalogue-sets-as-one-long-table" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="the-catalogue-sets-as-one-long-table">The catalogue sets as one long table</h2>
+<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/sets.html">sets</a></li></ol></nav></header><section id="the-catalogs-sets" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="the-catalogs-sets">The catalog’s sets</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>One row per entry and software version it applies to, as <code style="white-space: pre;">apb-catalog table</code> prints it.</p>
+<p>Every set of the bundle with its prefix, its purpose, its users and its number of entries. The prefix asks the set alone, as <code>“c:q_value”</code>.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">catalogue_table(catalogue = NULL)
-</code></pre>
-</section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
-<table role="presentation"><tbody><tr>
-<td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="catalogue">catalogue</code>
-</td>
-<td>
-One set’s name; <code>NULL</code> lists every set of the bundle.
-</td>
-</tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A data frame with columns <code>set</code>, <code>source</code> (the conversion software, an app or <code style="white-space: pre;">annotation:&lt;convention&gt;</code>), <code>software_version_pattern</code> (<code>NA</code> for an entry of every software version), <code>level</code>, <code>location</code>, <code>table</code>, <code>name</code> (<code style="white-space: pre;">prefix:&lt;prefix&gt;</code> for a field found by column-name prefix), <code>key</code>, <code>kind</code>, one <code style="white-space: pre;">qualifier.&lt;name&gt;</code> column per other qualifier, <code>requirement</code> and <code>entry_id</code>.</p>
+<pre><code class="language-R"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/sets.html">sets()
+</a></code></pre>
+</section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
+<p>A data frame with columns <code>set</code>, <code>prefix</code>, <code>purpose</code>, <code>used_by</code> (a list column), <code>has_requirements</code> and <code>entries</code>.</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table</a></span><span class="op">(</span><span class="st">"confidence_alpha"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/sets.html">sets</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>               set    source software_version_pattern           level location
-1 confidence_alpha  AlphaDIA       ^1\\.12(?:\\.|-|$) peptidoform_ion   layers
-2 confidence_alpha  AlphaDIA                    ^2\\. peptidoform_ion   layers
-3 confidence_alpha AlphaPept                ^0\\.5\\. peptidoform_ion   layers
-4 confidence_alpha    DIA-NN        ^1\\.[0-7](\\.|$) peptidoform_ion   layers
-5 confidence_alpha    DIA-NN         ^1\\.[89](\\.|$) peptidoform_ion   layers
-6 confidence_alpha    DIA-NN                  ^2\\..* peptidoform_ion   layers
-  table           name     key    kind qualifier.stage requirement
-1  &lt;NA&gt;           qval q_value q_value  identification        &lt;NA&gt;
-2  &lt;NA&gt; precursor_qval q_value q_value  identification        &lt;NA&gt;
-3  &lt;NA&gt;        q_value q_value q_value  identification        &lt;NA&gt;
-4  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
-5  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
-6  &lt;NA&gt;        Q_Value q_value q_value  identification        &lt;NA&gt;
-                                              entry_id
-1          AlphaDIA/1.12/peptidoform_ion/layers/qval/-
-2 AlphaDIA/2.x/peptidoform_ion/layers/precursor_qval/-
-3         AlphaPept/*/peptidoform_ion/layers/q_value/-
-4            DIA-NN/*/peptidoform_ion/layers/Q_Value/-
-5            DIA-NN/*/peptidoform_ion/layers/Q_Value/-
-6            DIA-NN/*/peptidoform_ion/layers/Q_Value/-</code></pre>
+<pre><code>                           set prefix
+1              abundance_alpha      a
+2             confidence_alpha      c
+3 proteobench_entrapment_alpha    pbe
+4                    apb_alpha    apb
+5         obs_annotation_alpha  annot
+6         fasta_peptides_alpha   fpep
+7         fasta_proteins_alpha  fprot
+8         chromatography_alpha     rt
+                                                                                                                                  purpose
+1                              What each layer an APB2 rule marks abundance measures, and whether the software normalizes it across runs.
+2                  How likely each identification, or the signal quantified for it, is correct: PEP and q-values per run and per feature.
+3                              The precursor q-values ProteoBench's entrapment scoring ranks by, each key in each location its own score.
+4 The fields apb2 convert writes for every vendor, asked for by kind: ProForma identifiers, decoy and contaminant flags and role columns.
+5                                                                     Each run's group and subject, whichever sample table supplied them.
+6                              apb-fasta's peptide verification, asked for by kind, once apb-fasta verify-peptides has run on the result.
+7                              apb-fasta's protein annotation, asked for by kind, once apb-fasta merge-annotations has run on the result.
+8                                       Retention times, elution-peak bounds and peak widths, with the unit the software reports them in.
+       used_by has_requirements entries
+1 apb-prot....             TRUE      45
+2 apb-aggr....            FALSE      26
+3 apb-prot....            FALSE       7
+4 apb-expo....             TRUE     181
+5 apb-expo....            FALSE       7
+6 apb-expo....            FALSE      28
+7 apb-expo....            FALSE       4
+8 apb-expo....            FALSE      58</code></pre>
 </div>
 </div>
 
@@ -809,4 +807,4 @@ One set’s name; <code>NULL</code> lists every set of the bundle.
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/anndata-omics-bridge/apbCatalogR/blob/main/man/catalogue_table.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/anndata-omics-bridge/apbCatalogR/blob/main/man/sets.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div></div></footer></body></html>

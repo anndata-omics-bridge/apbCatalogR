@@ -186,6 +186,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -194,18 +200,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="./man/Catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./man/catalogue_table.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -248,6 +242,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="./man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./man/sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -319,8 +319,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>New API.</strong> This package is new, and its API may still change between releases. Feedback is very welcome: open an <a href="https://github.com/anndata-omics-bridge/apbCatalogR/issues">issue</a> with what you need, what surprised you, or what broke.</p>
 </blockquote>
 <p>Documentation: <a href="https://anndata-omics-bridge.github.io/apbCatalogR/">anndata-omics-bridge.github.io/apbCatalogR</a>, with the <a href="https://anndata-omics-bridge.github.io/apbCatalogR/vignettes/apbCatalogR.html">vignette</a> as the walkthrough.</p>
-<p>Catalog viewer: <a href="https://fgcz-ms.uzh.ch/public/apb-catalog/">fgcz-ms.uzh.ch/public/apb-catalog</a>, every catalogue set with its entries, requirements and coverage, in the browser.</p>
-<p>Contributing: the catalogs can be extended to suit your application, and you are welcome to create your own; see <a href="https://anndata-omics-bridge.github.io/apb-catalog/contributing/">Contributing</a>.</p>
+<p>Catalog viewer: <a href="https://fgcz-ms.uzh.ch/public/apb-catalog/">fgcz-ms.uzh.ch/public/apb-catalog</a>, every set with its entries, requirements and coverage, in the browser.</p>
+<p>Contributing: the sets can be extended to suit your application, and you are welcome to create your own; see <a href="https://anndata-omics-bridge.github.io/apb-catalog/contributing/">Contributing</a>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="vignettes/figures/apb_actors.png" class="img-fluid figure-img"></p>
@@ -340,7 +340,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="apb-catalog" class="level2">
 <h2 class="anchored" data-anchor-id="apb-catalog">apb-catalog</h2>
-<p><a href="https://anndata-omics-bridge.github.io/apb-catalog/">apb-catalog</a> records what those columns mean, in reviewed catalogue sets. A consumer asks a set by key, such as <code>pep</code> or <code>intensity</code>, and gets the column.</p>
+<p><a href="https://anndata-omics-bridge.github.io/apb-catalog/">apb-catalog</a> records what those columns mean, in reviewed sets. A consumer asks a set by key, such as <code>pep</code> or <code>intensity</code>, and gets the column.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -396,7 +396,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="this-package" class="level2">
 <h2 class="anchored" data-anchor-id="this-package">This package</h2>
-<p>apbCatalogR is apb-catalog’s Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: <code>DataCatalog$snapshot()</code>, <code>$resolve()</code>, <code>attach_snapshot()</code> and <code>ResolutionSnapshot</code> have no R counterpart. It needs no Python: the catalogues come from a bundle shipped with the package.</p>
+<p>apbCatalogR is apb-catalog’s Python API in R, as R6 classes with the same names and methods. Snapshots are not ported: <code>DataCatalog$snapshot()</code>, <code>$resolve()</code>, <code>attach_snapshot()</code> and <code>ResolutionSnapshot</code> have no R counterpart. It needs no Python: the catalog comes from a bundle shipped with the package.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -410,15 +410,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>Catalog$new(software, version, set)</code></td>
-<td>From the catalogue alone, without data</td>
+<td><code>Catalog$new(software, software_version, set_name)</code></td>
+<td>From the catalog alone, without data</td>
 </tr>
 <tr class="even">
 <td><code>DataCatalog$new(result, set)</code></td>
 <td>On one result, the named sets alone, and returns the data</td>
 </tr>
 <tr class="odd">
-<td><code>catalogues()</code>, <code>rule_coverage()</code>, <code>catalogue_table()</code></td>
+<td><code>sets()</code>, <code>rule_coverage()</code>, <code>catalog_table()</code></td>
 <td>The sets, how each rule covers a set, every entry as a table</td>
 </tr>
 <tr class="even">
@@ -439,7 +439,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="use" class="level2">
 <h2 class="anchored" data-anchor-id="use">Use</h2>
-<p>Ask the catalogue which column a software version reports:</p>
+<p>Ask the catalog which column a software version reports:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(apbCatalogR)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>diann <span class="ot">&lt;-</span> Catalog<span class="sc">$</span><span class="fu">new</span>(<span class="st">"DIA-NN"</span>, <span class="st">"2.2.0"</span>, <span class="st">"abundance_alpha"</span>)<span class="sc">$</span>levels<span class="sc">$</span>peptidoform_ion</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>diann<span class="sc">$</span>layers<span class="sc">$</span><span class="fu">keys</span>()</span>
@@ -459,7 +459,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="the-bundle">The bundle</h2>
 <p>apb-catalog builds two bundles at each release:</p>
 <ul>
-<li>Bundle: the reviewed catalogue sets and the levels apb2 converts for each software version; lookups read only this</li>
+<li>Bundle: the reviewed sets and the levels apb2 converts for each software version; lookups read only this</li>
 <li>Test bundle: synthetic results, with apb-catalog’s answers on them; the tests check that R gives the same answers</li>
 </ul>
 <p>How R gets the latest bundle:</p>

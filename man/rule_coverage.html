@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/rule_coverage.html">rule_coverage</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/rule_coverage.html">rule_coverage</a></li></ol></nav>
         <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -169,6 +169,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -177,18 +183,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/Catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogue_table.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -231,6 +225,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -283,56 +283,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/rule_coverage.html">rule_coverage</a></li></ol></nav></header><section id="check-every-rule-against-one-catalogue-set" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="check-every-rule-against-one-catalogue-set">Check every rule against one catalogue set</h2>
+<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/rule_coverage.html">rule_coverage</a></li></ol></nav></header><section id="check-every-rule-against-one-set" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="check-every-rule-against-one-set">Check every rule against one set</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
-<p>One row per catalogued or required field of each rule level the set reviews; a set without vendor catalogues is checked against every level the bundle’s entries name for each version of <code>versions.csv</code>. A set with requirements judges each level: <code>fail</code> when a required field is unsupported, <code>warn</code> when a recommended one is, <code>pass</code> otherwise; an unsupported optional field is listed but passes.</p>
+<p>One row per cataloged or required field of each rule level the set reviews; a set without vendor entries is checked against every level the bundle’s entries name for each version of <code>versions.csv</code>. A set with requirements judges each level: <code>fail</code> when a required field is unsupported, <code>warn</code> when a recommended one is, <code>pass</code> otherwise; an unsupported optional field is listed but passes.</p>
 </section><section id="usage" class="level3"><h3 class="anchored" data-anchor-id="usage">Usage</h3>
-<pre><code class="language-R">rule_coverage(catalogue)
+<pre><code class="language-R">rule_coverage(set_name)
 </code></pre>
 </section><section id="arguments" class="level3"><h3 class="anchored" data-anchor-id="arguments">Arguments</h3>
 <table role="presentation"><tbody><tr>
 <td style="white-space: collapse; font-family: monospace; vertical-align: top">
-<code id="catalogue">catalogue</code>
+<code id="set_name">set_name</code>
 </td>
 <td>
 The set’s name.
 </td>
 </tr></tbody></table></section><section id="value" class="level3"><h3 class="anchored" data-anchor-id="value">Value</h3>
-<p>A data frame with columns <code>software</code>, <code>version</code> (the label), <code>software_version_pattern</code>, <code>level</code>, <code>key</code>, <code>kind</code>, <code>qualifiers</code> (the other qualifiers as <code>name=value</code>), <code>origin</code>, <code>producer</code> (the app, <code>NA</code> for the conversion software’s fields), <code>requirement</code>, <code>location</code>, <code>table</code>, <code>column</code> (<code>NA</code> when unsupported), <code>needs</code> (what to run before the field exists) and <code>verdict</code> (<code>NA</code> for a set without requirements).</p>
+<p>A data frame with columns <code>software</code> (the quantification software of the rule), <code>version</code> (the label), <code>software_version_pattern</code>, <code>level</code>, <code>slot</code>, <code>table</code> (the <code>varm</code> table, else <code>NA</code>), <code>name</code> (the field’s name, <code>NA</code> when unsupported), <code>key</code>, <code>kind</code>, one <code style="white-space: pre;">qualifier.&lt;name&gt;</code> column per other qualifier of the set, as in <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalog_table.html">catalog_table()</a></code>, <code>producer</code> (the app, <code>NA</code> for the quantification software’s fields), <code>requirement</code>, <code>needs</code> (what to run before the field exists) and <code>verdict</code> (<code>NA</code> for a set without requirements).</p>
 </section><section id="examples" class="level3"><h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/">"apbCatalogR"</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/rule_coverage.html">rule_coverage</a></span><span class="op">(</span><span class="st">"abundance_alpha"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  software version software_version_pattern           level
-1 AlphaDIA    1.10       ^1\\.10(?:\\.|-|$) peptidoform_ion
-2 AlphaDIA    1.10       ^1\\.10(?:\\.|-|$) peptidoform_ion
-3 AlphaDIA    1.12       ^1\\.12(?:\\.|-|$) peptidoform_ion
-4 AlphaDIA    1.12       ^1\\.12(?:\\.|-|$) peptidoform_ion
-5 AlphaDIA     2.x                    ^2\\. peptidoform_ion
-6 AlphaDIA     2.x                    ^2\\. peptidoform_ion
-                      key      kind
-1               intensity intensity
-2 intensity_norm_settings intensity
-3               intensity intensity
-4 intensity_norm_settings intensity
-5               intensity intensity
-6 intensity_norm_settings intensity
-                                               qualifiers origin producer
-1                                      normalization=none   &lt;NA&gt;       NA
-2 aggregation=none;ms_level=ms2;normalization=run_setting   &lt;NA&gt;       NA
-3                                      normalization=none   &lt;NA&gt;       NA
-4 aggregation=none;ms_level=ms2;normalization=run_setting   &lt;NA&gt;       NA
-5                                      normalization=none   &lt;NA&gt;       NA
-6 aggregation=none;ms_level=ms2;normalization=run_setting   &lt;NA&gt;       NA
-  requirement location table              column needs verdict
-1 recommended   layers  &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;    warn
-2        &lt;NA&gt;   layers  &lt;NA&gt;           Intensity  &lt;NA&gt;    warn
-3 recommended   layers  &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;    warn
-4        &lt;NA&gt;   layers  &lt;NA&gt;           intensity  &lt;NA&gt;    warn
-5 recommended   layers  &lt;NA&gt;                &lt;NA&gt;  &lt;NA&gt;    warn
-6        &lt;NA&gt;   layers  &lt;NA&gt; precursor_intensity  &lt;NA&gt;    warn</code></pre>
+<pre><code>  software version software_version_pattern           level   slot table
+1 AlphaDIA    1.10       ^1\\.10(?:\\.|-|$) peptidoform_ion layers  &lt;NA&gt;
+2 AlphaDIA    1.10       ^1\\.10(?:\\.|-|$) peptidoform_ion layers  &lt;NA&gt;
+3 AlphaDIA    1.12       ^1\\.12(?:\\.|-|$) peptidoform_ion layers  &lt;NA&gt;
+4 AlphaDIA    1.12       ^1\\.12(?:\\.|-|$) peptidoform_ion layers  &lt;NA&gt;
+5 AlphaDIA     2.x                    ^2\\. peptidoform_ion layers  &lt;NA&gt;
+6 AlphaDIA     2.x                    ^2\\. peptidoform_ion layers  &lt;NA&gt;
+                 name                     key      kind qualifier.normalization
+1                &lt;NA&gt;               intensity intensity                    none
+2           Intensity intensity_norm_settings intensity             run_setting
+3                &lt;NA&gt;               intensity intensity                    none
+4           intensity intensity_norm_settings intensity             run_setting
+5                &lt;NA&gt;               intensity intensity                    none
+6 precursor_intensity intensity_norm_settings intensity             run_setting
+  qualifier.aggregation qualifier.ms_level producer requirement needs verdict
+1                  &lt;NA&gt;               &lt;NA&gt;       NA recommended  &lt;NA&gt;    warn
+2                  none                ms2       NA        &lt;NA&gt;  &lt;NA&gt;    warn
+3                  &lt;NA&gt;               &lt;NA&gt;       NA recommended  &lt;NA&gt;    warn
+4                  none                ms2       NA        &lt;NA&gt;  &lt;NA&gt;    warn
+5                  &lt;NA&gt;               &lt;NA&gt;       NA recommended  &lt;NA&gt;    warn
+6                  none                ms2       NA        &lt;NA&gt;  &lt;NA&gt;    warn</code></pre>
 </div>
 </div>
 

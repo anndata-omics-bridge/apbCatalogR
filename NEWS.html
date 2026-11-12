@@ -151,6 +151,12 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -159,18 +165,6 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="./man/Catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./man/catalogue_table.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -213,6 +207,12 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="./man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./man/sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -271,6 +271,17 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<section id="apbcatalogr-0.99.4" class="level1">
+<h1>apbCatalogR 0.99.4</h1>
+<ul>
+<li>Names follow apb-catalog’s vocabulary: the catalog is apb-catalog as a whole, <code>abundance_alpha</code> and the others are its sets, spelled “catalog” throughout. <code>catalogues()</code> is <code>sets()</code>, with a <code>set</code> column instead of <code>catalogue</code>; <code>catalogue_table(catalogue)</code> is <code>catalog_table(set_name)</code>; <code>rule_coverage(catalogue)</code> is <code>rule_coverage(set_name)</code>.</li>
+<li><code>Catalog$new(software, software_version, set_name, enforce)</code> replaces <code>Catalog$new(software, version, catalog, enforce)</code>: the version is a real software version such as <code>"2.2.0"</code>, and a version label such as <code>2.x</code> stays <code>version</code>. <code>DataCatalog$new(result, ..., enforce)</code> is unchanged.</li>
+<li><code>catalog_table()</code> and <code>fields()</code> call the slot <code>slot</code>, not <code>location</code>, and have a <code>version</code> column after <code>source</code>: the version label of the entry’s id, for a vendor entry of every version the label of the row’s version pattern, <code>*</code> for an app’s or an annotation’s entry. <code>fields()</code> of a <code>DataCatalog</code> composing several sets keeps <code>catalog_table()</code>’s column order.</li>
+<li><code>rule_coverage()</code> has the columns <code>software</code>, <code>version</code>, <code>software_version_pattern</code>, <code>level</code>, <code>slot</code>, <code>table</code>, <code>name</code>, <code>key</code>, <code>kind</code>, one <code>qualifier.&lt;name&gt;</code> column per qualifier of the set, <code>producer</code>, <code>requirement</code>, <code>needs</code> and <code>verdict</code>: <code>column</code> is <code>name</code>, <code>location</code> is <code>slot</code>, and the <code>qualifiers</code> string and the <code>origin</code> column give way to the <code>qualifier.&lt;name&gt;</code> columns, as in <code>catalog_table()</code>.</li>
+<li>Bundle format 5: the tables are in <code>data/</code>, not <code>catalogues/</code>; the manifest lists <code>sets</code>; <code>catalog.csv</code> names who writes a field in a <code>source</code> column, not <code>software</code>. Bundles of format 4 are passed over. The test bundle’s cases name <code>set</code> and, for <code>Catalog</code>, <code>software_version</code>.</li>
+<li>Messages say “set”: “unknown set”, “no set named”, “the set reviews no entries for …”, “the sets … set no requirements”; in <code>Catalog$new()</code> and <code>rule_coverage()</code>, a <code>software_version</code> or <code>set_name</code> that is not one character string is an error naming that argument.</li>
+</ul>
+</section>
 <section id="apbcatalogr-0.99.3" class="level1">
 <h1>apbCatalogR 0.99.3</h1>
 <ul>

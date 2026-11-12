@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav>
         <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -169,6 +169,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../man/catalog_table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">catalog_table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../man/catalog_version.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">catalog_version</span></a>
   </div>
@@ -177,18 +183,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/Catalog.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Catalog</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogue_table.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogue_table</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../man/catalogues.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">catalogues</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -231,6 +225,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../man/rule_coverage.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">rule_coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../man/sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sets</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -283,7 +283,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_version.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav></header><section id="what-one-results-fields-mean-to-one-consumer" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-one-results-fields-mean-to-one-consumer">What one result’s fields mean to one consumer</h2>
+<main class="content" id="quarto-document-content" tabindex="-1"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../man/catalog_table.html">Reference</a></li><li class="breadcrumb-item"><a href="../man/DataCatalog.html">DataCatalog</a></li></ol></nav></header><section id="what-one-results-fields-mean-to-one-consumer" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="what-one-results-fields-mean-to-one-consumer">What one result’s fields mean to one consumer</h2>
 <section id="description" class="level3"><h3 class="anchored" data-anchor-id="description">Description</h3>
 <p>Answers on a result read with <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/read_parsed_levels.html">read_parsed_levels()</a></code> and hands the data back directly: <code>levels</code> give each level’s slots, looked up by one of the set’s keys, such as <code>“q_value”</code> or Sage’s <code>“quantification_q_value”</code>. Ambiguous or unreviewed answers signal <code>UnresolvedField</code>.</p>
 <p>Composes the named sets alone: <code>apb_alpha</code>, the fields apb2 convert writes, answers only when named. A key routes to the sets that define it; two sets naming different fields for one key on one level is an error. With no set named, every name is the level’s own. A named set that can answer nothing on the result, because its app has not run or the result records no sample annotation, is an error saying what to run. <code>enforce</code> checks the requirements once, here.</p>
@@ -308,7 +308,7 @@ One Level per level of the result, with anndataR’s slots looked up by key.
 <code>description</code>
 </dt>
 <dd>
-What the first catalogue set named holds and who uses it; an error when no set was named.
+What the first set named holds and who uses it; an error when no set was named.
 </dd>
 </dl>
 </div>
@@ -335,7 +335,7 @@ Public methods
 <h4 class="anchored">
 <code>DataCatalog$new()</code>
 </h4>
-<p>Bind the named catalogue sets, and no others, to the levels of one result.</p>
+<p>Bind the named sets, and no others, to the levels of one result.</p>
 <h5 class="anchored">
 Usage
 </h5>
@@ -357,7 +357,7 @@ A ParsedLevels object.
 <code>…</code>
 </dt>
 <dd>
-The catalogue sets, such as <code>“abundance_alpha”</code> and <code>“confidence_alpha”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogues.html">catalogues()</a></code>.
+The sets, such as <code>“abundance_alpha”</code> and <code>“confidence_alpha”</code>; see <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/sets.html">sets()</a></code>.
 </dd>
 <dt>
 <code>enforce</code>
@@ -372,7 +372,7 @@ The catalogue sets, such as <code>“abundance_alpha”</code> and <code>“conf
 <h4 class="anchored">
 <code>DataCatalog$fields()</code>
 </h4>
-<p>Every catalogued field of the result in every composed set, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalogue_table.html">catalogue_table()</a></code> shows them.</p>
+<p>Every cataloged field of the result in every composed set, one row per field, as <code><a href="https://anndata-omics-bridge.github.io/apbCatalogR/man/catalog_table.html">catalog_table()</a></code> shows them.</p>
 <h5 class="anchored">
 Usage
 </h5>
