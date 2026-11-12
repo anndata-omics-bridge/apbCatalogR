@@ -43,7 +43,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Witek Wolski \email{wewolski@gmail.com}
+\strong{Maintainer}: Witek Wolski \email{wewolski@gmail.com} (\href{https://orcid.org/0000-0002-6468-120X}{ORCID})
 
 Authors:
 \itemize{
