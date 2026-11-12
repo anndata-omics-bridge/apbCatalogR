@@ -113,3 +113,21 @@ How R gets the latest bundle:
 - Shipped: `inst/extdata/bundle/`, with the test bundle in `inst/extdata/test-bundle/`, both replaced by a pull request from each apb-catalog release
 - `update_catalog(path)`: installs a bundle archive, written by apb-catalog's `make bundle`, into the user cache; nothing is downloaded
 - Each session uses the newest bundle, shipped or installed; `catalog_version()` reports which
+
+## AI use and provenance
+
+AI coding agents helped write this package:
+
+- Tools: Claude Code (Anthropic), and in-house open-weight models such as Qwen
+- Extent: much of the R code, the tests and the documentation, written as a port of apb-catalog's Python implementation
+- Marking: most commits written with AI help carry an `Assisted-by: AI coding agent` trailer; the initial port (commit `487a420`) does not, so treat the whole code base as AI-assisted
+- Review: the maintainer reviewed every change before committing it
+- Testing: `tests/testthat/test-cases.R` replays every answer apb-catalog's Python implementation records in the test bundle, and R must give the same answer; R CMD check, BiocCheck and lintr run in CI on every push
+
+Provenance and licence:
+
+- No code is copied from other software projects
+- The port follows [apb-catalog](https://github.com/anndata-omics-bridge/apb-catalog), MIT licence, by the same author; the bundles in `inst/extdata/` are apb-catalog's release bundles, unchanged
+- Anthropic's terms assign the rights in generated output to the user, and the open-weight models' licences claim no rights in it, so all code can be redistributed under this package's MIT licence
+
+The maintainer is responsible for all code in this package, whatever helped write it, and for its reliability and maintenance.

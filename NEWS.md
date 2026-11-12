@@ -5,6 +5,7 @@
 * `catalog_table()` and `fields()` call the slot `slot`, not `location`, and have a `version` column after `source`: the version label of the entry's id, for a vendor entry of every version the label of the row's version pattern, `*` for an app's or an annotation's entry. `fields()` of a `DataCatalog` composing several sets keeps `catalog_table()`'s column order.
 * `rule_coverage()` has the columns `software`, `version`, `software_version_pattern`, `level`, `slot`, `table`, `name`, `key`, `kind`, one `qualifier.<name>` column per qualifier of the set, `producer`, `requirement`, `needs` and `verdict`: `column` is `name`, `location` is `slot`, and the `qualifiers` string and the `origin` column give way to the `qualifier.<name>` columns, as in `catalog_table()`.
 * Bundle format 5: the tables are in `data/`, not `catalogues/`; the manifest lists `sets`; `catalog.csv` names who writes a field in a `source` column, not `software`. Bundles of format 4 are passed over. The test bundle's cases name `set` and, for `Catalog`, `software_version`.
+* The README says how AI coding agents were used, where the code comes from, under which licence it can be redistributed, and that the maintainer is responsible for it.
 * Messages say "set": "unknown set", "no set named", "the set reviews no entries for …", "the sets … set no requirements"; in `Catalog$new()` and `rule_coverage()`, a `software_version` or `set_name` that is not one character string is an error naming that argument.
 
 # apbCatalogR 0.99.3
