@@ -468,6 +468,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>update_catalog(path)</code>: installs a bundle archive, written by apb-catalog’s <code>make bundle</code>, into the user cache; nothing is downloaded</li>
 <li>Each session uses the newest bundle, shipped or installed; <code>catalog_version()</code> reports which</li>
 </ul>
+</section>
+<section id="ai-use-and-provenance" class="level2">
+<h2 class="anchored" data-anchor-id="ai-use-and-provenance">AI use and provenance</h2>
+<p>AI coding agents helped write this package:</p>
+<ul>
+<li>Tools: Claude Code (Anthropic), and in-house open-weight models such as Qwen</li>
+<li>Extent: much of the R code, the tests and the documentation, written as a port of apb-catalog’s Python implementation</li>
+<li>Marking: most commits written with AI help carry an <code>Assisted-by: AI coding agent</code> trailer; the initial port (commit <code>487a420</code>) does not, so treat the whole code base as AI-assisted</li>
+<li>Review: the maintainer reviewed every change before committing it</li>
+<li>Testing: <code>tests/testthat/test-cases.R</code> replays every answer apb-catalog’s Python implementation records in the test bundle, and R must give the same answer; R CMD check, BiocCheck and lintr run in CI on every push</li>
+</ul>
+<p>Provenance and licence:</p>
+<ul>
+<li>No code is copied from other software projects</li>
+<li>The port follows <a href="https://github.com/anndata-omics-bridge/apb-catalog">apb-catalog</a>, MIT licence, by the same author; the bundles in <code>inst/extdata/</code> are apb-catalog’s release bundles, unchanged</li>
+<li>Anthropic’s terms assign the rights in generated output to the user, and the open-weight models’ licences claim no rights in it, so all code can be redistributed under this package’s MIT licence</li>
+</ul>
+<p>The maintainer is responsible for all code in this package, whatever helped write it, and for its reliability and maintenance.</p>
 
 
 </section>
