@@ -1,3 +1,7 @@
+# apbCatalogR (development version)
+
+* The vignette's actor figure calls the role on the right "Application developer", as the APB article does, not "Bioconductor developer".
+
 # apbCatalogR 0.99.4
 
 * Names follow apb-catalog's vocabulary: the catalog is apb-catalog as a whole, `abundance_alpha` and the others are its sets, spelled "catalog" throughout. `catalogues()` is `sets()`, with a `set` column instead of `catalogue`; `catalogue_table(catalogue)` is `catalog_table(set_name)`; `rule_coverage(catalogue)` is `rule_coverage(set_name)`.

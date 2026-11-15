@@ -4,7 +4,7 @@
 # ///
 """Draw the vignette's actor figure: the APB article's TOC regions, redrawn for apbCatalogR.
 
-The integrator's region holds the APB result and the catalog in the centre; the Bioconductor
+The integrator's region holds the APB result and the catalog in the centre; the application
 developer's overlaps it only around the apb-catalog API, in R, Python and TypeScript, through which
 applications such as prolfqua, exploreDE and QFeatures read the result. Run with
 `uv run tools/draw_actors.py`.
@@ -89,11 +89,11 @@ def box(x, y, w, h, kind, lines, font="Arial"):
 
 
 # One region per actor. The developer's overlaps the integrator's around apb2 and the parsing rules;
-# the Bioconductor developer's overlaps it only around the apb-catalog API, not the result.
+# the application developer's overlaps it only around the apb-catalog API, not the result.
 region(3, 6, 119, 114, "developer")
 region(74, 4, 194, 118, "integrator")
 region(190, 6, 155, 114, "application")
-for x, names in ((38.5, ("Developer,", "researcher")), (158, ("Integrator",)), (310, ("Bioconductor", "developer"))):
+for x, names in ((38.5, ("Developer,", "researcher")), (158, ("Integrator",)), (310, ("Application", "developer"))):
     actor(x, 116)
     for index, name in enumerate(names):
         label(name, x, 92 - 8 * index)
