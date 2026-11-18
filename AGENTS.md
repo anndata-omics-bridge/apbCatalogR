@@ -32,3 +32,7 @@ Set up with `usethis`; everything else follows prolfquapp and the R package rule
 | Lint | `make lint` |
 | Format | `make format` |
 | Site (altdoc, as prolfquapp) | `make site` |
+
+## Output style
+
+Every reply must follow the output style that `outputStyle` selects in [settings.json](/Users/wolski/.claude/settings.json), currently [Answer-first](/Users/wolski/.claude/output-styles/answer-first.md). Read that file if your harness does not load it. No exceptions for long, investigative or follow-up replies.
