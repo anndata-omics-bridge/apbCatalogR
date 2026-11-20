@@ -174,7 +174,7 @@ term_keys <- function(name, rows) {
     keys <- lapply(names, function(key) {
         found <- rows[rows$key == key, , drop = FALSE]
         kinds <- sort_c(unique(found$kind))
-        terms <- sort_c(unique(found$psi_ms))
+        terms <- sort_c(unique(found$cv_accession))
         if (length(kinds) != 1L || length(terms) != 1L) {
             stop(
                 sprintf(
@@ -194,7 +194,7 @@ term_keys <- function(name, rows) {
             key = key,
             kind = kinds,
             fixed = setNames(pairs$value, pairs$qualifier),
-            psi_ms = cell_list(terms)
+            cv_accession = cell_list(terms)
         )
     })
     setNames(keys, names)

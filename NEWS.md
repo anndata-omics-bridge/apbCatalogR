@@ -1,5 +1,6 @@
-# apbCatalogR (development version)
+# apbCatalogR 0.99.5
 
+* The catalog column `psi_ms` is `cv_accession`, as in apb-catalog 0.1.4: it holds controlled-vocabulary accessions, of which PSI-MS terms are one kind. The shipped bundle and test bundle are apb-catalog 0.1.4's.
 * The vignette's actor figure calls the role on the right "Application developer", as the APB article does, not "Bioconductor developer".
 
 # apbCatalogR 0.99.4
