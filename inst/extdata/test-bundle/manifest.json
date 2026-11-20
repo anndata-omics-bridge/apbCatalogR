@@ -1,7 +1,7 @@
 {
   "bundle_format": 5,
-  "version": "0.1.4",
-  "apb_catalog_version": "0.1.4",
+  "version": "0.1.5",
+  "apb_catalog_version": "0.1.5",
   "apb2_version": "0.1.2",
   "sets": [
     "abundance_alpha",
