@@ -110,7 +110,7 @@ apb-catalog builds two bundles at each release:
 
 How R gets the latest bundle:
 
-- Shipped: `inst/extdata/bundle/`, with the test bundle in `inst/extdata/test-bundle/`, both replaced by a pull request from each apb-catalog release
+- Shipped: `inst/extdata/bundle/`, with the test bundle in `inst/extdata/test-bundle/`, both replaced by the pull request that this repository's `update-bundle.yaml` workflow opens for each apb-catalog release
 - `update_catalog(path)`: installs a bundle archive, written by apb-catalog's `make bundle`, into the user cache; nothing is downloaded
 - Each session uses the newest bundle, shipped or installed; `catalog_version()` reports which
 

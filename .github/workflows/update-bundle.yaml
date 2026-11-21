@@ -1,0 +1,71 @@
+# Ships the bundles of the latest apb-catalog release: replaces inst/extdata/bundle/ and
+# inst/extdata/test-bundle/ with that release's two bundle archives and opens a pull request.
+# apbCatalogR pulls the release, so apb-catalog needs no access to this repository. The pull
+# request stays open, and is updated, until it is merged; with no change it opens none.
+# A pull request opened with the workflow token starts no workflows, so this workflow starts
+# R-CMD-check and lint on the pull request's branch itself.
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: apb-catalog release tag, such as v0.1.5; empty for the latest release
+        required: false
+        default: ""
+
+name: update-bundle.yaml
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-bundle:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6.0.3
+
+      - name: Find the release
+        id: release
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$TAG" ]; then
+            TAG=$(gh release view -R anndata-omics-bridge/apb-catalog --json tagName -q .tagName)
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Replace the shipped bundles
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh release download "$TAG" -R anndata-omics-bridge/apb-catalog \
+            -p apb-catalog-bundle.tar.gz -p apb-catalog-test-bundle.tar.gz -D "$RUNNER_TEMP"
+          tar xzf "$RUNNER_TEMP/apb-catalog-bundle.tar.gz" -C "$RUNNER_TEMP"
+          tar xzf "$RUNNER_TEMP/apb-catalog-test-bundle.tar.gz" -C "$RUNNER_TEMP"
+          rm -rf inst/extdata/bundle inst/extdata/test-bundle
+          mv "$RUNNER_TEMP/apb-catalog-bundle" inst/extdata/bundle
+          mv "$RUNNER_TEMP/apb-catalog-test-bundle" inst/extdata/test-bundle
+
+      - name: Open the pull request
+        id: pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: bundle/${{ steps.release.outputs.tag }}
+          commit-message: Ship the apb-catalog ${{ steps.release.outputs.tag }} bundle
+          title: Ship the apb-catalog ${{ steps.release.outputs.tag }} bundle
+          body: >-
+            Replaces `inst/extdata/bundle/` and `inst/extdata/test-bundle/` with the bundles of
+            apb-catalog release ${{ steps.release.outputs.tag }}.
+
+      - name: Check the pull request
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        env:
+          BRANCH: bundle/${{ steps.release.outputs.tag }}
+        run: |
+          gh workflow run R-CMD-check.yaml --ref "$BRANCH"
+          gh workflow run lint --ref "$BRANCH"
