@@ -6,7 +6,7 @@ The closest `AGENTS.md` wins. Explicit user instructions override this file. The
 
 apb-catalog's API in R, on the bundle apb-catalog releases. It reimplements the catalog, never apb2's conversion. Open work is in the workspace's TODO_bioconductor_submission.md under the apbCatalogR planning folder.
 
-- `inst/extdata/bundle/` is apb-catalog's bundle and `inst/extdata/test-bundle/` its test bundle, both unchanged; `.github/workflows/update-bundle.yaml` pulls each apb-catalog release's bundles and replaces them by pull request. Never edit them by hand: change apb-catalog and rebuild with `make bundle` there
+- `inst/extdata/bundle/` is apb-catalog's bundle and `inst/extdata/test-bundle/` its test bundle, both unchanged; `make update-bundle` replaces them with an apb-catalog release's bundles, runs `make check` and commits. Never edit them by hand: change apb-catalog and rebuild with `make bundle` there
 - `tests/testthat/test-cases.R` runs every answer the test bundle records; a change that makes R answer differently from Python is a bug in R, or a change that belongs in apb-catalog first
 - Each R file mirrors one apb-catalog module: `source.R`, `rules.R`, `resolver.R`, `catalog.R`, `coverage.R`, `table.R`
 
@@ -32,6 +32,7 @@ Set up with `usethis`; everything else follows prolfquapp and the R package rule
 | Lint | `make lint` |
 | Format | `make format` |
 | Site (altdoc, as prolfquapp) | `make site` |
+| Ship an apb-catalog release's bundles | `make update-bundle` (`TAG=vX.Y.Z`, default latest) |
 
 ## Output style
 

@@ -1,6 +1,6 @@
 # inst/extdata
 
-Both folders come from [apb-catalog](https://github.com/anndata-omics-bridge/apb-catalog) and are copied unchanged. `make bundle` in apb-catalog (`scripts/build_bundle.py`) writes them to its `build/apb-catalog-bundle/` and `build/apb-catalog-test-bundle/`. They are never edited by hand; the workflow `.github/workflows/update-bundle.yaml` replaces both with the archives attached to each apb-catalog release, by pull request.
+Both folders come from [apb-catalog](https://github.com/anndata-omics-bridge/apb-catalog) and are copied unchanged. `make bundle` in apb-catalog (`scripts/build_bundle.py`) writes them to its `build/apb-catalog-bundle/` and `build/apb-catalog-test-bundle/`. They are never edited by hand; `make update-bundle` replaces both with the archives attached to an apb-catalog release.
 
 Each folder's `manifest.json` records the apb-catalog version, the apb2 version and the bundle format it was built with, and lists its files.
 
