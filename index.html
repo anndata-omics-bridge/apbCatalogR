@@ -464,7 +464,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>How R gets the latest bundle:</p>
 <ul>
-<li>Shipped: <code>inst/extdata/bundle/</code>, with the test bundle in <code>inst/extdata/test-bundle/</code>, both replaced by a pull request from each apb-catalog release</li>
+<li>Shipped: <code>inst/extdata/bundle/</code>, with the test bundle in <code>inst/extdata/test-bundle/</code>, both replaced by the pull request that this repository’s <code>update-bundle.yaml</code> workflow opens for each apb-catalog release</li>
 <li><code>update_catalog(path)</code>: installs a bundle archive, written by apb-catalog’s <code>make bundle</code>, into the user cache; nothing is downloaded</li>
 <li>Each session uses the newest bundle, shipped or installed; <code>catalog_version()</code> reports which</li>
 </ul>
